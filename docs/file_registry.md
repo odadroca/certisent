@@ -1,4 +1,4 @@
-# File registry (v0.4.8)
+# File registry (v0.4.9)
 
 SHA-256 for all files in this release zip (excluding this file to avoid self-reference).
 
@@ -7,11 +7,11 @@ SHA-256 for all files in this release zip (excluding this file to avoid self-ref
 3f6911b5852dcce1f1ad56eb68c3a60f06d9121f2601937dd882ebe79cf5d13b  ./.env.example
 902bc8daaaa14d9568054ab9ae342bbbe56ac0e4f410d8eb6ac74301e85f11a3  ./.htaccess
 50e6751797c50dedd75ef1b8a0d9e42f5f8472e9fbce91f34718e9f97b0c780a  ./LICENSE
-493d606e531eced6cea9213ce7436b3005b523194a518e972f16502c50184268  ./README.md
+0c4dfc59c71a0c601a750fdb7cfcb62f25f938e21a9669ec11504bcce386ec6b  ./README.md
 0b43b476035f409e76abbd56213c0fe50fac880c48e3d6d7135e0fffde0c8950  ./app/api/Router.php
 ec5bb6fc4f32621d4eb451f26c5e8392afcbeee7d554eb8b507d06e98cde55f9  ./app/auth.php
 bad07c21ad319fd6d4175d93c1b50c1900ec359f1321c4055ad10cac8a4ec9d6  ./app/bootstrap.php
-f6321ea3dd21babf225e0e07b59af214a072403c09b8046139e14cf94bf6083f  ./app/config.php
+73bfb88f6c818548e2d3c63b62b3bcf4502ecd8ab26160dcfbdf605a1f9c7c09  ./app/config.php
 758ca4cc30a692f3ccd2cccc73b71c3fa160881a6d3cbecddabec3c5806781c1  ./app/csrf.php
 aecc90a04ebcad04406c415a4f84f801bd0fa9ce65e07eb486382417498ff70d  ./app/db.php
 9d5b5c1b775bac43a546b62242141389691b801a194db714af95f4e4f75b8fa9  ./app/logger.php
@@ -28,6 +28,7 @@ b59bed1521b45d16a2509d942db79ec6dcab881eda97f9138cf28a03b6626034  ./app/ui.php
 5f90ccc2ae9344790569dbf022c7af5f80e816f735cec7bc2074d427f222eea2  ./docs/architecture.md
 0b7457f93e1ef91d489b01f0073c5be2acc8bb47ffa0a430e06e5e3c52103462  ./docs/deploy.md
 9af54e5b29ecbdc20f12ca9a785cd22d311f447a89255c97768b500094111130  ./docs/ops_runbook.md
+4c4094b15e887dffb7ac9f0e39a9ead8afb5f0d29c6e2f6f367f1f40f2372fca  ./docs/release_notes_v0.4.x.md
 6659c65b484f5962b565fc98cee8e39ce2969c0a4e27c64f07e7fc9f50986d2f  ./docs/ui_map.md
 5827b8b739595255bef8c033dc9e147b024ae0d1960955bbf21021a6c83ca49c  ./public/.htaccess
 d377dfae62e2a968e3bf9dd609c9409290e28d1513484bb2d869da58c01a3c20  ./public/admin/api_keys.php
