@@ -16,7 +16,8 @@ function env_load(string $path): void {
         [$k, $v] = explode('=', $line, 2);
         $k = trim($k);
         $v = trim($v);
-        $v = trim($v, ""'");
+        // Strip surrounding quotes if present
+        $v = trim($v, "\"'");
         if ($k !== '' && getenv($k) === false) {
             putenv($k . '=' . $v);
             $_ENV[$k] = $v;
@@ -58,6 +59,20 @@ function cfg(string $key, $default = null) {
 
 function app_base_url(): string {
     return (string)cfg('APP_URL', '');
+}
+
+/**
+ * Build an absolute URL using APP_URL as the base.
+ * - If APP_URL is empty, returns a relative URL.
+ * - Does not inject '/public' (APP_URL may already point to the deployed base path).
+ */
+function app_url(string $path = ''): string {
+    $base = rtrim((string)cfg('APP_URL', ''), '/');
+    $path = ltrim($path, '/');
+    if ($base === '') {
+        return $path === '' ? '' : '/' . $path;
+    }
+    return $path === '' ? $base : ($base . '/' . $path);
 }
 
 function app_secret(): string {

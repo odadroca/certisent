@@ -45,7 +45,16 @@ final class MonitorService {
         return $mid;
     }
 
-    public static function updateMonitor(int $actorUserId, int $monitorId, string $url, int $notifyDays, int $freqMin, int $enabled): void {
+    public static function updateMonitor(
+        int $actorUserId,
+        int $monitorId,
+        string $url,
+        int $notifyDays,
+        int $freqMin,
+        int $enabled,
+        ?int $notifyOnChange = null,
+        ?int $notifyOnRenewal = null
+    ): void {
         $parsed = self::parseUrl($url);
         $now = db_now_utc();
 
@@ -59,10 +68,23 @@ final class MonitorService {
             ':id'=>$monitorId,
         ]);
 
-        $st2 = db()->prepare('UPDATE monitor_settings SET notify_days_before_expiry=:d, check_frequency_minutes=:f WHERE monitor_id=:id');
-        $st2->execute([':d'=>$notifyDays, ':f'=>$freqMin, ':id'=>$monitorId]);
+        $fields = 'notify_days_before_expiry=:d, check_frequency_minutes=:f';
+        $params = [':d'=>$notifyDays, ':f'=>$freqMin, ':id'=>$monitorId];
+        if ($notifyOnChange !== null) {
+            $fields .= ', notify_on_change=:noc';
+            $params[':noc'] = $notifyOnChange ? 1 : 0;
+        }
+        if ($notifyOnRenewal !== null) {
+            $fields .= ', notify_on_renewal=:nor';
+            $params[':nor'] = $notifyOnRenewal ? 1 : 0;
+        }
+        $st2 = db()->prepare('UPDATE monitor_settings SET '.$fields.' WHERE monitor_id=:id');
+        $st2->execute($params);
 
-        Audit::log($actorUserId, 'monitor.update', 'monitor', $monitorId, ['url'=>$parsed['url']]);
+        $meta = ['url'=>$parsed['url'], 'enabled'=>$enabled ? 1 : 0, 'notify_days_before_expiry'=>$notifyDays, 'check_frequency_minutes'=>$freqMin];
+        if ($notifyOnChange !== null) $meta['notify_on_change'] = $notifyOnChange ? 1 : 0;
+        if ($notifyOnRenewal !== null) $meta['notify_on_renewal'] = $notifyOnRenewal ? 1 : 0;
+        Audit::log($actorUserId, 'monitor.update', 'monitor', $monitorId, $meta);
     }
 
     public static function deleteMonitor(int $actorUserId, int $monitorId): void {

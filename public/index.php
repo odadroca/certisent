@@ -4,12 +4,7 @@ require_once __DIR__ . '/../app/bootstrap.php';
 require_once __DIR__ . '/../app/ui.php';
 
 $user = current_user();
-if ($user) {
-    header('Location: dashboard.php');
-    exit;
-}
-
-render_header('Home');
+render_header('Home', $user);
 
 ?>
 <div class="bg-white text-black rounded-2xl p-6 shadow">
@@ -36,9 +31,16 @@ render_header('Home');
         <li>Set “warn me N days before expiry”</li>
         <li>Run the worker via cron (or call the API worker endpoint)</li>
       </ul>
-      <div class="mt-4 flex gap-3">
-        <a class="bg-black text-white px-4 py-2 rounded" href="register.php">Register</a>
-        <a class="bg-white border border-black text-black px-4 py-2 rounded" href="login.php">Sign in</a>
+      <div class="mt-4 flex flex-wrap gap-3">
+        <?php if ($user): ?>
+          <a class="bg-black text-white px-4 py-2 rounded" href="dashboard.php">Go to dashboard</a>
+          <?php if (has_role($user,'viewer')): ?>
+            <a class="bg-white border border-black text-black px-4 py-2 rounded" href="monitor_add.php">Add monitor</a>
+          <?php endif; ?>
+        <?php else: ?>
+          <a class="bg-black text-white px-4 py-2 rounded" href="register.php">Register</a>
+          <a class="bg-white border border-black text-black px-4 py-2 rounded" href="login.php">Sign in</a>
+        <?php endif; ?>
       </div>
     </div>
   </div>

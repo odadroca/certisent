@@ -12,6 +12,7 @@ session_set_cookie_params([
 session_start();
 
 require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/logger.php';
 require_once __DIR__ . '/db.php';
 require_once __DIR__ . '/auth.php';
 require_once __DIR__ . '/csrf.php';
@@ -25,3 +26,44 @@ require_once __DIR__ . '/services/Worker.php';
 require_once __DIR__ . '/api/Router.php';
 
 date_default_timezone_set('UTC'); // keep cron consistent; UI prints UTC by default.
+
+// Error handling: log server-side, keep UI messages non-verbose.
+if (is_dev()) {
+    ini_set('display_errors', '1');
+    error_reporting(E_ALL);
+} else {
+    ini_set('display_errors', '0');
+    error_reporting(E_ALL);
+}
+
+set_exception_handler(function(Throwable $e): void {
+    $cid = log_error('exception', $e->getMessage(), [
+        'type' => get_class($e),
+        'file' => $e->getFile(),
+        'line' => $e->getLine(),
+        'trace' => is_dev() ? $e->getTraceAsString() : null,
+    ]);
+    if (!headers_sent()) {
+        render_internal_error($cid);
+    }
+});
+
+set_error_handler(function(int $severity, string $message, string $file, int $line): bool {
+    // Convert to ErrorException so it hits the exception handler.
+    throw new ErrorException($message, 0, $severity, $file, $line);
+});
+
+register_shutdown_function(function(): void {
+    $err = error_get_last();
+    if (!$err) return;
+    $fatal = [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR];
+    if (!in_array((int)$err['type'], $fatal, true)) return;
+    $cid = log_error('fatal', (string)($err['message'] ?? 'fatal'), [
+        'file' => (string)($err['file'] ?? ''),
+        'line' => (int)($err['line'] ?? 0),
+        'type' => (int)($err['type'] ?? 0),
+    ]);
+    if (!headers_sent()) {
+        render_internal_error($cid);
+    }
+});

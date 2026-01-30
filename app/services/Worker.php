@@ -163,6 +163,7 @@ final class Worker {
 
         // Change/Renewal detection
         if ($prev && $finger && !empty($prev['fingerprint_sha256']) && $prev['fingerprint_sha256'] !== $finger) {
+            $samples = max(1, (int)cfg('TLS_SAMPLES_ON_CHANGE', 2));
             $confirmOk = self::confirmChange($m, $finger);
             if ($confirmOk) {
                 $out['changed'] = 1;
@@ -181,6 +182,8 @@ final class Worker {
                     'new_fingerprint' => $finger,
                     'prev_valid_to' => $prev['valid_to'],
                     'new_valid_to' => $validTo,
+                    'confirm_samples' => $samples,
+                    'confirm_result' => 'confirmed',
                 ];
 
                 if ($prevTo && $newFrom) {
@@ -198,7 +201,9 @@ final class Worker {
                 // Unstable endpoint / probable load-balancer variation.
                 self::createEvent($monitorId, 'changed_unstable', 'warn', "Certificate change detected but not consistent across samples (possible false positive).", [
                     'prev_fingerprint'=>$prev['fingerprint_sha256'],
-                    'new_fingerprint'=>$finger
+                    'new_fingerprint'=>$finger,
+                    'confirm_samples' => $samples,
+                    'confirm_result' => 'unstable'
                 ]);
             }
         }

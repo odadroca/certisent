@@ -52,14 +52,18 @@ $lastCron = Worker::getSystemState('last_cron_run_at');
       <tbody>
       <?php foreach ($monitors as $m): ?>
         <?php $snap = MonitorService::getLatestSnapshot((int)$m['id']); ?>
+        <?php $displayStatus = $snap ? (string)($m['last_status'] ?? 'unknown') : 'not_checked'; ?>
         <tr class="border-b">
-          <td class="py-2 pr-3"><?php echo badge_status($m['last_status'] ?? 'unknown'); ?></td>
+          <td class="py-2 pr-3"><?php echo badge_status($displayStatus); ?></td>
           <td class="py-2 pr-3 font-mono"><?php echo h($m['url']); ?></td>
-          <td class="py-2 pr-3"><?php echo h((string)($snap['issuer_cn'] ?? '')); ?></td>
-          <td class="py-2 pr-3"><?php echo h((string)($snap['valid_to'] ?? '')); ?> UTC</td>
-          <td class="py-2 pr-3"><?php echo h((string)($snap['days_remaining'] ?? '')); ?></td>
+          <td class="py-2 pr-3"><?php echo h((string)($snap['issuer_cn'] ?? '—')); ?></td>
+          <td class="py-2 pr-3"><?php echo h((string)($snap['valid_to'] ?? '—')); ?><?php echo $snap ? ' UTC' : ''; ?></td>
+          <td class="py-2 pr-3"><?php echo h((string)($snap['days_remaining'] ?? '—')); ?></td>
           <td class="py-2 pr-3">
-            <a class="text-green-700 hover:underline" href="monitor_edit.php?id=<?php echo (int)$m['id']; ?>">Edit</a>
+            <a class="text-gray-800 hover:underline mr-3" href="monitor_view.php?id=<?php echo (int)$m['id']; ?>">View</a>
+            <?php if (has_role($user,'viewer')): ?>
+              <a class="text-green-700 hover:underline" href="monitor_edit.php?id=<?php echo (int)$m['id']; ?>">Edit</a>
+            <?php endif; ?>
           </td>
         </tr>
       <?php endforeach; ?>
@@ -70,33 +74,38 @@ $lastCron = Worker::getSystemState('last_cron_run_at');
   <div class="grid md:grid-cols-2 gap-4">
     <?php foreach ($monitors as $m): ?>
       <?php $snap = MonitorService::getLatestSnapshot((int)$m['id']); ?>
+      <?php $displayStatus = $snap ? (string)($m['last_status'] ?? 'unknown') : 'not_checked'; ?>
       <div class="bg-white text-black rounded-2xl p-5 shadow">
         <div class="flex items-start justify-between gap-3">
           <div>
             <div class="font-mono text-sm break-all"><?php echo h($m['url']); ?></div>
-            <div class="text-xs text-gray-600 mt-1">Issuer: <?php echo h((string)($snap['issuer_cn'] ?? '')); ?></div>
+            <div class="text-xs text-gray-600 mt-1">Issuer: <?php echo h((string)($snap['issuer_cn'] ?? '—')); ?></div>
           </div>
-          <div><?php echo badge_status($m['last_status'] ?? 'unknown'); ?></div>
+          <div><?php echo badge_status($displayStatus); ?></div>
         </div>
 
         <div class="mt-4 space-y-2">
           <div class="text-xs text-gray-600 flex justify-between">
-            <span>Valid from: <?php echo h((string)($snap['valid_from'] ?? '')); ?> UTC</span>
-            <span>Valid to: <?php echo h((string)($snap['valid_to'] ?? '')); ?> UTC</span>
+            <span>Valid from: <?php echo h((string)($snap['valid_from'] ?? '—')); ?><?php echo $snap ? ' UTC' : ''; ?></span>
+            <span>Valid to: <?php echo h((string)($snap['valid_to'] ?? '—')); ?><?php echo $snap ? ' UTC' : ''; ?></span>
           </div>
           <?php echo progress_bar($snap ? (int)$snap['days_remaining'] : null, $snap['valid_from'] ?? null, $snap['valid_to'] ?? null); ?>
           <div class="text-xs text-gray-700 flex justify-between">
-            <span>Days left: <span class="font-semibold"><?php echo h((string)($snap['days_remaining'] ?? '')); ?></span></span>
+            <span>Days left: <span class="font-semibold"><?php echo h((string)($snap['days_remaining'] ?? '—')); ?></span></span>
             <span>Warn threshold: <?php echo (int)$m['notify_days_before_expiry']; ?> days</span>
           </div>
         </div>
 
         <div class="mt-4 flex gap-3 text-sm">
           <?php if (has_role($user,'viewer')): ?>
+            <a class="text-gray-800 hover:underline" href="monitor_view.php?id=<?php echo (int)$m['id']; ?>">View</a>
             <a class="text-green-700 hover:underline" href="monitor_edit.php?id=<?php echo (int)$m['id']; ?>">Edit</a>
             <a class="text-red-700 hover:underline" href="monitor_delete.php?id=<?php echo (int)$m['id']; ?>">Delete</a>
           <?php endif; ?>
-          <a class="text-gray-800 hover:underline" href="events.php?monitor_id=<?php echo (int)$m['id']; ?>">History</a>
+          <?php if (!has_role($user,'viewer')): ?>
+            <a class="text-gray-800 hover:underline" href="monitor_view.php?id=<?php echo (int)$m['id']; ?>">View</a>
+          <?php endif; ?>
+          <a class="text-gray-800 hover:underline" href="events.php?monitor_id=<?php echo (int)$m['id']; ?>">Events</a>
         </div>
       </div>
     <?php endforeach; ?>

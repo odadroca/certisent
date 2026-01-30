@@ -4,6 +4,27 @@ declare(strict_types=1);
 function h(string $s): string { return htmlspecialchars($s, ENT_QUOTES, 'UTF-8'); }
 
 /**
+ * Flash messages stored in session.
+ * Types: info|success|warn|error
+ */
+function flash_set(string $type, string $message): void {
+    if (!isset($_SESSION['flash']) || !is_array($_SESSION['flash'])) {
+        $_SESSION['flash'] = [];
+    }
+    $_SESSION['flash'][] = ['type' => $type, 'message' => $message];
+}
+
+/** @return array<int,array{type:string,message:string}> */
+function flash_pop_all(): array {
+    $out = [];
+    if (isset($_SESSION['flash']) && is_array($_SESSION['flash'])) {
+        $out = $_SESSION['flash'];
+    }
+    unset($_SESSION['flash']);
+    return $out;
+}
+
+/**
  * Returns URL path to the /public folder (no trailing slash).
  * Works even when running from /public/admin/*.
  */
@@ -31,8 +52,14 @@ function render_header(string $title, ?array $user = null): void {
     echo '<script src="https://cdn.tailwindcss.com"></script>';
     echo '</head><body class="bg-black text-white min-h-screen">';
     echo '<div class="max-w-6xl mx-auto px-4 py-6">';
-    echo '<div class="flex items-center justify-between mb-6">';
-    echo '<div class="text-2xl font-semibold"><span class="text-green-400">Certinel</span> <span class="text-gray-300 text-base">certificate sentinel</span></div>';
+
+    echo '<div class="flex items-center justify-between">';
+    echo '<div class="text-2xl font-semibold">';
+    echo '<a href="'.h(url_for('index.php')).'" class="hover:opacity-90">';
+    echo '<span class="text-green-400">Certinel</span> <span class="text-gray-300 text-base">certificate sentinel</span>';
+    echo '</a>';
+    echo '</div>';
+
     echo '<div class="text-sm">';
     if ($user) {
         echo '<span class="text-gray-300 mr-3">'.h($user['email']).' ('.h($user['role']).')</span>';
@@ -41,11 +68,46 @@ function render_header(string $title, ?array $user = null): void {
         echo '<a class="text-green-400 hover:underline mr-3" href="'.h(url_for('login.php')).'">Sign in</a>';
         echo '<a class="text-green-400 hover:underline" href="'.h(url_for('register.php')).'">Register</a>';
     }
-    echo '</div></div>';
+    echo '</div>';
+    echo '</div>';
+
+    // Signed-in navigation
+    if ($user) {
+        echo '<div class="mt-4 flex flex-wrap gap-3 text-sm">';
+        echo '<a class="text-green-400 hover:underline" href="'.h(url_for('dashboard.php')).'">Dashboard</a>';
+        echo '<a class="text-green-400 hover:underline" href="'.h(url_for('history.php')).'">History</a>';
+        echo '<a class="text-green-400 hover:underline" href="'.h(url_for('settings.php')).'">Settings</a>';
+        echo '<a class="text-green-400 hover:underline" href="'.h(url_for('index.php')).'">Quick check</a>';
+        if (($user['role'] ?? '') === 'admin') {
+            echo '<a class="text-green-400 hover:underline" href="'.h(url_for('admin/monitors.php')).'">Admin · Monitors</a>';
+            echo '<a class="text-green-400 hover:underline" href="'.h(url_for('admin/users.php')).'">Admin · Users</a>';
+            echo '<a class="text-green-400 hover:underline" href="'.h(url_for('admin/system.php')).'">Admin · System</a>';
+        }
+        echo '</div>';
+    }
+
+    // Flash messages
+    $flashes = flash_pop_all();
+    if ($flashes) {
+        echo '<div class="mt-4 space-y-2">';
+        foreach ($flashes as $f) {
+            $t = (string)($f['type'] ?? 'info');
+            $msg = (string)($f['message'] ?? '');
+            $cls = 'bg-gray-800 text-gray-100';
+            if ($t === 'success') $cls = 'bg-green-900 text-green-100';
+            elseif ($t === 'warn') $cls = 'bg-yellow-900 text-yellow-100';
+            elseif ($t === 'error') $cls = 'bg-red-900 text-red-100';
+            echo '<div class="p-3 rounded-lg text-sm '.$cls.'">'.h($msg).'</div>';
+        }
+        echo '</div>';
+    }
+
+    echo '<div class="mt-6">';
 }
 
 function render_footer(): void {
-    echo '<div class="mt-10 text-xs text-gray-500">Certinel v0 · UTC timestamps</div>';
+    echo '</div>'; // content wrapper
+    echo '<div class="mt-10 text-xs text-gray-500">Certinel v0.2 · UTC timestamps</div>';
     echo '</div></body></html>';
 }
 
@@ -55,10 +117,64 @@ function badge_status(?string $status): string {
         'ok' => 'bg-green-700',
         'warn' => 'bg-yellow-700',
         'critical' => 'bg-red-700',
+        'not_checked' => 'bg-slate-700',
         'unknown' => 'bg-gray-700',
     ];
     $cls = $map[$status] ?? 'bg-gray-700';
     return '<span class="px-2 py-1 rounded '.$cls.' text-xs">'.h(strtoupper($status)).'</span>';
+}
+
+/**
+ * Parse event meta JSON safely.
+ * @return array<string,mixed>
+ */
+function event_meta_array(?string $metaJson): array {
+    if (!$metaJson) return [];
+    $arr = json_decode($metaJson, true);
+    return is_array($arr) ? $arr : [];
+}
+
+/**
+ * Human-readable meta summary (keeps only a few high-signal fields).
+ */
+function format_event_meta(?string $metaJson): string {
+    $m = event_meta_array($metaJson);
+    if (!$m) return '';
+
+    $parts = [];
+    if (isset($m['confirm_result'])) {
+        $parts[] = 'confirm=' . (string)$m['confirm_result'];
+    }
+    if (isset($m['confirm_samples'])) {
+        $parts[] = 'samples=' . (int)$m['confirm_samples'];
+    }
+    if (isset($m['early_renewal_days'])) {
+        $parts[] = 'early_renewal_days=' . (int)$m['early_renewal_days'];
+    }
+    if (isset($m['prev_valid_to'])) {
+        $parts[] = 'prev_valid_to=' . (string)$m['prev_valid_to'];
+    }
+    if (isset($m['new_valid_to'])) {
+        $parts[] = 'new_valid_to=' . (string)$m['new_valid_to'];
+    }
+    if (isset($m['error'])) {
+        $parts[] = 'error=' . (string)$m['error'];
+    }
+
+    // Fingerprints are long; show only a prefix.
+    if (isset($m['prev_fingerprint'])) {
+        $parts[] = 'prev_fp=' . substr((string)$m['prev_fingerprint'], 0, 12) . '…';
+    }
+    if (isset($m['new_fingerprint'])) {
+        $parts[] = 'new_fp=' . substr((string)$m['new_fingerprint'], 0, 12) . '…';
+    }
+
+    // Fallback: if we didn't pick anything, show a compact JSON.
+    if (!$parts) {
+        $j = json_encode($m, JSON_UNESCAPED_SLASHES);
+        return $j ? $j : '';
+    }
+    return implode(' | ', $parts);
 }
 
 function progress_bar(?int $daysRemaining, ?string $validFrom, ?string $validTo): string {

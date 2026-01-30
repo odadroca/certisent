@@ -22,9 +22,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $days = max(1, min(365, (int)($_POST['notify_days'] ?? 30)));
     $freq = max(5, min(1440, (int)($_POST['freq_min'] ?? 60)));
     $enabled = isset($_POST['enabled']) ? 1 : 0;
+    $noc = isset($_POST['notify_on_change']) ? 1 : 0;
+    $nor = isset($_POST['notify_on_renewal']) ? 1 : 0;
 
     try {
-        MonitorService::updateMonitor((int)$user['id'], $id, $url, $days, $freq, $enabled);
+        MonitorService::updateMonitor((int)$user['id'], $id, $url, $days, $freq, $enabled, $noc, $nor);
         header('Location: dashboard.php');
         exit;
     } catch (Throwable $e) {
@@ -58,6 +60,17 @@ render_header('Edit monitor', $user);
     <div class="flex items-center gap-2">
       <input type="checkbox" name="enabled" <?php echo ((int)($m['enabled'])===1 ? 'checked' : ''); ?> />
       <label class="text-sm">Enabled</label>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-3">
+      <div class="flex items-center gap-2">
+        <input type="checkbox" name="notify_on_change" <?php echo ((int)($m['notify_on_change'])===1 ? 'checked' : ''); ?> />
+        <label class="text-sm">Notify on change</label>
+      </div>
+      <div class="flex items-center gap-2">
+        <input type="checkbox" name="notify_on_renewal" <?php echo ((int)($m['notify_on_renewal'])===1 ? 'checked' : ''); ?> />
+        <label class="text-sm">Notify on renewal</label>
+      </div>
     </div>
     <button class="bg-green-700 text-white px-4 py-2 rounded">Save</button>
     <a class="ml-3 text-green-400 hover:underline" href="dashboard.php">Cancel</a>
