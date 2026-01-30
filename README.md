@@ -1,9 +1,9 @@
-# Certinel — the certificate sentinel — v0.2
+# Certinel — the certificate sentinel — v0.2.1
 Certinel is a lightweight TLS/SSL certificate monitoring service that **live-fetches** the certificate presented by an endpoint (SNI-capable), stores immutable snapshots, detects changes (renewals/rotations), and notifies interested parties before outages happen.
 
 It is designed to be simple to host (shared hosting or VPS), easy to operate (cron-driven worker), and explicit about what it is observing: **the certificate the endpoint actually serves**.
 
-## Notes / limitations (v0.2)
+## Notes / limitations (v0.2.1)
 - Notifications: email (PHP `mail()`) + optional Slack/Teams webhooks (basic POST). RSS is read-only.
 - “False positives” are mitigated with a confirm re-check on certificate change (configurable sample count).
 - No background job queue; worker sends notifications inline.

@@ -3,8 +3,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/../../app/bootstrap.php';
 require_once __DIR__ . '/../../app/ui.php';
 
-$user = require_login();
-require_role($user, 'admin');
+$user = require_role('admin');
 
 $now = time();
 $lastCron = Worker::getSystemState('last_cron_run_at');

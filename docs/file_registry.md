@@ -1,10 +1,7 @@
 # File registry (SHA-256)
 
-This registry lists SHA-256 hashes for files in this repository at build time (v0.2).
-
-Limitations:
-- docs/file_registry.md is not hashed in this file (self-referential).
-- The release ZIP hash is provided as a sibling file: certinel_v.0.2.zip.sha256 (outside the zip).
+- Generated: 2026-01-27 23:39:51 UTC
+- Note: docs/file_registry.md is excluded (self-referential).
 
 ## Files
 
@@ -32,8 +29,8 @@ e1b845b5bbda126fa9ca3950c56c5279b082c4431c69745459c46f7db8a59627  docs/hostinger
 ca7acd72059e430940cc08c07c6872edfd9eabfa318aea8b0e6fdac9a333dac9  docs/ui_map.md
 7b3794151464dfbb8fc3a5483102c3689eba1039b64b4ab584ec827dc4eabdcd  public/.htaccess
 27f6868ae9be946447e1ec80b9088ac41be918739ef9236419d7312e1a7cbf52  public/admin/audit.php
-a77081b049592017c69d7f27f5b09da935273efab754ace42c92c4a2a09f0ea5  public/admin/monitors.php
-28d65a4ef53cbbe8ff665647adaf1a51838bb7c119134b0cb5b8076fa109ba36  public/admin/system.php
+97dfb6c5a9f813fd6d38059659ac1a8450bcffeb1550ae16aa9cdc895ba6b769  public/admin/monitors.php
+e2444c81476c77346ac5ddc2f3826977bd2f842c89d228bfe817bba27e8b6213  public/admin/system.php
 b2d92825b8d7c8edaae7d8b1631d3155355294212625381f962557985c8b0a6f  public/admin/user_edit.php
 46c122df3d3aa650c68d47256d7c8e54a6748413315a445117a08d32886aada9  public/admin/users.php
 59e6232d80876d09457849368908fcd60a552b5843b15d5b9ce54eeb72eec0da  public/api/v1/index.php
