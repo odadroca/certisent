@@ -1,11 +1,19 @@
-# Deployment and Upgrades (v0.4.2)
+# Deployment and Upgrades (v0.4.6)
 
+
+## Apache note: Authorization header forwarding
+Some Apache configurations do not pass the `Authorization` header through to PHP by default. If API requests return `401 missing_bearer`, ensure `public/.htaccess` forwards `Authorization` to PHP (this repo ships that rule) and that `mod_rewrite` is enabled.
 ## Versioning: app vs DB schema
 - **App version** (code release): `app_version()` (shown in Admin → System), e.g. `0.4.2`.
 - **DB schema version** (database contract): `schema_version()` and `system_state.schema_version`, e.g. `0.4`.
 
 Patch releases in the `0.4.x` line are expected to keep the **same DB schema** (`system_state.schema_version=0.4`).
 Only run SQL migrations when upgrading across releases that change the schema.
+
+## Patch upgrades (0.4.x → 0.4.y)
+- Patch releases in the `0.4.x` line keep the same **DB schema version** (`system_state.schema_version=0.4`).
+- Upgrade path: replace the code (files) and keep your existing database; **no SQL migrations are required**.
+- Only run migrations when a release explicitly changes `schema_version()` (not expected in `0.4.x`).
 
 ## Fresh install
 1. Upload the project.

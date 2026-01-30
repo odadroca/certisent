@@ -15,6 +15,9 @@ Base path: `/public/api/v1/` (unless you set document root to `public/`).
 
 ## Apache note: Authorization header forwarding
 
+
+See `docs/deploy.md` for deployment/upgrade context.
+
 Some Apache configurations do not pass the `Authorization` header through to PHP by default, which can cause `401 missing_bearer` even when your client sends the header.
 
 This release forwards `Authorization` in `public/.htaccess`. If you still see `missing_bearer`, verify that:

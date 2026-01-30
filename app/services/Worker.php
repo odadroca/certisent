@@ -28,6 +28,31 @@ final class Worker {
         return $r ? (string)$r['value'] : null;
     }
 
+    /**
+     * Correlation IDs are used for server-side log tracing of worker runs and job processing.
+     * They are not persisted in the DB and are not shown to unauthenticated users.
+     */
+    private static function newCorrelationId(): string {
+        try {
+            return bin2hex(random_bytes(8));
+        } catch (Throwable $e) {
+            // Fallback for environments with restricted CSPRNG access.
+            return substr(str_replace('.', '', uniqid('', true)), 0, 16);
+        }
+    }
+
+    /**
+     * Server-side logging helper (error_log). Keep payloads minimal (no secrets).
+     */
+    private static function logWithCid(string $cid, string $event, array $meta = []): void {
+        $line = '[certinel] cid=' . $cid . ' ' . $event;
+        if (!empty($meta)) {
+            $line .= ' ' . json_encode($meta, JSON_UNESCAPED_SLASHES);
+        }
+        error_log($line);
+    }
+
+
 
     /**
      * Create an async job to run checks for all enabled monitors.
@@ -72,6 +97,14 @@ final class Worker {
         self::requireSchemaVersion(schema_version());
         $t0 = microtime(true);
 
+        $cid = self::newCorrelationId();
+        self::logWithCid($cid, 'job_processing_start', [
+            'only_job_id' => $onlyJobId,
+            'max_checks' => $maxChecks,
+            'max_seconds' => $maxSeconds,
+        ]);
+
+
         if ($onlyJobId !== null) {
             $st = db()->prepare("SELECT * FROM worker_jobs WHERE id=:id LIMIT 1");
             $st->execute([':id'=>$onlyJobId]);
@@ -80,10 +113,14 @@ final class Worker {
             $st->execute();
         }
         $job = $st->fetch();
-        if (!$job) return null;
+        if (!$job) {
+            self::logWithCid($cid, 'job_processing_no_job');
+            return null;
+        }
 
         $jobId = (int)$job['id'];
         $status = (string)$job['status'];
+        self::logWithCid($cid, 'job_processing_selected', ['job_id'=>$jobId,'status'=>$status,'type'=>(string)$job['type']]);
         if ($status === 'pending') {
             // claim job
             $claim = db()->prepare("UPDATE worker_jobs SET status='running', started_at=:u, updated_at=:u WHERE id=:id AND status='pending'");
@@ -96,6 +133,7 @@ final class Worker {
         }
 
         if ($status !== 'running') {
+            self::logWithCid($cid, 'job_processing_exit', ['job_id'=>$jobId,'status'=>$status,'total_processed'=>(int)$job['total_processed']]);
             return ['id'=>$jobId,'status'=>$status,'total_processed'=>(int)$job['total_processed']];
         }
 
@@ -103,6 +141,7 @@ final class Worker {
             $fail = db()->prepare("UPDATE worker_jobs SET status='failed', error=:e, updated_at=:u, finished_at=:u WHERE id=:id");
             $fail->execute([':e'=>'unknown_job_type', ':u'=>db_now_utc(), ':id'=>$jobId]);
             self::createSystemEvent('job_failed','warn','Worker job failed (unknown type).',['job_id'=>$jobId]);
+            self::logWithCid($cid, 'job_processing_exit', ['job_id'=>$jobId,'status'=>'failed','error'=>'unknown_job_type']);
             return ['id'=>$jobId,'status'=>'failed','error'=>'unknown_job_type'];
         }
 
@@ -152,6 +191,7 @@ final class Worker {
                 ':id'=>$jobId,
             ]);
 
+            self::logWithCid($cid, 'job_processing_exit', ['job_id'=>$jobId,'status'=>'cancelled','total_processed'=>$processed,'last_monitor_id'=>$lastId]);
             return [
                 'id'=>$jobId,
                 'status'=>'cancelled',
@@ -178,9 +218,12 @@ final class Worker {
             ]);
         }
 
+        $exitStatus = (count($rows)===0 ? 'completed' : 'running');
+        self::logWithCid($cid, 'job_processing_exit', ['job_id'=>$jobId,'status'=>$exitStatus,'total_processed'=>$processed,'last_monitor_id'=>$lastId]);
+
         return [
             'id'=>$jobId,
-            'status'=>(count($rows)===0 ? 'completed' : 'running'),
+            'status'=>$exitStatus,
             'batch' => ['checked'=>$checked,'errors'=>$errors,'changed'=>$changed,'renewed'=>$renewed,'warned'=>$warned],
             'total_processed'=>$processed,
             'last_monitor_id'=>$lastId,
@@ -190,6 +233,8 @@ final class Worker {
     public static function runDueChecks(?int $limit = null): array {
         self::requireSchemaVersion(schema_version());
         $t0 = microtime(true);
+        $cid = self::newCorrelationId();
+        self::logWithCid($cid, 'worker_due_start', ['limit'=>$limit]);
         // Fetch all information needed to decide whether each monitor is due in one query
         // (avoid re-loading each monitor and its latest snapshot in a loop).
         $sql = "SELECT
@@ -229,6 +274,7 @@ final class Worker {
         $outbox = Notifier::processOutbox(100);
 
         $durationMs = (int)round((microtime(true) - $t0) * 1000);
+        self::logWithCid($cid, 'worker_due_end', array_merge($results, ['duration_ms'=>$durationMs,'outbox'=>$outbox]));
         self::createSystemEvent('worker_run', 'info', 'Worker run (due).', array_merge($results, ['mode'=>'due','duration_ms'=>$durationMs,'outbox'=>$outbox]));
         return $results;
     }

@@ -1,9 +1,10 @@
-# Certinel — the certificate sentinel - v.0.4.5
+# Certinel (certificate sentinel) — v0.4.7
 Certinel is a lightweight TLS/SSL certificate monitoring service that **live-fetches** the certificate presented by an endpoint (SNI-capable), stores immutable snapshots, detects changes (renewals/rotations), and notifies interested parties before outages happen.
 
 It is designed to be simple to host (shared hosting or VPS), easy to operate (cron-driven worker), and explicit about what it is observing: **the certificate the endpoint actually serves**.
 
-## Highlights (v.0.4.5)
+## Highlights (v0.4.7)
+- Worker runs and async job processing emit correlation IDs into server logs for troubleshooting.
 - `/api/v1/health` can be authorized with a **narrow scope** (`read_health`) while still accepting `run_worker` for backward compatibility.
 - Apache deployments: `public/.htaccess` forwards the `Authorization` header so Bearer auth works reliably.
 
@@ -15,6 +16,9 @@ It is designed to be simple to host (shared hosting or VPS), easy to operate (cr
 - App version vs DB schema version:
   - App version may advance in v0.4.x patch releases.
   - DB schema version remains `0.4` unless you apply a future migration.
+- Notifications: email (PHP `mail()`) + optional Slack/Teams webhooks (basic POST). RSS is read-only.
+- “False positives” are mitigated with a confirm re-check on certificate change (configurable sample count).
+- No background job queue; worker sends notifications inline.
 
 ## v0.4 highlights
 - UI theme updated (background `#0b2840`, accent `#09d2e8`).
@@ -28,10 +32,15 @@ It is designed to be simple to host (shared hosting or VPS), easy to operate (cr
 
 Patch releases in the `0.4.x` line **do not require** bumping `system_state.schema_version` and should not require running SQL migrations.
 
-## Notes / limitations (v0.4)
-- Notifications: email (PHP `mail()`) + optional Slack/Teams webhooks (basic POST). RSS is read-only.
-- “False positives” are mitigated with a confirm re-check on certificate change (configurable sample count).
-- No background job queue; worker sends notifications inline.
+## Quick start (shared hosting)
+1. Upload the contents of this zip to your hosting under `public_html/certinel/` (or similar).
+2. Copy `.env.example` to `.env` and set values.
+3. Create the MySQL DB + user, then import `sql/schema.sql`.
+4. Visit `/public/` and create the first admin user (first registered user becomes admin).
+5. Add monitors from the dashboard.
+6. Create a cron job running `php /path/to/certinel/scripts/worker.php --due` every 5–15 minutes.
+
+Detailed steps: see `docs/deploy.md` and `docs/ops_runbook.md`.
 
 ## Security baseline
 - Password hashing (`password_hash` / `password_verify`)
@@ -39,7 +48,6 @@ Patch releases in the `0.4.x` line **do not require** bumping `system_state.sche
 - Prepared statements (PDO)
 - Role checks on every action
 - Session hardening (`SameSite`, `HttpOnly`, `Secure` when HTTPS)
-
 
 ## Features
 - **Live certificate fetching (SNI-capable)** for host:port endpoints
