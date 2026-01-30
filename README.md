@@ -1,12 +1,13 @@
-# Certinel (certificate sentinel) — v0.4.7
+# Certinel (certificate sentinel) — v0.4.8
 Certinel is a lightweight TLS/SSL certificate monitoring service that **live-fetches** the certificate presented by an endpoint (SNI-capable), stores immutable snapshots, detects changes (renewals/rotations), and notifies interested parties before outages happen.
 
 It is designed to be simple to host (shared hosting or VPS), easy to operate (cron-driven worker), and explicit about what it is observing: **the certificate the endpoint actually serves**.
 
-## Highlights (v0.4.7)
+## Highlights (v0.4.8)
 - Worker runs and async job processing emit correlation IDs into server logs for troubleshooting.
 - `/api/v1/health` can be authorized with a **narrow scope** (`read_health`) while still accepting `run_worker` for backward compatibility.
 - Apache deployments: `public/.htaccess` forwards the `Authorization` header so Bearer auth works reliably.
+- Bearer token extraction is more robust across hosting variants (`HTTP_AUTHORIZATION`, `REDIRECT_HTTP_AUTHORIZATION`, `getallheaders()`).
 
 ## Notes / limitations
 - API auth:

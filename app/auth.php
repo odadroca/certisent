@@ -57,7 +57,25 @@ function user_agent(): string {
 }
 
 function bearer_token_from_headers(): ?string {
-    $hdr = $_SERVER['HTTP_AUTHORIZATION'] ?? $_SERVER['Authorization'] ?? '';
+    // Robust header extraction across Apache/nginx/FastCGI variants.
+    // This is additive: it preserves the original behavior but looks in more places.
+    $hdr = $_SERVER['HTTP_AUTHORIZATION'] ?? $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? $_SERVER['Authorization'] ?? $_SERVER['HTTP_X_AUTHORIZATION'] ?? '';
+    if (!$hdr) {
+        // getallheaders() is not available everywhere; check when present.
+        if (function_exists('getallheaders')) {
+            $h = getallheaders();
+            if (is_array($h)) {
+                $hdr = $h['Authorization'] ?? $h['authorization'] ?? $hdr;
+            }
+        }
+        // Some Apache setups expose headers via apache_request_headers().
+        if (!$hdr && function_exists('apache_request_headers')) {
+            $h = apache_request_headers();
+            if (is_array($h)) {
+                $hdr = $h['Authorization'] ?? $h['authorization'] ?? $hdr;
+            }
+        }
+    }
     if (!$hdr) return null;
     if (stripos($hdr, 'Bearer ') !== 0) return null;
     $t = trim(substr($hdr, 7));

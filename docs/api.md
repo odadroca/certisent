@@ -24,6 +24,8 @@ This release forwards `Authorization` in `public/.htaccess`. If you still see `m
 - `mod_rewrite` is enabled, and
 - requests are hitting the `public/` folder (document root or `/public/` in the URL).
 
+In some hosting environments the header may surface as `REDIRECT_HTTP_AUTHORIZATION` or only via `getallheaders()`; v0.4.8 expands Bearer token extraction to cover these common variants.
+
 ## Endpoints
 
 ### GET /api/v1/health
