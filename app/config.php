@@ -3,30 +3,88 @@ declare(strict_types=1);
 
 /**
  * Tiny .env loader (no dependencies).
- * - Reads project root .env (same folder as this file's parent).
- * - For shared hosting, protect .env with .htaccess.
+ * v0.3.1: searches multiple candidate locations to reduce accidental misplacement outages.
  */
-function env_load(string $path): void {
-    if (!is_file($path)) return;
-    $lines = file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+
+function app_version(): string {
+    return '0.3.1';
+}
+
+/**
+ * Load a .env file into getenv()/$_ENV (only for keys not already set).
+ * @return bool whether the file was loaded.
+ */
+function env_load(string $path): bool {
+    if (!is_file($path)) {
+        return false;
+    }
+    $lines = file($path, FILE_IGNORE_NEW_LINES);
+    if ($lines === false) {
+        return false;
+    }
     foreach ($lines as $line) {
-        $line = trim($line);
-        if ($line === '' || str_starts_with($line, '#')) continue;
-        if (!str_contains($line, '=')) continue;
+        $line = trim((string)$line);
+        if ($line === '' || str_starts_with($line, '#')) {
+            continue;
+        }
+        if (!str_contains($line, '=')) {
+            continue;
+        }
         [$k, $v] = explode('=', $line, 2);
         $k = trim($k);
         $v = trim($v);
-        // Strip surrounding quotes if present
         $v = trim($v, "\"'");
         if ($k !== '' && getenv($k) === false) {
             putenv($k . '=' . $v);
             $_ENV[$k] = $v;
         }
     }
+    return true;
 }
 
-$root = dirname(__DIR__);
-env_load($root . '/.env');
+/**
+ * Candidate .env paths, in order.
+ * - project root
+ * - one level above (common misplacement)
+ * - public/ (sometimes moved there)
+ * @return array<int,string>
+ */
+function env_candidate_paths(): array {
+    $root = dirname(__DIR__);
+    return [
+        $root . '/.env',
+        dirname($root) . '/.env',
+        $root . '/public/.env',
+    ];
+}
+
+/**
+ * Load env from the first existing candidate.
+ */
+function env_bootstrap(): void {
+    $paths = env_candidate_paths();
+    $loadedFrom = '';
+    foreach ($paths as $p) {
+        if (env_load($p)) {
+            $loadedFrom = $p;
+            break;
+        }
+    }
+    $GLOBALS['__CERTINEL_ENV_SEARCHED'] = $paths;
+    $GLOBALS['__CERTINEL_ENV_LOADED_FROM'] = $loadedFrom;
+}
+
+env_bootstrap();
+
+function env_loaded_from(): string {
+    return (string)($GLOBALS['__CERTINEL_ENV_LOADED_FROM'] ?? '');
+}
+
+/** @return array<int,string> */
+function env_searched_paths(): array {
+    $p = $GLOBALS['__CERTINEL_ENV_SEARCHED'] ?? [];
+    return is_array($p) ? $p : [];
+}
 
 function env(string $key, ?string $default = null): ?string {
     $v = getenv($key);
@@ -48,6 +106,7 @@ function cfg(string $key, $default = null) {
             'MAIL_FROM' => (string)env('MAIL_FROM', 'no-reply@example.com'),
             'MAIL_FROM_NAME' => (string)env('MAIL_FROM_NAME', 'Certinel'),
             'ADMIN_EMAIL' => (string)env('ADMIN_EMAIL', ''),
+            // Legacy fallback. Prefer scoped API keys stored in DB (v0.3+).
             'API_WORKER_KEY' => (string)env('API_WORKER_KEY', ''),
             'TLS_CONNECT_TIMEOUT_SECS' => (int)env('TLS_CONNECT_TIMEOUT_SECS', '7'),
             'TLS_READ_TIMEOUT_SECS' => (int)env('TLS_READ_TIMEOUT_SECS', '7'),
@@ -55,6 +114,10 @@ function cfg(string $key, $default = null) {
         ];
     }
     return $cache[$key] ?? $default;
+}
+
+function is_dev(): bool {
+    return (string)cfg('APP_ENV', 'prod') === 'dev';
 }
 
 function app_base_url(): string {
@@ -75,15 +138,14 @@ function app_url(string $path = ''): string {
     return $path === '' ? $base : ($base . '/' . $path);
 }
 
-function app_secret(): string {
-    $s = (string)cfg('APP_SECRET', '');
-    if ($s === '') {
-        // Fail fast in prod; allow empty in dev only.
-        if (cfg('APP_ENV') !== 'dev') {
-            http_response_code(500);
-            echo "Misconfiguration: APP_SECRET missing.";
-            exit;
+/** @return array<int,string> */
+function missing_config_keys(): array {
+    $required = ['APP_SECRET', 'DB_NAME', 'DB_USER', 'DB_PASS'];
+    $missing = [];
+    foreach ($required as $k) {
+        if ((string)cfg($k, '') === '') {
+            $missing[] = $k;
         }
     }
-    return $s;
+    return $missing;
 }

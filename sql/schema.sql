@@ -142,3 +142,7 @@ CREATE TABLE IF NOT EXISTS system_state (
 INSERT INTO system_state (`key`,`value`,updated_at)
   VALUES ('last_cron_run_at','',UTC_TIMESTAMP())
   ON DUPLICATE KEY UPDATE updated_at=VALUES(updated_at);
+
+-- v0.3.1 schema marker
+INSERT INTO system_state (`key`,`value`,`updated_at`) VALUES ('schema_version','0.3.1', UTC_TIMESTAMP())
+ON DUPLICATE KEY UPDATE `value`=VALUES(`value`), `updated_at`=VALUES(`updated_at`);

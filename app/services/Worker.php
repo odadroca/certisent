@@ -3,6 +3,18 @@ declare(strict_types=1);
 
 final class Worker {
 
+    private static function requireSchemaVersion(string $expected): void {
+        $current = self::getSystemState('schema_version');
+        if ($current === null || $current === '') {
+            // Fresh install or pre-versioned DB: set version marker.
+            self::setSystemState('schema_version', $expected);
+            return;
+        }
+        if ($current !== $expected) {
+            throw new RuntimeException('DB schema_version mismatch: expected ' . $expected . ', got ' . $current);
+        }
+    }
+
     public static function setSystemState(string $key, string $value): void {
         $st = db()->prepare("INSERT INTO system_state (`key`,`value`,`updated_at`) VALUES (:k,:v,:u)
                              ON DUPLICATE KEY UPDATE `value`=VALUES(`value`), updated_at=VALUES(updated_at)");
@@ -17,6 +29,7 @@ final class Worker {
     }
 
     public static function runDueChecks(?int $limit = null): array {
+        self::requireSchemaVersion(app_version());
         $t0 = microtime(true);
         $sql = "SELECT m.id
                 FROM monitors m
@@ -51,6 +64,7 @@ final class Worker {
     }
 
     public static function runAllChecks(?int $limit = null): array {
+        self::requireSchemaVersion(app_version());
         $t0 = microtime(true);
         $st = db()->query("SELECT id FROM monitors WHERE enabled=1 ORDER BY updated_at DESC");
         $rows = $st->fetchAll();

@@ -41,6 +41,12 @@ $stSys->execute();
 $sysEvents = $stSys->fetchAll();
 
 render_header('Admin · System', $user);
+
+$schemaVersion = Worker::getSystemState('schema_version') ?? '';
+$appVersion = app_version();
+$envFrom = env_loaded_from();
+$schemaOk = ($schemaVersion === '' || $schemaVersion === $appVersion);
+
 ?>
 
 <div class="flex items-start justify-between mb-4">

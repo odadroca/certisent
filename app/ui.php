@@ -109,7 +109,7 @@ function render_header(string $title, ?array $user = null): void {
 
 function render_footer(): void {
     echo '</div>'; // content wrapper
-    echo '<div class="mt-10 text-xs text-gray-500">Certinel v0.3 · UTC timestamps</div>';
+    echo '<div class="mt-10 text-xs text-gray-500">Certinel v0.3.1 · UTC timestamps</div>';
     echo '</div></body></html>';
 }
 
