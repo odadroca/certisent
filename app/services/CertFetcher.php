@@ -13,6 +13,17 @@ final class CertFetcher {
      *  - fingerprint_sha256 (string|null)
      */
     public static function fetch(string $host, int $port = 443): array {
+        $policy = SsrfPolicy::evaluateTarget($host, $port);
+        if (!$policy['ok']) {
+            return [
+                'ok' => false,
+                'error' => 'ssrf_blocked: ' . (string)($policy['reason'] ?? 'blocked'),
+                'pem' => null,
+                'parsed' => null,
+                'fingerprint_sha256' => null,
+            ];
+        }
+
         $ctx = stream_context_create([
             'ssl' => [
                 'capture_peer_cert' => true,

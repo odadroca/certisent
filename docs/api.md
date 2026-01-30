@@ -77,6 +77,9 @@ Body (quick check):
 
 Quick-check response includes parsed certificate summary (no DB write).
 
+Notes (v0.5 SSRF policy):
+- In non-`legacy` SSRF modes, URL-based quick checks may be rejected with `ssrf_blocked: <reason>`.
+
 ## Status vocabulary used by the system
 - `ok`: certificate valid; days_remaining > notify threshold
 - `warn`: certificate valid but within notify threshold

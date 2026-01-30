@@ -16,6 +16,9 @@ $emailEnabled = (bool)($channels['email'] ?? true);
 $slackWebhook = (string)($channels['slack_webhook'] ?? '');
 $teamsWebhook = (string)($channels['teams_webhook'] ?? '');
 
+$oldSlackWebhook = $slackWebhook;
+$oldTeamsWebhook = $teamsWebhook;
+
 $err = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_verify();
@@ -54,6 +57,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ':c'=>json_encode($new, JSON_UNESCAPED_SLASHES),
             ':id'=>(int)$user['id'],
         ]);
+
+        // Audit webhook URL changes without storing URL values.
+        $auditWebhook = function(string $channel, string $old, string $new) use ($user): void {
+            $old = trim($old);
+            $new = trim($new);
+            if ($old === $new) return;
+
+            $class = ($old === '' && $new !== '') ? 'set' : (($old !== '' && $new === '') ? 'cleared' : 'changed');
+
+            $oldHost = '';
+            $newHost = '';
+            if ($old !== '') {
+                $p = @parse_url($old);
+                if (is_array($p) && isset($p['host'])) $oldHost = (string)$p['host'];
+            }
+            if ($new !== '') {
+                $p = @parse_url($new);
+                if (is_array($p) && isset($p['host'])) $newHost = (string)$p['host'];
+            }
+
+            Audit::log((int)$user['id'], 'user.webhook.update', 'user', (int)$user['id'], [
+                'channel' => $channel,
+                'change' => $class,
+                'old_set' => ($old !== '' ? 1 : 0),
+                'new_set' => ($new !== '' ? 1 : 0),
+                'old_host' => $oldHost,
+                'new_host' => $newHost,
+                'old_hash' => ($old !== '' ? hash('sha256', $old) : ''),
+                'new_hash' => ($new !== '' ? hash('sha256', $new) : ''),
+            ]);
+        };
+
+        $auditWebhook('slack', $oldSlackWebhook, $slackWebhook);
+        $auditWebhook('teams', $oldTeamsWebhook, $teamsWebhook);
 
         // Do NOT log webhook URL values.
         Audit::log((int)$user['id'], 'user.settings.update', 'user', (int)$user['id'], [

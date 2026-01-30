@@ -2,3 +2,5 @@
 RewriteEngine On
 RewriteRule ^(app|sql|scripts|docs)(/|$) - [F,L]
 RewriteRule ^\.env(\.example)?$ - [F,L]
+# Internally rewrite root and other requests to public/index.php
+RewriteRule ^(.*)$ /public/index.php [L]

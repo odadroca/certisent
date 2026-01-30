@@ -210,6 +210,12 @@ final class Notifier {
      * @return array{0:bool,1:?string}
      */
     private static function sendWebhook(string $url, array $payload): array {
+        $policy = SsrfPolicy::evaluateWebhookUrl($url);
+        if (!($policy['ok'] ?? false)) {
+            $reason = (string)($policy['reason'] ?? 'blocked');
+            return [false, 'webhook_ssrf_blocked: ' . $reason];
+        }
+
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_POST, true);
@@ -217,6 +223,21 @@ final class Notifier {
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload, JSON_UNESCAPED_SLASHES));
         curl_setopt($ch, CURLOPT_TIMEOUT, 10);
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+
+        // Prevent redirect-based bypass and reduce protocol ambiguity.
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, false);
+        curl_setopt($ch, CURLOPT_MAXREDIRS, 0);
+        if (defined('CURLOPT_PROTOCOLS') && defined('CURLPROTO_HTTPS')) {
+            // In legacy mode we preserve prior behavior; SsrfPolicy already required https for non-legacy.
+            $wm = strtolower(trim((string)cfg('WEBHOOK_MODE', 'legacy')));
+            if ($wm !== 'legacy') {
+                curl_setopt($ch, CURLOPT_PROTOCOLS, CURLPROTO_HTTPS);
+                if (defined('CURLOPT_REDIR_PROTOCOLS')) {
+                    curl_setopt($ch, CURLOPT_REDIR_PROTOCOLS, CURLPROTO_HTTPS);
+                }
+            }
+        }
+
         $resp = curl_exec($ch);
         $errNo = curl_errno($ch);
         $errMsg = curl_error($ch);

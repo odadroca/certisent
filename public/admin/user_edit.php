@@ -11,6 +11,11 @@ $st->execute([':id'=>$id]);
 $u = $st->fetch();
 if (!$u) { http_response_code(404); echo "Not found."; exit; }
 
+$oldChannels = json_decode((string)($u['notify_channels_json'] ?? '{}'), true);
+if (!is_array($oldChannels)) $oldChannels = [];
+$oldSlackWebhook = (string)($oldChannels['slack_webhook'] ?? '');
+$oldTeamsWebhook = (string)($oldChannels['teams_webhook'] ?? '');
+
 $err = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_verify();
@@ -24,6 +29,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         $st2 = db()->prepare("UPDATE users SET role=:r, notify_channels_json=:c WHERE id=:id");
         $st2->execute([':r'=>$role, ':c'=>json_encode($channels, JSON_UNESCAPED_SLASHES), ':id'=>$id]);
+
+        // Audit webhook changes without logging URL values.
+        $auditWebhook = function(string $channel, string $old, string $new) use ($admin, $id): void {
+            $old = trim((string)$old);
+            $new = trim((string)$new);
+            if ($old === $new) return;
+
+            $class = ($old === '' && $new !== '') ? 'set' : (($old !== '' && $new === '') ? 'cleared' : 'changed');
+            $oldHost = $old !== '' ? ((string)(parse_url($old, PHP_URL_HOST) ?? '')) : '';
+            $newHost = $new !== '' ? ((string)(parse_url($new, PHP_URL_HOST) ?? '')) : '';
+            Audit::log((int)$admin['id'], 'user.webhook.update', 'user', $id, [
+                'channel' => $channel,
+                'change' => $class,
+                'old_set' => ($old !== '' ? 1 : 0),
+                'new_set' => ($new !== '' ? 1 : 0),
+                'old_host' => $oldHost,
+                'new_host' => $newHost,
+                'old_hash' => ($old !== '' ? hash('sha256', $old) : ''),
+                'new_hash' => ($new !== '' ? hash('sha256', $new) : ''),
+            ]);
+        };
+
+        $newSlackWebhook = (string)($channels['slack_webhook'] ?? '');
+        $newTeamsWebhook = (string)($channels['teams_webhook'] ?? '');
+        $auditWebhook('slack', $oldSlackWebhook, $newSlackWebhook);
+        $auditWebhook('teams', $oldTeamsWebhook, $newTeamsWebhook);
 
         Audit::log((int)$admin['id'], 'user.update', 'user', $id, ['role'=>$role]);
         header('Location: users.php');

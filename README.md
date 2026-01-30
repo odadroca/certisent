@@ -1,16 +1,25 @@
-<p align="center"><img src="https://i.postimg.cc/qMpPkTVz/certinel-neg.png" alt="Certinel" width="200" height="200"></p>
-
-# Certinel (certificate sentinel) — v.0.4.9
+# Certinel (certificate sentinel) — v0.5.2
 Certinel is a lightweight TLS/SSL certificate monitoring service that **live-fetches** the certificate presented by an endpoint (SNI-capable), stores immutable snapshots, detects changes (renewals/rotations), and notifies interested parties before outages happen.
 
 It is designed to be simple to host (shared hosting or VPS), easy to operate (cron-driven worker), and explicit about what it is observing: **the certificate the endpoint actually serves**.
 
-## Highlights (v0.4.9)
-- Stabilization release (no new runtime features beyond v0.4.8).
-- Fixed admin API key creation failing with "Bad request (CSRF)".
-- Footer now displays the current app version dynamically.
-- Added consolidated v0.4.x patch release notes (`docs/release_notes_v0.4.x.md`).
-- All prior v0.4.x improvements remain (Apache Bearer auth compatibility, schema/app version decoupling, due-check perf, job cancellation responsiveness, health scope narrowing, correlation IDs).
+## Highlights (v0.5.2)
+- Added an SSRF policy framework for outbound TLS checks (opt-in):
+  - `SSRF_MODE=legacy` (default) preserves v0.4.x behavior (no SSRF blocking).
+  - `SSRF_MODE=public_only` blocks private/reserved IP ranges.
+  - `SSRF_MODE=allowlist_private` blocks private/reserved ranges unless allowlisted.
+- Added allowlist primitives: `SSRF_ALLOW_CIDRS`, `SSRF_ALLOW_HOSTS`, `SSRF_ALLOW_PORTS`.
+- Policy enforced for: monitor checks, quick checks, and `/api/v1/check` URL-based checks.
+
+- Webhook egress hardening (opt-in):
+  - `WEBHOOK_MODE=legacy` (default) preserves v0.4.x behavior.
+  - `WEBHOOK_MODE=public_only` requires `https://` and blocks private/reserved IP ranges.
+  - `WEBHOOK_MODE=allowlist` requires `https://` and allows private/reserved targets only if allowlisted via `SSRF_ALLOW_*`.
+  - Redirect following is disabled to prevent redirect-based bypass.
+
+- RSS tenancy hardening (safe default):
+  - Non-admin RSS tokens no longer receive system/global events (`monitor_id IS NULL`).
+  - `RSS_INCLUDE_SYSTEM_EVENTS=false` by default; only `admin`/`auditor` RSS tokens may include system events when enabled.
 
 ## Notes / limitations
 - API auth:
@@ -18,23 +27,21 @@ It is designed to be simple to host (shared hosting or VPS), easy to operate (cr
   - Legacy: `.env` `API_WORKER_KEY` is still accepted and is treated as full-scope (`*`) for upgrade safety.
 - No automated test suite is shipped yet (manual verification required for changes).
 - App version vs DB schema version:
-  - App version may advance in v0.4.x patch releases.
+  - App version may advance in patch releases.
   - DB schema version remains `0.4` unless you apply a future migration.
 - Notifications: email (PHP `mail()`) + optional Slack/Teams webhooks (basic POST). RSS is read-only.
+- RSS (v0.5.2):
+  - Non-admin RSS tokens only return events for monitors owned by that user.
+  - System/global events are excluded unless `RSS_INCLUDE_SYSTEM_EVENTS=true` and the token belongs to an `admin`/`auditor`.
 - “False positives” are mitigated with a confirm re-check on certificate change (configurable sample count).
 - No background job queue; worker sends notifications inline.
-
-## v0.4 highlights
-- UI theme updated (background `#0b2840`, accent `#09d2e8`).
-- Email outbound supports `MAIL_TRANSPORT=mail|smtp|api` (SMTP without external dependencies).
-- Dashboard “Check now (all)” runs via an async job, with progress + cancel controls on Admin → System.
-- Operator controls: Run outbox now, cancel jobs, view job history.
-
-## Versioning: app vs DB schema
-- **App version**: the release version of the codebase (this zip), e.g. `0.4.2`.
-- **DB schema version**: the version stored in `system_state.schema_version`, e.g. `0.4`.
-
-Patch releases in the `0.4.x` line **do not require** bumping `system_state.schema_version` and should not require running SQL migrations.
+- SSRF policy (v0.5):
+  - Only applies in non-`legacy` modes.
+  - `public_only` and `allowlist_private` may block targets that resolve to private/reserved IPs.
+  - When blocked, checks return errors like `ssrf_blocked: <reason>`.
+- Webhook policy (v0.5.1):
+  - Only applies in non-`legacy` `WEBHOOK_MODE`.
+  - When blocked, webhook delivery may record errors like `webhook_ssrf_blocked: <reason>`.
 
 ## Quick start (shared hosting)
 1. Upload the contents of this zip to your hosting under `public_html/certinel/` (or similar).
@@ -178,7 +185,7 @@ This project is licensed under the **Apache License 2.0** (see `LICENSE.md`).
 ## Acknowledgments
 
 - Contributors: 
-- Inspirations: Norges Bank - it seems that every time someone sneezes there, a new certificate is issued.
+- Inspirations: Norges Bank - it seems that every time someone sneezes there, a new certificate is issued - *"bless you"*.
 - Libraries / tools:
   - PHP (built-in networking + OpenSSL)
   - MySQL / MariaDB

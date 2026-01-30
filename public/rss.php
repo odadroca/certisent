@@ -9,7 +9,7 @@ if ($token === '') {
     exit;
 }
 
-$st = db()->prepare("SELECT id,email FROM users WHERE rss_token=:t");
+$st = db()->prepare("SELECT id,email,role FROM users WHERE rss_token=:t");
 $st->execute([':t'=>$token]);
 $u = $st->fetch();
 if (!$u) {
@@ -18,16 +18,36 @@ if (!$u) {
     exit;
 }
 
-$st2 = db()->prepare("
-    SELECT e.*, m.url, m.host
-    FROM events e
-    LEFT JOIN monitors m ON m.id=e.monitor_id
-    WHERE (m.user_id=:uid OR e.monitor_id IS NULL)
-    ORDER BY e.created_at DESC
-    LIMIT 50
-");
-$st2->execute([':uid'=>$u['id']]);
-$events = $st2->fetchAll();
+$role = (string)($u['role'] ?? 'viewer');
+
+$rawFlag = strtolower(trim((string)cfg('RSS_INCLUDE_SYSTEM_EVENTS', 'false')));
+$flag = in_array($rawFlag, ['1','true','yes','on'], true);
+$includeSystem = $flag && ($role === 'admin' || $role === 'auditor');
+
+if ($includeSystem) {
+    $st2 = db()->prepare("
+        SELECT e.*, m.url, m.host
+        FROM events e
+        LEFT JOIN monitors m ON m.id=e.monitor_id
+        WHERE (m.user_id=:uid OR e.monitor_id IS NULL)
+        ORDER BY e.created_at DESC
+        LIMIT 50
+    ");
+    $st2->execute([':uid'=>$u['id']]);
+    $events = $st2->fetchAll();
+} else {
+    // Non-admin RSS tokens must not receive system/global events (monitor_id IS NULL).
+    $st2 = db()->prepare("
+        SELECT e.*, m.url, m.host
+        FROM events e
+        INNER JOIN monitors m ON m.id=e.monitor_id
+        WHERE m.user_id=:uid
+        ORDER BY e.created_at DESC
+        LIMIT 50
+    ");
+    $st2->execute([':uid'=>$u['id']]);
+    $events = $st2->fetchAll();
+}
 
 header('Content-Type: application/rss+xml; charset=utf-8');
 

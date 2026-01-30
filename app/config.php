@@ -7,7 +7,7 @@ declare(strict_types=1);
  */
 
 function app_version(): string {
-    return '0.4.9';
+    return '0.5.2';
 }
 
 /**
@@ -130,6 +130,23 @@ function cfg(string $key, $default = null) {
             'TLS_CONNECT_TIMEOUT_SECS' => (int)env('TLS_CONNECT_TIMEOUT_SECS', '7'),
             'TLS_READ_TIMEOUT_SECS' => (int)env('TLS_READ_TIMEOUT_SECS', '7'),
             'TLS_SAMPLES_ON_CHANGE' => (int)env('TLS_SAMPLES_ON_CHANGE', '2'),
+
+            // v0.5 SSRF policy framework (default preserves v0.4.x behavior).
+            'SSRF_MODE' => (string)env('SSRF_MODE', 'legacy'),
+            'SSRF_ALLOW_CIDRS' => (string)env('SSRF_ALLOW_CIDRS', ''),
+            'SSRF_ALLOW_HOSTS' => (string)env('SSRF_ALLOW_HOSTS', ''),
+            'SSRF_ALLOW_PORTS' => (string)env('SSRF_ALLOW_PORTS', ''),
+
+            // v0.5.1 Webhook egress hardening (default preserves v0.4.x behavior).
+            // Modes:
+            // - legacy: allow any URL (current behavior)
+            // - public_only: require https and block private/reserved
+            // - allowlist: require https and allow private/reserved only if allowlisted via SSRF_ALLOW_*.
+            'WEBHOOK_MODE' => (string)env('WEBHOOK_MODE', 'legacy'),
+
+            // v0.5.2 RSS tenancy hardening.
+            // Default false: do not include system/global events for non-admin RSS tokens.
+            'RSS_INCLUDE_SYSTEM_EVENTS' => (string)env('RSS_INCLUDE_SYSTEM_EVENTS', 'false'),
         ];
     }
     return $cache[$key] ?? $default;
