@@ -1,7 +1,6 @@
 # Code of Conduct
 
 ## Scope
-
 This Code of Conduct applies to all project spaces (issues, pull requests, discussions, and any other collaboration channels).
 
 ## Expected behavior

@@ -1,8 +1,17 @@
 # API (v0)
 
-Authentication: `Authorization: Bearer <API_WORKER_KEY>` (shared secret from `.env`).
+Authentication:
+- Preferred: create an API key in the admin UI (Admin → API Keys) and use `Authorization: Bearer <token>`.
+- Legacy fallback: `.env` `API_WORKER_KEY` is still accepted and is treated as full-scope (`*`) for upgrade safety.
 
 Base path: `/public/api/v1/` (unless you set document root to `public/`).
+
+## Scopes
+
+- `run_worker`: POST `/api/v1/worker/run`
+- `check_monitor`: POST `/api/v1/check`
+- `read_health`: GET `/api/v1/health` (new in v0.4.5; `run_worker` is still accepted for backward compatibility)
+
 
 ## Apache note: Authorization header forwarding
 
@@ -21,6 +30,16 @@ Response:
 ```json
 { "ok": true, "time_utc": "2026-01-24 12:00:00", "last_cron_run_at": "..." }
 ```
+
+Example:
+```bash
+curl -s \
+  -H 'Authorization: Bearer <token>' \
+  https://example.com/certinel/public/api/v1/health
+```
+
+Note: For API keys stored in `api_keys`, the recommended scope is `read_health`. For backward compatibility, `run_worker` also grants access to this endpoint.
+
 
 ### POST /api/v1/worker/run
 Runs the worker.

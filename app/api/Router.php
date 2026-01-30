@@ -27,7 +27,7 @@ final class ApiRouter {
             return;
         }
         if ($method === 'GET' && $sub === '/health') {
-            require_api_scope('run_worker');
+            require_api_any_scope(['run_worker','read_health']);
             echo json_encode(['ok'=>true,'time_utc'=>db_now_utc(),'last_cron_run_at'=>Worker::getSystemState('last_cron_run_at')]);
             return;
         }

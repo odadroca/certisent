@@ -64,14 +64,17 @@ function bearer_token_from_headers(): ?string {
     return $t !== '' ? $t : null;
 }
 
+
 /**
- * API auth for worker endpoints.
+ * API auth requiring ANY of the provided scopes.
  *
  * - Validates Bearer token against api_keys (hashed).
- * - Enforces scope.
+ * - Enforces at least one scope (or '*' scope).
  * - Fallback: .env API_WORKER_KEY (legacy), treated as full-scope.
+ *
+ * @param array<int,string> $scopesWanted
  */
-function require_api_scope(string $scope): array {
+function require_api_any_scope(array $scopesWanted): array {
     $token = bearer_token_from_headers();
     if (!$token) {
         http_response_code(401);
@@ -79,7 +82,7 @@ function require_api_scope(string $scope): array {
         exit;
     }
 
-    // Legacy fallback (kept for upgrade safety)
+    // Legacy fallback (kept for upgrade safety) — treated as full-scope.
     $legacy = (string)cfg('API_WORKER_KEY', '');
     if ($legacy !== '' && hash_equals($legacy, $token)) {
         return ['id'=>0,'name'=>'legacy','scopes_json'=>json_encode(['*'])];
@@ -95,14 +98,21 @@ function require_api_scope(string $scope): array {
         echo json_encode(['ok'=>false,'error'=>'invalid_token']);
         exit;
     }
+
     $scopes = json_decode((string)$row['scopes_json'], true);
     if (!is_array($scopes)) $scopes = [];
-    $allowed = in_array('*', $scopes, true) || in_array($scope, $scopes, true);
+    $allowed = in_array('*', $scopes, true);
+    if (!$allowed) {
+        foreach ($scopesWanted as $s) {
+            if (in_array($s, $scopes, true)) { $allowed = true; break; }
+        }
+    }
     if (!$allowed) {
         http_response_code(403);
         echo json_encode(['ok'=>false,'error'=>'insufficient_scope']);
         exit;
     }
+
     // Update last_used_at (best-effort)
     try {
         $pdo->prepare('UPDATE api_keys SET last_used_at = :t WHERE id = :id')->execute([':t'=>db_now_utc(), ':id'=>$row['id']]);
@@ -110,4 +120,15 @@ function require_api_scope(string $scope): array {
         // ignore
     }
     return $row;
+}
+
+/**
+ * API auth for worker endpoints.
+ *
+ * - Validates Bearer token against api_keys (hashed).
+ * - Enforces scope.
+ * - Fallback: .env API_WORKER_KEY (legacy), treated as full-scope.
+ */
+function require_api_scope(string $scope): array {
+    return require_api_any_scope([$scope]);
 }

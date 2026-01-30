@@ -21,7 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($name === '') $name = 'worker';
 
         $scopes = (array)($_POST['scopes'] ?? []);
-        $allowed = ['run_worker','check_monitor'];
+        $allowed = ['run_worker','check_monitor','read_health'];
         $scopes = array_values(array_unique(array_filter(array_map('strval', $scopes), function(string $s) use ($allowed) {
             return in_array($s, $allowed, true);
         })));

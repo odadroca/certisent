@@ -1,13 +1,32 @@
-# Certinel — the certificate sentinel — v0.4.4
+# Certinel — the certificate sentinel - v.0.4.5
 Certinel is a lightweight TLS/SSL certificate monitoring service that **live-fetches** the certificate presented by an endpoint (SNI-capable), stores immutable snapshots, detects changes (renewals/rotations), and notifies interested parties before outages happen.
 
 It is designed to be simple to host (shared hosting or VPS), easy to operate (cron-driven worker), and explicit about what it is observing: **the certificate the endpoint actually serves**.
+
+## Highlights (v.0.4.5)
+- `/api/v1/health` can be authorized with a **narrow scope** (`read_health`) while still accepting `run_worker` for backward compatibility.
+- Apache deployments: `public/.htaccess` forwards the `Authorization` header so Bearer auth works reliably.
+
+## Notes / limitations
+- API auth:
+  - Preferred: API keys created in the admin UI (stored hashed in `api_keys`).
+  - Legacy: `.env` `API_WORKER_KEY` is still accepted and is treated as full-scope (`*`) for upgrade safety.
+- No automated test suite is shipped yet (manual verification required for changes).
+- App version vs DB schema version:
+  - App version may advance in v0.4.x patch releases.
+  - DB schema version remains `0.4` unless you apply a future migration.
 
 ## v0.4 highlights
 - UI theme updated (background `#0b2840`, accent `#09d2e8`).
 - Email outbound supports `MAIL_TRANSPORT=mail|smtp|api` (SMTP without external dependencies).
 - Dashboard “Check now (all)” runs via an async job, with progress + cancel controls on Admin → System.
 - Operator controls: Run outbox now, cancel jobs, view job history.
+
+## Versioning: app vs DB schema
+- **App version**: the release version of the codebase (this zip), e.g. `0.4.2`.
+- **DB schema version**: the version stored in `system_state.schema_version`, e.g. `0.4`.
+
+Patch releases in the `0.4.x` line **do not require** bumping `system_state.schema_version` and should not require running SQL migrations.
 
 ## Notes / limitations (v0.4)
 - Notifications: email (PHP `mail()`) + optional Slack/Teams webhooks (basic POST). RSS is read-only.
