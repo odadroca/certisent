@@ -1,19 +1,19 @@
-# File registry (v0.5.2)
+# File registry (v0.5.3)
 
 SHA-256 for all files in this release zip (excluding this file to avoid self-reference).
 
 ## Files
 
-614fe525ee80697177df621197d17afc5a39baf9d77362fe66b8c75af7a7bba7  ./.env.example
+c6893d3c21fa8f8f13e0d494067b263be49fa745ec46e327371aea35f06b3cc4  ./.env.example
 902bc8daaaa14d9568054ab9ae342bbbe56ac0e4f410d8eb6ac74301e85f11a3  ./.htaccess
 f068c6196ca35260c316d3f8b0f179e736eb7d0bf125bd92bee432b195d0497e  ./CODE_OF_CONDUCT.md
 ee2eed0d3dbebba268cdc1f99d8791ba3cca78a7f22946d9c180e3174e3e2108  ./CONTRIBUTING.md
 d5010198d478747fe2ec481da8e9a8fb8949ffc20f8a51666cb8956145f5ad51  ./LICENSE.md
-39d0a44e59677edf2beadb06ff64316811981cb9fa46c919fab25f67c5d6a65c  ./README.md
+0b883cfad47e2bb537b8eff0e22f004befc591278bb65391729ddc1fb6fd83af  ./README.md
 0b43b476035f409e76abbd56213c0fe50fac880c48e3d6d7135e0fffde0c8950  ./app/api/Router.php
 ec5bb6fc4f32621d4eb451f26c5e8392afcbeee7d554eb8b507d06e98cde55f9  ./app/auth.php
 90325bad1c896eb25c964f3ed8e7d5ccd79011ac6018f9b4ca41f6b68934c4b7  ./app/bootstrap.php
-253d8b12dcf57c8ac83c4c5b56ec671b9584efac905ae006c5ee461a3b7e81b0  ./app/config.php
+1a3184d868597222b6322e0c3ba14ac90141a49b0c0d167d102096ad8863aef6  ./app/config.php
 758ca4cc30a692f3ccd2cccc73b71c3fa160881a6d3cbecddabec3c5806781c1  ./app/csrf.php
 aecc90a04ebcad04406c415a4f84f801bd0fa9ce65e07eb486382417498ff70d  ./app/db.php
 9d5b5c1b775bac43a546b62242141389691b801a194db714af95f4e4f75b8fa9  ./app/logger.php
@@ -32,9 +32,10 @@ bbb5ec6a12edbcc13541c21792f5ba28e98e1b07f5416abf8e0ef89d05b0d102  ./assets/certi
 d53cb67492377f9b07afc1e0e4cccdd66767dcd2b247551e61e11a05af08776a  ./docs/api.md
 5f90ccc2ae9344790569dbf022c7af5f80e816f735cec7bc2074d427f222eea2  ./docs/architecture.md
 0b7457f93e1ef91d489b01f0073c5be2acc8bb47ffa0a430e06e5e3c52103462  ./docs/deploy.md
-5be9f041cc24197f9cae0bd8dd013854080e0b510469294944ac4e23551b7d27  ./docs/file_registry.md.new
+f74dde704f5899325dd8374a8e38fd90927e57d6332aa580793d12ecb0162dcd  ./docs/file_registry.md.new
 9af54e5b29ecbdc20f12ca9a785cd22d311f447a89255c97768b500094111130  ./docs/ops_runbook.md
 4c4094b15e887dffb7ac9f0e39a9ead8afb5f0d29c6e2f6f367f1f40f2372fca  ./docs/release_notes_v0.4.x.md
+d39f19d3d75ce09e8f7e26028e9d454df240edfaba934f4c29bbc163efca49ae  ./docs/release_notes_v0.5.x.md
 6659c65b484f5962b565fc98cee8e39ce2969c0a4e27c64f07e7fc9f50986d2f  ./docs/ui_map.md
 5827b8b739595255bef8c033dc9e147b024ae0d1960955bbf21021a6c83ca49c  ./public/.htaccess
 611338328cfe48aef1323355fbdd35229d4e1337d2b5501b0bb08035f328a81b  ./public/admin/api_keys.php
@@ -44,7 +45,7 @@ d53cb67492377f9b07afc1e0e4cccdd66767dcd2b247551e61e11a05af08776a  ./docs/api.md
 97dfb6c5a9f813fd6d38059659ac1a8450bcffeb1550ae16aa9cdc895ba6b769  ./public/admin/monitors.php
 69312d911548cf26b8b5eb98a0173a8e782b74ae58d6147c16de386929a5f4f0  ./public/admin/outbox.php
 120476e502ba3d87917b7219a6884891c44a66f5b87ddaeec6c65df2dadcef37  ./public/admin/outbox_run.php
-69cd7765f3b28c0856e5eb502a842f85fc9682ad3fae04a1078cfac78cfde4a6  ./public/admin/system.php
+964949a348b4646303e0e7a14c49a244b604c89df894ada95fb18f19362bd260  ./public/admin/system.php
 e177f0c84d944524e099ba262dbb02abc67567bad6be4eb77033b8d220fb1266  ./public/admin/user_edit.php
 46c122df3d3aa650c68d47256d7c8e54a6748413315a445117a08d32886aada9  ./public/admin/users.php
 59e6232d80876d09457849368908fcd60a552b5843b15d5b9ce54eeb72eec0da  ./public/api/v1/index.php
@@ -61,7 +62,7 @@ db8f9749c62c0e77ef5df5e90002b9638d17d2105500181945ec2ef5719d0275  ./public/monit
 2e767c4ebaa6bed1149a482cca184b98428d63cb475169ee3923eaa7980510ee  ./public/monitor_delete.php
 814d67c063f80f4c98a19572b48dd0521465dd77ccae5e1b5f03c859a27c7e2f  ./public/monitor_edit.php
 dfe3221ab8acc9d170254e966c33dba4633d17a88850804fbfa5185fa48f62d5  ./public/monitor_view.php
-91772cc2fbf7d0458284839028b9b7d3677fa224a55895bc710357d3aafb8f29  ./public/register.php
+1c9f321c6e860d49309683e253dbdf2d2b1b9099a8083d38e87c7faa64a5f90c  ./public/register.php
 640313d0a505def2aebe548000be2c71c01576be0efb4590bedef359c9549573  ./public/rss.php
 488557b26a86f5b1f8f2275a55a0785904851a602320a41d980ad553a5498567  ./public/settings.php
 46070bd17c15bee8a012b1553c75fe8daac4667c76dcd77b6a9a1f026230746e  ./scripts/worker.php

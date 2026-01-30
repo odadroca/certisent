@@ -1,9 +1,11 @@
-# Certinel (certificate sentinel) — v0.5.2
+<p align="center"><img src="https://i.postimg.cc/qMpPkTVz/certinel-neg.png" alt="Certinel" width="200" height="200"></p>
+
+# Certinel (certificate sentinel) — v0.5.3
 Certinel is a lightweight TLS/SSL certificate monitoring service that **live-fetches** the certificate presented by an endpoint (SNI-capable), stores immutable snapshots, detects changes (renewals/rotations), and notifies interested parties before outages happen.
 
 It is designed to be simple to host (shared hosting or VPS), easy to operate (cron-driven worker), and explicit about what it is observing: **the certificate the endpoint actually serves**.
 
-## Highlights (v0.5.2)
+## Highlights (v0.5.3)
 - Added an SSRF policy framework for outbound TLS checks (opt-in):
   - `SSRF_MODE=legacy` (default) preserves v0.4.x behavior (no SSRF blocking).
   - `SSRF_MODE=public_only` blocks private/reserved IP ranges.
@@ -21,6 +23,12 @@ It is designed to be simple to host (shared hosting or VPS), easy to operate (cr
   - Non-admin RSS tokens no longer receive system/global events (`monitor_id IS NULL`).
   - `RSS_INCLUDE_SYSTEM_EVENTS=false` by default; only `admin`/`auditor` RSS tokens may include system events when enabled.
 
+- Admin bootstrap hardening (v0.5.3, safe defaults):
+  - `REGISTRATION_MODE=open|invite|closed` (default `open`).
+  - Optional `SETUP_ADMIN_TOKEN`: required to claim the first admin (and required for all registrations in `invite` mode).
+  - Optional `ADMIN_EMAIL`: on a fresh install (no users yet), only this email can claim the first admin.
+  - Admin → System: button to disable/enable registrations post-setup (DB flag).
+
 ## Notes / limitations
 - API auth:
   - Preferred: API keys created in the admin UI (stored hashed in `api_keys`).
@@ -30,6 +38,11 @@ It is designed to be simple to host (shared hosting or VPS), easy to operate (cr
   - App version may advance in patch releases.
   - DB schema version remains `0.4` unless you apply a future migration.
 - Notifications: email (PHP `mail()`) + optional Slack/Teams webhooks (basic POST). RSS is read-only.
+- Registration (v0.5.3):
+  - `REGISTRATION_MODE=closed` disables new registrations.
+  - Admin can also disable registrations via Admin → System (DB flag).
+  - `SETUP_ADMIN_TOKEN` and `ADMIN_EMAIL` only affect fresh installs (first admin claim).
+
 - RSS (v0.5.2):
   - Non-admin RSS tokens only return events for monitors owned by that user.
   - System/global events are excluded unless `RSS_INCLUDE_SYSTEM_EVENTS=true` and the token belongs to an `admin`/`auditor`.

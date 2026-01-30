@@ -7,7 +7,7 @@ declare(strict_types=1);
  */
 
 function app_version(): string {
-    return '0.5.2';
+    return '0.5.3';
 }
 
 /**
@@ -147,6 +147,13 @@ function cfg(string $key, $default = null) {
             // v0.5.2 RSS tenancy hardening.
             // Default false: do not include system/global events for non-admin RSS tokens.
             'RSS_INCLUDE_SYSTEM_EVENTS' => (string)env('RSS_INCLUDE_SYSTEM_EVENTS', 'false'),
+
+            // v0.5.3 Registration bootstrap hardening.
+            // REGISTRATION_MODE: open (default), invite, closed.
+            // SETUP_ADMIN_TOKEN: optional token required for first-admin claim (and for invite registrations).
+            // ADMIN_EMAIL (already used for admin notifications) also gates the first admin claim when set.
+            'REGISTRATION_MODE' => (string)env('REGISTRATION_MODE', 'open'),
+            'SETUP_ADMIN_TOKEN' => (string)env('SETUP_ADMIN_TOKEN', ''),
         ];
     }
     return $cache[$key] ?? $default;

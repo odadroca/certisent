@@ -5,6 +5,32 @@ require_once __DIR__ . '/../../app/ui.php';
 
 $user = require_role('admin');
 
+// Registration controls (v0.5.3): admin can disable registrations post-setup (DB flag).
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    csrf_verify();
+    $action = (string)($_POST['action'] ?? '');
+    if ($action === 'registration_toggle') {
+        $desired = (string)($_POST['desired'] ?? '');
+        $prev = Worker::getSystemState('registrations_disabled') === '1' ? '1' : '0';
+        $next = ($desired === 'disable') ? '1' : '0';
+        Worker::setSystemState('registrations_disabled', $next);
+        Audit::log((int)$user['id'], 'admin.registration.toggle', 'system', null, [
+            'prev' => $prev,
+            'next' => $next,
+        ]);
+        flash_set('success', ($next === '1') ? 'Registrations disabled.' : 'Registrations enabled.');
+        header('Location: system.php');
+        exit;
+    }
+}
+
+$registrationMode = strtolower(trim((string)cfg('REGISTRATION_MODE', 'open')));
+if (!in_array($registrationMode, ['open','invite','closed'], true)) { $registrationMode = 'open'; }
+$registrationsDisabled = (Worker::getSystemState('registrations_disabled') === '1');
+$setupAdminTokenSet = ((string)cfg('SETUP_ADMIN_TOKEN', '') !== '');
+$adminEmailBind = trim((string)cfg('ADMIN_EMAIL', ''));
+
+
 $now = time();
 $lastCron = Worker::getSystemState('last_cron_run_at');
 $lastCronOk = Worker::getSystemState('last_cron_ok');
@@ -108,7 +134,42 @@ $schemaOk = ($schemaVersion === '' || $schemaVersion === $appVersion);
         </div>
       <?php endif; ?>
     <?php endif; ?>
+  
+</div>
+
+  <div class="bg-white text-black rounded-2xl p-6 shadow">
+    <h2 class="font-semibold mb-3">Registration</h2>
+    <div class="text-sm text-gray-700 space-y-2">
+      <div><span class="text-gray-500">REGISTRATION_MODE:</span> <span class="font-mono text-xs"><?php echo h($registrationMode); ?></span></div>
+      <div><span class="text-gray-500">DB override disabled:</span> <?php echo $registrationsDisabled ? '<span class="font-semibold text-red-700">yes</span>' : '<span class="font-semibold text-green-700">no</span>'; ?></div>
+      <div><span class="text-gray-500">SETUP_ADMIN_TOKEN set:</span> <?php echo $setupAdminTokenSet ? 'yes' : 'no'; ?></div>
+      <div><span class="text-gray-500">ADMIN_EMAIL set:</span> <?php echo ($adminEmailBind !== '' ? 'yes' : 'no'); ?></div>
+    </div>
+
+    <div class="mt-4 flex gap-3">
+      <?php if ($registrationsDisabled): ?>
+        <form method="post" class="inline">
+          <?php echo csrf_field(); ?>
+          <input type="hidden" name="action" value="registration_toggle" />
+          <input type="hidden" name="desired" value="enable" />
+          <button class="bg-green-700 text-white px-3 py-2 rounded" type="submit">Enable registrations</button>
+        </form>
+      <?php else: ?>
+        <form method="post" class="inline" onsubmit="return confirm('Disable new registrations? Existing users can still sign in.');">
+          <?php echo csrf_field(); ?>
+          <input type="hidden" name="action" value="registration_toggle" />
+          <input type="hidden" name="desired" value="disable" />
+          <button class="bg-black text-white px-3 py-2 rounded" type="submit">Disable registrations</button>
+        </form>
+      <?php endif; ?>
+    </div>
+
+    <div class="mt-3 text-xs text-gray-600">
+      DB override only affects <span class="font-mono">/register.php</span>. If <span class="font-mono">REGISTRATION_MODE=closed</span>, registrations remain closed regardless.
+    </div>
   </div>
+
+</div>
 
   <div class="bg-white text-black rounded-2xl p-6 shadow">
     <h2 class="font-semibold mb-3">Last worker run</h2>
