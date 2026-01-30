@@ -116,8 +116,18 @@ final class Worker {
         $rows = $sel->fetchAll();
 
         $checked = 0; $errors=0; $changed=0; $renewed=0; $warned=0;
+        // Cancellation responsiveness: check job status between monitor checks.
+        $stStatus = db()->prepare("SELECT status FROM worker_jobs WHERE id=:id LIMIT 1");
+        $stopStatus = 'running';
 
         foreach ($rows as $r) {
+            $stStatus->execute([':id'=>$jobId]);
+            $cur = $stStatus->fetch();
+            $stopStatus = $cur ? (string)$cur['status'] : 'running';
+            if ($stopStatus !== 'running') {
+                break;
+            }
+
             $mid = (int)$r['id'];
             $out = self::checkOne($mid);
             $checked++;
@@ -130,6 +140,25 @@ final class Worker {
             if ((microtime(true) - $t0) >= $maxSeconds) {
                 break;
             }
+        }
+
+        if ($stopStatus === 'cancelled') {
+            // Persist progress even if cancellation occurred mid-batch.
+            $upC = db()->prepare("UPDATE worker_jobs SET total_processed=:p, last_monitor_id=:last, updated_at=:u, finished_at=COALESCE(finished_at,:u) WHERE id=:id AND status='cancelled'");
+            $upC->execute([
+                ':p'=>$processed,
+                ':last'=>($lastId>0?$lastId:null),
+                ':u'=>db_now_utc(),
+                ':id'=>$jobId,
+            ]);
+
+            return [
+                'id'=>$jobId,
+                'status'=>'cancelled',
+                'batch' => ['checked'=>$checked,'errors'=>$errors,'changed'=>$changed,'renewed'=>$renewed,'warned'=>$warned],
+                'total_processed'=>$processed,
+                'last_monitor_id'=>$lastId,
+            ];
         }
 
         // update cursor/progress
