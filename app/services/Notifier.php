@@ -98,8 +98,9 @@ final class Notifier {
                     if (empty($r['email'])) {
                         $err = 'missing_email';
                     } else {
-                        $ok = self::sendEmail((string)$r['email'], self::emailSubject($event, $monitor), self::renderEmailBody($event, $monitor));
-                        if (!$ok) $err = 'mail_failed';
+                        $send = Emailer::sendText((string)$r['email'], self::emailSubject($event, $monitor), self::renderEmailBody($event, $monitor));
+                        $ok = (bool)($send['ok'] ?? false);
+                        if (!$ok) $err = (string)($send['error'] ?? 'mail_failed');
                     }
                 } elseif ($ch === 'slack') {
                     $url = (string)($channels['slack_webhook'] ?? '');
@@ -203,16 +204,6 @@ final class Notifier {
     private static function emailSubject(array $event, ?array $monitor): string {
         $host = $monitor['host'] ?? 'system';
         return "[Certinel] {$event['severity']} {$event['type']} — {$host}";
-    }
-
-    private static function sendEmail(string $to, string $subject, string $body): bool {
-        $from = cfg('MAIL_FROM', 'no-reply@example.com');
-        $fromName = cfg('MAIL_FROM_NAME', 'Certinel');
-        $headers = [];
-        $headers[] = "From: {$fromName} <{$from}>";
-        $headers[] = "MIME-Version: 1.0";
-        $headers[] = "Content-Type: text/plain; charset=utf-8";
-        return (bool)@mail($to, $subject, $body, implode("\r\n", $headers));
     }
 
     /**

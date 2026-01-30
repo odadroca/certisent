@@ -28,6 +28,136 @@ final class Worker {
         return $r ? (string)$r['value'] : null;
     }
 
+
+    /**
+     * Create an async job to run checks for all enabled monitors.
+     */
+    public static function createRunAllJob(?int $requestedByUserId): int {
+        self::requireSchemaVersion(app_version());
+        $now = db_now_utc();
+        $st = db()->prepare("INSERT INTO worker_jobs (type, requested_by_user_id, status, total_processed, last_monitor_id, error, created_at, updated_at, started_at, finished_at)
+                             VALUES ('run_all', :uid, 'pending', 0, NULL, NULL, :c, :u, NULL, NULL)");
+        $st->execute([':uid' => $requestedByUserId, ':c' => $now, ':u' => $now]);
+        return (int)db()->lastInsertId();
+    }
+
+    /**
+     * Cancel a job.
+     */
+    public static function cancelJob(int $jobId): bool {
+        self::requireSchemaVersion(app_version());
+        $st = db()->prepare("UPDATE worker_jobs SET status='cancelled', updated_at=:u, finished_at=:u WHERE id=:id AND status IN ('pending','running')");
+        $st->execute([':u'=>db_now_utc(), ':id'=>$jobId]);
+        return $st->rowCount() > 0;
+    }
+
+    /**
+     * Latest job requested by a specific user.
+     * @return array<string,mixed>|null
+     */
+    public static function getLatestJobForUser(int $userId): ?array {
+        self::requireSchemaVersion(app_version());
+        $st = db()->prepare("SELECT * FROM worker_jobs WHERE requested_by_user_id=:uid ORDER BY created_at DESC LIMIT 1");
+        $st->execute([':uid'=>$userId]);
+        $r = $st->fetch();
+        return $r ?: null;
+    }
+
+    /**
+     * Process one pending/running job in small batches.
+     * Designed to be callable from both CLI worker and web (time boxed).
+     * @return array<string,mixed>|null job summary or null if no job.
+     */
+    public static function processJobs(int $maxChecks = 25, int $maxSeconds = 20, ?int $onlyJobId = null): ?array {
+        self::requireSchemaVersion(app_version());
+        $t0 = microtime(true);
+
+        if ($onlyJobId !== null) {
+            $st = db()->prepare("SELECT * FROM worker_jobs WHERE id=:id LIMIT 1");
+            $st->execute([':id'=>$onlyJobId]);
+        } else {
+            $st = db()->prepare("SELECT * FROM worker_jobs WHERE status IN ('pending','running') ORDER BY created_at ASC LIMIT 1");
+            $st->execute();
+        }
+        $job = $st->fetch();
+        if (!$job) return null;
+
+        $jobId = (int)$job['id'];
+        $status = (string)$job['status'];
+        if ($status === 'pending') {
+            // claim job
+            $claim = db()->prepare("UPDATE worker_jobs SET status='running', started_at=:u, updated_at=:u WHERE id=:id AND status='pending'");
+            $claim->execute([':u'=>db_now_utc(), ':id'=>$jobId]);
+            // reload
+            $st2 = db()->prepare("SELECT * FROM worker_jobs WHERE id=:id LIMIT 1");
+            $st2->execute([':id'=>$jobId]);
+            $job = $st2->fetch() ?: $job;
+            $status = (string)$job['status'];
+        }
+
+        if ($status !== 'running') {
+            return ['id'=>$jobId,'status'=>$status,'total_processed'=>(int)$job['total_processed']];
+        }
+
+        if ((string)$job['type'] !== 'run_all') {
+            $fail = db()->prepare("UPDATE worker_jobs SET status='failed', error=:e, updated_at=:u, finished_at=:u WHERE id=:id");
+            $fail->execute([':e'=>'unknown_job_type', ':u'=>db_now_utc(), ':id'=>$jobId]);
+            self::createSystemEvent('job_failed','warn','Worker job failed (unknown type).',['job_id'=>$jobId]);
+            return ['id'=>$jobId,'status'=>'failed','error'=>'unknown_job_type'];
+        }
+
+        $lastId = $job['last_monitor_id'] !== null ? (int)$job['last_monitor_id'] : 0;
+        $processed = (int)$job['total_processed'];
+
+        $sel = db()->prepare("SELECT id FROM monitors WHERE enabled=1 AND id > :last ORDER BY id ASC LIMIT :lim");
+        $sel->bindValue(':last', $lastId, PDO::PARAM_INT);
+        $sel->bindValue(':lim', $maxChecks, PDO::PARAM_INT);
+        $sel->execute();
+        $rows = $sel->fetchAll();
+
+        $checked = 0; $errors=0; $changed=0; $renewed=0; $warned=0;
+
+        foreach ($rows as $r) {
+            $mid = (int)$r['id'];
+            $out = self::checkOne($mid);
+            $checked++;
+            $errors += (int)($out['errors'] ?? 0);
+            $changed += (int)($out['changed'] ?? 0);
+            $renewed += (int)($out['renewed'] ?? 0);
+            $warned += (int)($out['warned'] ?? 0);
+            $processed++;
+            $lastId = $mid;
+            if ((microtime(true) - $t0) >= $maxSeconds) {
+                break;
+            }
+        }
+
+        // update cursor/progress
+        $up = db()->prepare("UPDATE worker_jobs SET total_processed=:p, last_monitor_id=:last, updated_at=:u WHERE id=:id AND status='running'");
+        $up->execute([':p'=>$processed, ':last'=>($lastId>0?$lastId:null), ':u'=>db_now_utc(), ':id'=>$jobId]);
+
+        $doneBatch = count($rows) == 0 || ($checked < count($rows));
+
+        // Determine completion: if we fetched 0 new rows, we're done.
+        if (count($rows) === 0) {
+            $fin = db()->prepare("UPDATE worker_jobs SET status='completed', updated_at=:u, finished_at=:u WHERE id=:id AND status='running'");
+            $fin->execute([':u'=>db_now_utc(), ':id'=>$jobId]);
+            self::createSystemEvent('job_completed','info','Worker job completed.',[
+                'job_id'=>$jobId,
+                'type'=>'run_all',
+                'total_processed'=>$processed,
+            ]);
+        }
+
+        return [
+            'id'=>$jobId,
+            'status'=>(count($rows)===0 ? 'completed' : 'running'),
+            'batch' => ['checked'=>$checked,'errors'=>$errors,'changed'=>$changed,'renewed'=>$renewed,'warned'=>$warned],
+            'total_processed'=>$processed,
+            'last_monitor_id'=>$lastId,
+        ];
+    }
+
     public static function runDueChecks(?int $limit = null): array {
         self::requireSchemaVersion(app_version());
         $t0 = microtime(true);

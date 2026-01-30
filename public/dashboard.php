@@ -26,7 +26,11 @@ render_header('Dashboard', $user);
     <?php if (has_role($user,'viewer')): ?>
       <a class="bg-green-700 text-white px-3 py-2 rounded" href="monitor_add.php">Add to monitor</a>
     <?php endif; ?>
-    <a class="bg-white text-black px-3 py-2 rounded" href="index.php">Check now</a>
+    <form method="post" action="check_now_all.php" class="inline">
+      <?php echo csrf_field(); ?>
+      <button class="bg-green-700 text-white px-3 py-2 rounded" type="submit">Check now (all)</button>
+    </form>
+    <a class="bg-white text-black px-3 py-2 rounded" href="index.php">Quick check</a>
   </div>
 </div>
 
@@ -35,6 +39,11 @@ render_header('Dashboard', $user);
 $lastCron = Worker::getSystemState('last_cron_run_at');
 ?>
 <div class="text-xs text-gray-400 mb-6">Worker heartbeat: <?php echo $lastCron ? h($lastCron).' UTC' : 'unknown'; ?></div>
+
+<?php $job = Worker::getLatestJobForUser((int)$user['id']); ?>
+<div class="text-xs text-gray-400 mb-6">
+  Last check-now job: <?php echo $job ? ('#'.(int)$job['id'].' · '.h((string)$job['status']).' · processed='.(int)$job['total_processed']) : 'none'; ?>
+</div>
 
 <?php if ($view === 'list'): ?>
   <div class="bg-white text-black rounded-2xl p-4 shadow overflow-x-auto">

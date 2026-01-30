@@ -40,6 +40,11 @@ $stSys = db()->prepare("SELECT id, created_at, severity, type, message, meta_jso
 $stSys->execute();
 $sysEvents = $stSys->fetchAll();
 
+// Recent worker jobs
+$stJobs = db()->prepare("SELECT j.*, u.email AS requested_by_email FROM worker_jobs j LEFT JOIN users u ON u.id=j.requested_by_user_id ORDER BY j.created_at DESC LIMIT 25");
+$stJobs->execute();
+$jobs = $stJobs->fetchAll();
+
 render_header('Admin · System', $user);
 
 $schemaVersion = Worker::getSystemState('schema_version') ?? '';
@@ -58,6 +63,8 @@ $schemaOk = ($schemaVersion === '' || $schemaVersion === $appVersion);
     <a class="text-green-400 hover:underline" href="monitors.php">Monitors</a>
     <span class="text-gray-600 mx-2">·</span>
     <a class="text-green-400 hover:underline" href="outbox.php">Outbox</a>
+    <span class="text-gray-600 mx-2">·</span>
+    <a class="text-green-400 hover:underline" href="email.php">Email</a>
     <span class="text-gray-600 mx-2">·</span>
     <a class="text-green-400 hover:underline" href="api_keys.php">API Keys</a>
     <span class="text-gray-600 mx-2">·</span>
@@ -142,8 +149,56 @@ $schemaOk = ($schemaVersion === '' || $schemaVersion === $appVersion);
     </div>
     <div class="mt-4 text-sm">
       <a class="text-green-700 hover:underline" href="outbox.php">View outbox</a>
+      <form method="post" action="outbox_run.php" class="mt-3">
+        <?php echo csrf_field(); ?>
+        <button class="bg-green-700 text-white px-3 py-2 rounded" type="submit">Run outbox now</button>
+      </form>
     </div>
   </div>
+</div>
+
+<div class="mt-6 bg-white text-black rounded-2xl p-6 shadow overflow-x-auto">
+  <h2 class="font-semibold mb-3">Worker jobs (25)</h2>
+  <?php if (empty($jobs)): ?>
+    <div class="text-sm text-gray-700">No jobs recorded.</div>
+  <?php else: ?>
+    <table class="min-w-full text-sm">
+      <thead>
+        <tr class="text-left border-b">
+          <th class="py-2 pr-3">ID</th>
+          <th class="py-2 pr-3">Type</th>
+          <th class="py-2 pr-3">Status</th>
+          <th class="py-2 pr-3">Processed</th>
+          <th class="py-2 pr-3">Requested by</th>
+          <th class="py-2 pr-3">Created</th>
+          <th class="py-2 pr-3">Updated</th>
+          <th class="py-2 pr-3"></th>
+        </tr>
+      </thead>
+      <tbody>
+        <?php foreach ($jobs as $j): ?>
+          <tr class="border-b">
+            <td class="py-2 pr-3 font-mono text-xs">#<?php echo (int)$j['id']; ?></td>
+            <td class="py-2 pr-3 font-mono text-xs"><?php echo h((string)$j['type']); ?></td>
+            <td class="py-2 pr-3"><?php echo h((string)$j['status']); ?></td>
+            <td class="py-2 pr-3"><?php echo (int)$j['total_processed']; ?></td>
+            <td class="py-2 pr-3 text-xs"><?php echo h((string)($j['requested_by_email'] ?? '—')); ?></td>
+            <td class="py-2 pr-3 font-mono text-xs"><?php echo h((string)$j['created_at']); ?></td>
+            <td class="py-2 pr-3 font-mono text-xs"><?php echo h((string)$j['updated_at']); ?></td>
+            <td class="py-2 pr-3">
+              <?php if (in_array((string)$j['status'], ['pending','running'], true)): ?>
+                <form method="post" action="job_cancel.php" class="inline">
+                  <?php echo csrf_field(); ?>
+                  <input type="hidden" name="job_id" value="<?php echo (int)$j['id']; ?>">
+                  <button class="text-red-700 hover:underline" type="submit">Cancel</button>
+                </form>
+              <?php endif; ?>
+            </td>
+          </tr>
+        <?php endforeach; ?>
+      </tbody>
+    </table>
+  <?php endif; ?>
 </div>
 
 <div class="mt-6 bg-white text-black rounded-2xl p-6 shadow overflow-x-auto">

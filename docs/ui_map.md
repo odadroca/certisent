@@ -1,4 +1,4 @@
-# Certinel v0.3 UI map
+# Certinel v0.4 UI map
 
 All routes are relative to the `/public/` folder.
 
@@ -16,10 +16,11 @@ All routes are relative to the `/public/` folder.
 - `dashboard.php`
   - Monitors list/cards.
   - Status badges + days remaining.
-  - Links to View/Edit/Delete (role-dependent).
+  - Actions (role-dependent): View/Edit/Delete.
+  - “Check now (all)” (creates an async job and runs a short slice immediately).
 - `history.php`
   - Event history.
-  - Viewer: only own monitors.
+  - Viewer: own monitors.
   - Admin/Auditor: global.
 - `settings.php`
   - Notification channel settings (email/webhooks).
@@ -52,10 +53,16 @@ All routes are relative to the `/public/` folder.
   - Recent events table.
   - Actions:
     - Edit (viewer)
-    - Check now (store) (viewer/admin; not auditor)
+    - Check now (stored single monitor) (viewer/admin; not auditor)
 
 - `monitor_check.php` (POST) (viewer/admin; owner/admin)
   - Executes a single stored check via `Worker::checkOne()` and redirects back to `monitor_view.php`.
+
+## “Check now (all)” job
+
+- `check_now_all.php` (POST) (viewer/admin)
+  - Creates a `worker_jobs` record (`type=run_all`) and processes a time-boxed slice immediately.
+  - Full completion happens across cron runs.
 
 ## Other views
 
@@ -78,10 +85,22 @@ All routes are relative to the `/public/` folder.
   - Audit log.
 
 - `/admin/system.php` (admin)
-  - Operator diagnostics: worker heartbeat, event counts (last 24h), and recent system events.
+  - Operator diagnostics: worker heartbeat, last worker run, event counts (last 24h), recent system events.
+  - Worker jobs list + cancel.
+  - Outbox summary + “Run outbox now”.
+
+- `/admin/email.php` (admin)
+  - Outbound mail configuration summary (non-secret) + test email.
 
 - `/admin/api_keys.php` (admin)
   - Create/revoke scoped Bearer tokens for API/worker calls.
 
 - `/admin/outbox.php` (admin)
   - Notification delivery queue: pending/sent/failed, attempts, next retry, last error.
+
+### Admin POST endpoints
+
+- `/admin/outbox_run.php` (POST)
+  - Processes the outbox immediately.
+- `/admin/job_cancel.php` (POST)
+  - Cancels a pending/running `worker_jobs` record.

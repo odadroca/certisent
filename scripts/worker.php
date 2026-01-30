@@ -20,10 +20,11 @@ foreach ($argv as $a) {
 }
 
 try {
+    $job = Worker::processJobs(50, 25);
     if ($mode === 'all') $res = Worker::runAllChecks($limit);
     else $res = Worker::runDueChecks($limit);
 
-    echo json_encode(['ok'=>true,'mode'=>$mode,'result'=>$res], JSON_UNESCAPED_SLASHES) . PHP_EOL;
+    echo json_encode(['ok'=>true,'mode'=>$mode,'jobs'=>$job,'result'=>$res], JSON_UNESCAPED_SLASHES) . PHP_EOL;
 } catch (Throwable $e) {
     Worker::setSystemState('last_cron_run_at', db_now_utc());
     Worker::setSystemState('last_cron_ok', '0');

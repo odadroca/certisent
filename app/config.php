@@ -7,7 +7,7 @@ declare(strict_types=1);
  */
 
 function app_version(): string {
-    return '0.3.1';
+    return '0.4';
 }
 
 /**
@@ -105,6 +105,15 @@ function cfg(string $key, $default = null) {
             'DB_PASS' => (string)env('DB_PASS', ''),
             'MAIL_FROM' => (string)env('MAIL_FROM', 'no-reply@example.com'),
             'MAIL_FROM_NAME' => (string)env('MAIL_FROM_NAME', 'Certinel'),
+            'MAIL_TRANSPORT' => (string)env('MAIL_TRANSPORT', 'mail'),
+            'SMTP_HOST' => (string)env('SMTP_HOST', ''),
+            'SMTP_PORT' => (int)env('SMTP_PORT', '587'),
+            'SMTP_USER' => (string)env('SMTP_USER', ''),
+            'SMTP_PASS' => (string)env('SMTP_PASS', ''),
+            'SMTP_ENCRYPTION' => (string)env('SMTP_ENCRYPTION', 'starttls'),
+            'SMTP_TIMEOUT_SECS' => (int)env('SMTP_TIMEOUT_SECS', '12'),
+            'MAIL_API_URL' => (string)env('MAIL_API_URL', ''),
+            'MAIL_API_TOKEN' => (string)env('MAIL_API_TOKEN', ''),
             'ADMIN_EMAIL' => (string)env('ADMIN_EMAIL', ''),
             // Legacy fallback. Prefer scoped API keys stored in DB (v0.3+).
             'API_WORKER_KEY' => (string)env('API_WORKER_KEY', ''),

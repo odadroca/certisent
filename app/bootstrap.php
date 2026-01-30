@@ -83,6 +83,8 @@ require_once __DIR__ . '/csrf.php';
 
 require_once __DIR__ . '/services/Audit.php';
 require_once __DIR__ . '/services/CertFetcher.php';
+require_once __DIR__ . '/services/SmtpClient.php';
+require_once __DIR__ . '/services/Emailer.php';
 require_once __DIR__ . '/services/Notifier.php';
 require_once __DIR__ . '/services/MonitorService.php';
 require_once __DIR__ . '/services/Worker.php';

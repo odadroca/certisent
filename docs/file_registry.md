@@ -1,45 +1,50 @@
-# File Registry (SHA-256)
+# File registry (v0.4)
 
-Generated: 2026-01-28 15:33:37 UTC
-App version: 0.3.1
+SHA-256 for all files in this release zip (excluding this file to avoid self-reference).
 
 ## Files
 
-e8f4a74328e9f22a98dee07639bdcebaf3ebc75263e3d490be42268d013b9687  ./.env.example
+3f6911b5852dcce1f1ad56eb68c3a60f06d9121f2601937dd882ebe79cf5d13b  ./.env.example
 902bc8daaaa14d9568054ab9ae342bbbe56ac0e4f410d8eb6ac74301e85f11a3  ./.htaccess
 677b0992eae535a57a2b98c512c5260366af7aa68f5009fbbc20ca42c138c700  ./LICENSE
-5ca5c3dc04cb41378726f5555766d3aadf808363ecc2a37840e3bed280262197  ./README.md
+357298f49e7a7c06925d9b6810ebd2c92814c71529cf570c6b03ba8f6c80440d  ./README.md
 f79595c80be1c0db24e18160eec86f41eb36dd4c9281c5e87a270eb9a2605e9d  ./app/api/Router.php
 20c31e1455fc949b183b3041a5e7f08f5eae5294332d8927ea1738e9f1ee4d92  ./app/auth.php
-e100c7ad3bbbab07ce4ea1a4c483488f315e0013ffab4900a78184b89a1a3b16  ./app/bootstrap.php
-c1d490ff94897565633e4208c065260dd32fc9daf84577bccff6c70661a360ed  ./app/config.php
+bad07c21ad319fd6d4175d93c1b50c1900ec359f1321c4055ad10cac8a4ec9d6  ./app/bootstrap.php
+08588d40c30170bc80dd43f5582f899920e8207d66f9d7d9d79352cf9628f6e3  ./app/config.php
 758ca4cc30a692f3ccd2cccc73b71c3fa160881a6d3cbecddabec3c5806781c1  ./app/csrf.php
 aecc90a04ebcad04406c415a4f84f801bd0fa9ce65e07eb486382417498ff70d  ./app/db.php
 9d5b5c1b775bac43a546b62242141389691b801a194db714af95f4e4f75b8fa9  ./app/logger.php
 ef94d4c2ac2a038b6c2ae673d9573333a0a20f7fac9e2d75af11c6c387a157a3  ./app/logs/.htaccess
 5e92a0d79abf10af238786f2dd0caa8541e580595f0e9aa68a580703f2c0bfe0  ./app/services/Audit.php
 252c344d0eadc7a880d1e31ff35de93e93a5d1e49ace08a93d91966683aa9d21  ./app/services/CertFetcher.php
+0d3e8a2a204574c55410dd208aeb30591353a53d4b4649905f33b60ffb2c2e59  ./app/services/Emailer.php
 e45f93a1eaf5a4e2db148a4d05c45e657872edf73bc641815f42812e2f56a198  ./app/services/MonitorService.php
-b06fdfe644ed974ce8cd8da6786320c152e239c29b3d0010b3185bba77148365  ./app/services/Notifier.php
-42ad073b7323037f60d68fba3be33bb73407abc69e1edcc69efd28ebef282820  ./app/services/Worker.php
-8180a4030392b0e744c850c6e8eb6589632ab085894eb10106d3264f7efdfa95  ./app/ui.php
+30610143a05bfe660778b5414dedd012d8edc7a541d5f7b8543a24669c81151b  ./app/services/Notifier.php
+207b77be26eda12f401e31a479041b464628470105cec210be0ed563cac83575  ./app/services/SmtpClient.php
+98688cf35404d59a7e38d456d0b8745e7fca65f3266bee9183b78bcf0cb6b43f  ./app/services/Worker.php
+b59bed1521b45d16a2509d942db79ec6dcab881eda97f9138cf28a03b6626034  ./app/ui.php
 ac58ff212d825cc94ba415e24c3b0aebc8d374b1129721deb413a859e6d73a26  ./docs/api.md
 5f90ccc2ae9344790569dbf022c7af5f80e816f735cec7bc2074d427f222eea2  ./docs/architecture.md
-60325379e74b37a1e9983ae00646f2954564cb370863a92e9f1cb979b58c34f9  ./docs/deploy.md
+ebd287bbe7ac033454f2a8f711ee7de071e6bfcbdfba1926d8e0c2ff2f50061d  ./docs/deploy.md
 e1b845b5bbda126fa9ca3950c56c5279b082c4431c69745459c46f7db8a59627  ./docs/hostinger-checklist.md
 b22ab783f53ec3d1bba933bd0f07753ba2d6edcbbb7eb97076852f5f09cf0d66  ./docs/ops_runbook.md
-84556313f9dd8b67ac75a02ba580b79508c855fd8f61b98f2660a5b9f77df1d5  ./docs/ui_map.md
+6659c65b484f5962b565fc98cee8e39ce2969c0a4e27c64f07e7fc9f50986d2f  ./docs/ui_map.md
 7b3794151464dfbb8fc3a5483102c3689eba1039b64b4ab584ec827dc4eabdcd  ./public/.htaccess
 aa27c55407f39f730107f720657521d71e63cdc38c8e1b9395737f5a8b428c1b  ./public/admin/api_keys.php
 27f6868ae9be946447e1ec80b9088ac41be918739ef9236419d7312e1a7cbf52  ./public/admin/audit.php
+5a08e925df5e8f18c892ac38d2aea7b0c037d9787976d3bc70bc4e50c630c762  ./public/admin/email.php
+786bcad0ad55d26fb95e443c2cfd1290c15a71ff5adc7a58c6734ae084b3d5c4  ./public/admin/job_cancel.php
 97dfb6c5a9f813fd6d38059659ac1a8450bcffeb1550ae16aa9cdc895ba6b769  ./public/admin/monitors.php
 69312d911548cf26b8b5eb98a0173a8e782b74ae58d6147c16de386929a5f4f0  ./public/admin/outbox.php
-c0c8b283a8c5de398b2355f9f1b4824079fb3d2b15edcd031a2a412ff47de2bd  ./public/admin/system.php
+120476e502ba3d87917b7219a6884891c44a66f5b87ddaeec6c65df2dadcef37  ./public/admin/outbox_run.php
+69cd7765f3b28c0856e5eb502a842f85fc9682ad3fae04a1078cfac78cfde4a6  ./public/admin/system.php
 b2d92825b8d7c8edaae7d8b1631d3155355294212625381f962557985c8b0a6f  ./public/admin/user_edit.php
 46c122df3d3aa650c68d47256d7c8e54a6748413315a445117a08d32886aada9  ./public/admin/users.php
 59e6232d80876d09457849368908fcd60a552b5843b15d5b9ce54eeb72eec0da  ./public/api/v1/index.php
 471dbc4c7081a8a512801868a7c8261bdf7650c704bb5d36a5d5275249d67a97  ./public/check_now.php
-8dda6a858f0b37397b5f0ebdb7bd10940e8052590af66ca72d91f0d5d24e8b91  ./public/dashboard.php
+c114df6a25073e834c22d7117cc76e9d22884dd1a690b75ec1bfcdcb846538d2  ./public/check_now_all.php
+a928c12deeca11e03d37d6b2587ff962cc4eecb2cab58a122e0137b927cb9d6d  ./public/dashboard.php
 91a4e802395d978631bb78f5d46e8010cbe27a0736864750c890f6d418e70616  ./public/events.php
 90b58c93bb88dcaa3b3cd3940148e24387b7504e1f9ad8e8b43e6cd473998cac  ./public/history.php
 da6724f23df478641462006f9caec1881b32548b4dd5a6a9d4ff9024678629b2  ./public/index.php
@@ -53,7 +58,8 @@ dfe3221ab8acc9d170254e966c33dba4633d17a88850804fbfa5185fa48f62d5  ./public/monit
 91772cc2fbf7d0458284839028b9b7d3677fa224a55895bc710357d3aafb8f29  ./public/register.php
 6d4c8a70363b47ea732d9220dc9d02ebb1aa31a47b9d5232835f4316133577ba  ./public/rss.php
 272fd95d58f22bc870bcec82153b2a0478b67df4a358d74caa72c3ff508bce79  ./public/settings.php
-c7afea5dcbcf51d214f4aa14aee8e317f64e52e404a7dd8fb5eae66eedca83fa  ./scripts/worker.php
+46070bd17c15bee8a012b1553c75fe8daac4667c76dcd77b6a9a1f026230746e  ./scripts/worker.php
 ab2856f49d677ba7ceef867cde767637a222f99562ca4ba4491fb615125f4e86  ./sql/migrations/v0.2.1_to_v0.3.sql
+1b9f7b774851865c9d55ab0276b5af747979248e97b173dbdc76097d9815479c  ./sql/migrations/v0.3.1_to_v0.4.sql
 27e1a529a6e8a234962d94d01e9309cf337193ef22d433fe9a6a84710b790ac4  ./sql/migrations/v0.3_to_v0.3.1.sql
-a9de9cbae4205fd52e51458e320444e2917e4377ce2a280fc0b5e3af8edfc962  ./sql/schema.sql
+6b92be3488914ed8c40eddee13c46c32b3074d5652d0df3421ede5cbb173f270  ./sql/schema.sql

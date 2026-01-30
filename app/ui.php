@@ -50,23 +50,24 @@ function render_header(string $title, ?array $user = null): void {
     echo '<meta name="viewport" content="width=device-width, initial-scale=1">';
     echo '<title>'.h($title).' · '.$appName.'</title>';
     echo '<script src="https://cdn.tailwindcss.com"></script>';
-    echo '</head><body class="bg-black text-white min-h-screen">';
+    echo '<style>:root{--app-bg:#0b2840;--app-accent:#09d2e8;--app-card:rgba(255,255,255,.06);--app-border:rgba(255,255,255,.12);}body{background:var(--app-bg);color:#fff;}a.accent,span.accent{color:var(--app-accent);} .card{background:var(--app-card);border:1px solid var(--app-border);} .btn{background:var(--app-accent);color:#001018;} .btn-outline{border:1px solid var(--app-accent);color:var(--app-accent);} .bg-green-400,.bg-green-500,.bg-green-600,.bg-green-700{background-color:var(--app-accent)!important;} .text-green-400{color:var(--app-accent)!important;} .text-green-700{color:var(--app-accent)!important;} </style>';
+    echo '</head><body class="min-h-screen">';
     echo '<div class="max-w-6xl mx-auto px-4 py-6">';
 
     echo '<div class="flex items-center justify-between">';
     echo '<div class="text-2xl font-semibold">';
     echo '<a href="'.h(url_for('index.php')).'" class="hover:opacity-90">';
-    echo '<span class="text-green-400">Certinel</span> <span class="text-gray-300 text-base">certificate sentinel</span>';
+    echo '<span class="accent">Certinel</span> <span class="text-gray-300 text-base">certificate sentinel</span>';
     echo '</a>';
     echo '</div>';
 
     echo '<div class="text-sm">';
     if ($user) {
         echo '<span class="text-gray-300 mr-3">'.h($user['email']).' ('.h($user['role']).')</span>';
-        echo '<a class="text-green-400 hover:underline" href="'.h(url_for('logout.php')).'">Sign out</a>';
+        echo '<a class="accent hover:underline" href="'.h(url_for('logout.php')).'">Sign out</a>';
     } else {
-        echo '<a class="text-green-400 hover:underline mr-3" href="'.h(url_for('login.php')).'">Sign in</a>';
-        echo '<a class="text-green-400 hover:underline" href="'.h(url_for('register.php')).'">Register</a>';
+        echo '<a class="accent hover:underline mr-3" href="'.h(url_for('login.php')).'">Sign in</a>';
+        echo '<a class="accent hover:underline" href="'.h(url_for('register.php')).'">Register</a>';
     }
     echo '</div>';
     echo '</div>';
@@ -74,16 +75,17 @@ function render_header(string $title, ?array $user = null): void {
     // Signed-in navigation
     if ($user) {
         echo '<div class="mt-4 flex flex-wrap gap-3 text-sm">';
-        echo '<a class="text-green-400 hover:underline" href="'.h(url_for('dashboard.php')).'">Dashboard</a>';
-        echo '<a class="text-green-400 hover:underline" href="'.h(url_for('history.php')).'">History</a>';
-        echo '<a class="text-green-400 hover:underline" href="'.h(url_for('settings.php')).'">Settings</a>';
-        echo '<a class="text-green-400 hover:underline" href="'.h(url_for('index.php')).'">Quick check</a>';
+        echo '<a class="accent hover:underline" href="'.h(url_for('dashboard.php')).'">Dashboard</a>';
+        echo '<a class="accent hover:underline" href="'.h(url_for('history.php')).'">History</a>';
+        echo '<a class="accent hover:underline" href="'.h(url_for('settings.php')).'">Settings</a>';
+        echo '<a class="accent hover:underline" href="'.h(url_for('index.php')).'">Quick check</a>';
         if (($user['role'] ?? '') === 'admin') {
-            echo '<a class="text-green-400 hover:underline" href="'.h(url_for('admin/monitors.php')).'">Admin · Monitors</a>';
-            echo '<a class="text-green-400 hover:underline" href="'.h(url_for('admin/users.php')).'">Admin · Users</a>';
-            echo '<a class="text-green-400 hover:underline" href="'.h(url_for('admin/system.php')).'">Admin · System</a>';
-            echo '<a class="text-green-400 hover:underline" href="'.h(url_for('admin/api_keys.php')).'">Admin · API Keys</a>';
-            echo '<a class="text-green-400 hover:underline" href="'.h(url_for('admin/outbox.php')).'">Admin · Outbox</a>';
+            echo '<a class="accent hover:underline" href="'.h(url_for('admin/monitors.php')).'">Admin · Monitors</a>';
+            echo '<a class="accent hover:underline" href="'.h(url_for('admin/users.php')).'">Admin · Users</a>';
+            echo '<a class="accent hover:underline" href="'.h(url_for('admin/system.php')).'">Admin · System</a>';
+            echo '<a class="accent hover:underline" href="'.h(url_for('admin/email.php')).'">Admin · Email</a>';
+            echo '<a class="accent hover:underline" href="'.h(url_for('admin/api_keys.php')).'">Admin · API Keys</a>';
+            echo '<a class="accent hover:underline" href="'.h(url_for('admin/outbox.php')).'">Admin · Outbox</a>';
         }
         echo '</div>';
     }
@@ -109,7 +111,7 @@ function render_header(string $title, ?array $user = null): void {
 
 function render_footer(): void {
     echo '</div>'; // content wrapper
-    echo '<div class="mt-10 text-xs text-gray-500">Certinel v0.3.1 · UTC timestamps</div>';
+    echo '<div class="mt-10 text-xs text-gray-500">Certinel v0.4 · UTC timestamps</div>';
     echo '</div></body></html>';
 }
 

@@ -132,6 +132,24 @@ CREATE TABLE IF NOT EXISTS notification_outbox (
 CREATE UNIQUE INDEX uq_outbox_dedupe ON notification_outbox(dedupe_key);
 CREATE INDEX idx_outbox_status_retry ON notification_outbox(status, next_retry_at);
 
+-- Worker jobs for async operations (e.g., dashboard Check now all)
+CREATE TABLE IF NOT EXISTS worker_jobs (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  type ENUM('run_all') NOT NULL,
+  requested_by_user_id INT NULL,
+  status ENUM('pending','running','completed','cancelled','failed') NOT NULL DEFAULT 'pending',
+  total_processed INT NOT NULL DEFAULT 0,
+  last_monitor_id INT NULL,
+  error VARCHAR(512) NULL,
+  created_at DATETIME NOT NULL,
+  updated_at DATETIME NOT NULL,
+  started_at DATETIME NULL,
+  finished_at DATETIME NULL,
+  CONSTRAINT fk_jobs_user FOREIGN KEY (requested_by_user_id) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE INDEX idx_jobs_status_updated ON worker_jobs(status, updated_at);
+
 CREATE TABLE IF NOT EXISTS system_state (
   `key` VARCHAR(64) PRIMARY KEY,
   `value` VARCHAR(1024) NOT NULL,
@@ -143,6 +161,6 @@ INSERT INTO system_state (`key`,`value`,updated_at)
   VALUES ('last_cron_run_at','',UTC_TIMESTAMP())
   ON DUPLICATE KEY UPDATE updated_at=VALUES(updated_at);
 
--- v0.3.1 schema marker
-INSERT INTO system_state (`key`,`value`,`updated_at`) VALUES ('schema_version','0.3.1', UTC_TIMESTAMP())
+-- v0.4 schema marker
+INSERT INTO system_state (`key`,`value`,`updated_at`) VALUES ('schema_version','0.4', UTC_TIMESTAMP())
 ON DUPLICATE KEY UPDATE `value`=VALUES(`value`), `updated_at`=VALUES(`updated_at`);
