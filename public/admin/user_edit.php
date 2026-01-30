@@ -1,0 +1,68 @@
+<?php
+declare(strict_types=1);
+require_once __DIR__ . '/../../app/bootstrap.php';
+require_once __DIR__ . '/../../app/ui.php';
+
+$admin = require_role('admin');
+
+$id = (int)($_GET['id'] ?? 0);
+$st = db()->prepare("SELECT id,email,role,notify_channels_json FROM users WHERE id=:id");
+$st->execute([':id'=>$id]);
+$u = $st->fetch();
+if (!$u) { http_response_code(404); echo "Not found."; exit; }
+
+$err = '';
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    csrf_verify();
+    $role = (string)($_POST['role'] ?? 'viewer');
+    if (!in_array($role, ['admin','viewer','auditor'], true)) $role = 'viewer';
+
+    $channelsRaw = (string)($_POST['channels_json'] ?? '{}');
+    $channels = json_decode($channelsRaw, true);
+    if (!is_array($channels)) {
+        $err = 'channels_json must be valid JSON.';
+    } else {
+        $st2 = db()->prepare("UPDATE users SET role=:r, notify_channels_json=:c WHERE id=:id");
+        $st2->execute([':r'=>$role, ':c'=>json_encode($channels, JSON_UNESCAPED_SLASHES), ':id'=>$id]);
+
+        Audit::log((int)$admin['id'], 'user.update', 'user', $id, ['role'=>$role]);
+        header('Location: users.php');
+        exit;
+    }
+}
+
+render_header('Admin · Edit user', $admin);
+?>
+<div class="bg-white text-black rounded-2xl p-6 shadow max-w-2xl">
+  <div class="flex items-start justify-between mb-4">
+    <div>
+      <h1 class="text-xl font-semibold">Edit user</h1>
+      <div class="text-sm text-gray-700"><?php echo h($u['email']); ?></div>
+    </div>
+    <a class="text-green-700 hover:underline" href="users.php">Back</a>
+  </div>
+
+  <?php if ($err): ?>
+    <div class="mb-3 p-3 rounded bg-red-100 text-red-800 text-sm"><?php echo h($err); ?></div>
+  <?php endif; ?>
+
+  <form method="post" class="space-y-3">
+    <?php echo csrf_field(); ?>
+    <div>
+      <label class="text-sm">Role</label>
+      <select name="role" class="w-full border rounded px-3 py-2">
+        <?php foreach (['admin','viewer','auditor'] as $r): ?>
+          <option value="<?php echo h($r); ?>" <?php echo (($u['role']===$r)?'selected':''); ?>><?php echo h($r); ?></option>
+        <?php endforeach; ?>
+      </select>
+      <div class="text-xs text-gray-600 mt-1">auditor = read-only. viewer = can manage own monitors. admin = manage everything.</div>
+    </div>
+    <div>
+      <label class="text-sm">Notification channels JSON</label>
+      <textarea name="channels_json" class="w-full border rounded px-3 py-2 font-mono text-xs" rows="6"><?php echo h($_POST['channels_json'] ?? (string)$u['notify_channels_json']); ?></textarea>
+      <div class="text-xs text-gray-600 mt-1">Example: {"email":true,"slack_webhook":"https://hooks.slack.com/...","teams_webhook":null}</div>
+    </div>
+    <button class="bg-green-700 text-white px-4 py-2 rounded">Save</button>
+  </form>
+</div>
+<?php render_footer(); ?>

@@ -1,0 +1,111 @@
+<?php
+declare(strict_types=1);
+
+final class MonitorService {
+
+    public static function parseUrl(string $url): array {
+        $url = trim($url);
+        if ($url === '') throw new RuntimeException('Empty URL');
+
+        if (!preg_match('#^https?://#i', $url)) {
+            $url = 'https://' . $url;
+        }
+
+        $p = parse_url($url);
+        if (!$p || empty($p['host'])) throw new RuntimeException('Invalid URL');
+        $scheme = strtolower($p['scheme'] ?? 'https');
+        if ($scheme !== 'https') throw new RuntimeException('Only https is supported in v0');
+
+        $host = $p['host'];
+        $port = (int)($p['port'] ?? 443);
+
+        $norm = 'https://' . $host . ($port !== 443 ? (':' . $port) : '') . '/';
+        return ['url'=>$norm, 'host'=>$host, 'port'=>$port];
+    }
+
+    public static function addMonitor(int $userId, string $url, int $notifyDays): int {
+        $parsed = self::parseUrl($url);
+
+        $st = db()->prepare('INSERT INTO monitors (user_id,url,host,port,enabled,created_at,updated_at) VALUES (:uid,:url,:host,:port,1,:c,:u)');
+        $now = db_now_utc();
+        $st->execute([
+            ':uid'=>$userId,
+            ':url'=>$parsed['url'],
+            ':host'=>$parsed['host'],
+            ':port'=>$parsed['port'],
+            ':c'=>$now,
+            ':u'=>$now,
+        ]);
+        $mid = (int)db()->lastInsertId();
+
+        $st2 = db()->prepare('INSERT INTO monitor_settings (monitor_id, notify_days_before_expiry, check_frequency_minutes, notify_on_change, notify_on_renewal) VALUES (:mid,:days,60,1,1)');
+        $st2->execute([':mid'=>$mid, ':days'=>$notifyDays]);
+
+        Audit::log($userId, 'monitor.create', 'monitor', $mid, ['url'=>$parsed['url']]);
+        return $mid;
+    }
+
+    public static function updateMonitor(int $actorUserId, int $monitorId, string $url, int $notifyDays, int $freqMin, int $enabled): void {
+        $parsed = self::parseUrl($url);
+        $now = db_now_utc();
+
+        $st = db()->prepare('UPDATE monitors SET url=:url, host=:host, port=:port, enabled=:en, updated_at=:u WHERE id=:id');
+        $st->execute([
+            ':url'=>$parsed['url'],
+            ':host'=>$parsed['host'],
+            ':port'=>$parsed['port'],
+            ':en'=>$enabled ? 1 : 0,
+            ':u'=>$now,
+            ':id'=>$monitorId,
+        ]);
+
+        $st2 = db()->prepare('UPDATE monitor_settings SET notify_days_before_expiry=:d, check_frequency_minutes=:f WHERE monitor_id=:id');
+        $st2->execute([':d'=>$notifyDays, ':f'=>$freqMin, ':id'=>$monitorId]);
+
+        Audit::log($actorUserId, 'monitor.update', 'monitor', $monitorId, ['url'=>$parsed['url']]);
+    }
+
+    public static function deleteMonitor(int $actorUserId, int $monitorId): void {
+        $st = db()->prepare('DELETE FROM monitors WHERE id=:id');
+        $st->execute([':id'=>$monitorId]);
+        Audit::log($actorUserId, 'monitor.delete', 'monitor', $monitorId, []);
+    }
+
+    public static function getMonitorsForUser(array $user): array {
+        if ($user['role'] === 'admin' || $user['role'] === 'auditor') {
+            $sql = "SELECT m.*, s.notify_days_before_expiry, s.check_frequency_minutes,
+                    (SELECT status FROM cert_snapshots cs WHERE cs.monitor_id=m.id ORDER BY cs.fetched_at DESC LIMIT 1) AS last_status,
+                    (SELECT days_remaining FROM cert_snapshots cs WHERE cs.monitor_id=m.id ORDER BY cs.fetched_at DESC LIMIT 1) AS last_days_remaining,
+                    (SELECT valid_to FROM cert_snapshots cs WHERE cs.monitor_id=m.id ORDER BY cs.fetched_at DESC LIMIT 1) AS last_valid_to
+                    FROM monitors m
+                    JOIN monitor_settings s ON s.monitor_id=m.id
+                    ORDER BY m.updated_at DESC";
+            return db()->query($sql)->fetchAll();
+        }
+        $st = db()->prepare("SELECT m.*, s.notify_days_before_expiry, s.check_frequency_minutes,
+                (SELECT status FROM cert_snapshots cs WHERE cs.monitor_id=m.id ORDER BY cs.fetched_at DESC LIMIT 1) AS last_status,
+                (SELECT days_remaining FROM cert_snapshots cs WHERE cs.monitor_id=m.id ORDER BY cs.fetched_at DESC LIMIT 1) AS last_days_remaining,
+                (SELECT valid_to FROM cert_snapshots cs WHERE cs.monitor_id=m.id ORDER BY cs.fetched_at DESC LIMIT 1) AS last_valid_to
+                FROM monitors m
+                JOIN monitor_settings s ON s.monitor_id=m.id
+                WHERE m.user_id=:uid
+                ORDER BY m.updated_at DESC");
+        $st->execute([':uid'=>$user['id']]);
+        return $st->fetchAll();
+    }
+
+    public static function getMonitorById(int $monitorId): ?array {
+        $st = db()->prepare("SELECT m.*, s.notify_days_before_expiry, s.check_frequency_minutes, s.notify_on_change, s.notify_on_renewal
+                             FROM monitors m JOIN monitor_settings s ON s.monitor_id=m.id WHERE m.id=:id");
+        $st->execute([':id'=>$monitorId]);
+        $r = $st->fetch();
+        return $r ?: null;
+    }
+
+    public static function getLatestSnapshot(int $monitorId): ?array {
+        $st = db()->prepare("SELECT * FROM cert_snapshots WHERE monitor_id=:id ORDER BY fetched_at DESC LIMIT 1");
+        $st->execute([':id'=>$monitorId]);
+        $r = $st->fetch();
+        return $r ?: null;
+    }
+}
