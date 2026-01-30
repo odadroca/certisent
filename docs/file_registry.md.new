@@ -1,9 +1,3 @@
-# File registry (v0.4.9)
-
-SHA-256 for all files in this release zip (excluding this file to avoid self-reference).
-
-## Files
-
 3f6911b5852dcce1f1ad56eb68c3a60f06d9121f2601937dd882ebe79cf5d13b  ./.env.example
 902bc8daaaa14d9568054ab9ae342bbbe56ac0e4f410d8eb6ac74301e85f11a3  ./.htaccess
 50e6751797c50dedd75ef1b8a0d9e42f5f8472e9fbce91f34718e9f97b0c780a  ./LICENSE
@@ -27,7 +21,6 @@ b2187b16acc5dce55c4729434f97c4ef5db6917bf9d42c0cffb604d413a8802b  ./app/services
 5c41462476d2f8b136aeda65c1806617af29dd89964dccc6d4cb5bbde762b30b  ./docs/api.md
 5f90ccc2ae9344790569dbf022c7af5f80e816f735cec7bc2074d427f222eea2  ./docs/architecture.md
 0b7457f93e1ef91d489b01f0073c5be2acc8bb47ffa0a430e06e5e3c52103462  ./docs/deploy.md
-a206348a48e794a6b8642231819bf8615d7948384e685bbd927d887bd06ffccf  ./docs/file_registry.md.new
 9af54e5b29ecbdc20f12ca9a785cd22d311f447a89255c97768b500094111130  ./docs/ops_runbook.md
 4c4094b15e887dffb7ac9f0e39a9ead8afb5f0d29c6e2f6f367f1f40f2372fca  ./docs/release_notes_v0.4.x.md
 6659c65b484f5962b565fc98cee8e39ce2969c0a4e27c64f07e7fc9f50986d2f  ./docs/ui_map.md

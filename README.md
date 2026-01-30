@@ -5,6 +5,8 @@ It is designed to be simple to host (shared hosting or VPS), easy to operate (cr
 
 ## Highlights (v0.4.9)
 - Stabilization release (no new runtime features beyond v0.4.8).
+- Fixed admin API key creation failing with "Bad request (CSRF)".
+- Footer now displays the current app version dynamically.
 - Added consolidated v0.4.x patch release notes (`docs/release_notes_v0.4.x.md`).
 - All prior v0.4.x improvements remain (Apache Bearer auth compatibility, schema/app version decoupling, due-check perf, job cancellation responsiveness, health scope narrowing, correlation IDs).
 

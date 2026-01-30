@@ -111,7 +111,8 @@ function render_header(string $title, ?array $user = null): void {
 
 function render_footer(): void {
     echo '</div>'; // content wrapper
-    echo '<div class="mt-10 text-xs text-gray-500">Certinel v0.4 · UTC timestamps</div>';
+    $v = function_exists('app_version') ? app_version() : 'unknown';
+    echo '<div class="mt-10 text-xs text-gray-500">Certinel v'.h($v).' · UTC timestamps</div>';
     echo '</div></body></html>';
 }
 

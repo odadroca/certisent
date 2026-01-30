@@ -97,7 +97,7 @@ if ($createdToken !== null) {
 <div class="bg-white text-black rounded-2xl p-6 shadow mb-6">
   <h2 class="font-semibold mb-3">Create API key</h2>
   <form method="post" class="space-y-4">
-    <input type="hidden" name="csrf" value="<?php echo h(csrf_token()); ?>" />
+    <?php echo csrf_field(); ?>
     <input type="hidden" name="action" value="create" />
 
     <div>
@@ -143,7 +143,7 @@ if ($createdToken !== null) {
           <td class="py-2 pr-3 whitespace-nowrap">
             <?php if ((int)$k['is_active']===1): ?>
               <form method="post" class="inline" onsubmit="return confirm('Revoke this key?');">
-                <input type="hidden" name="csrf" value="<?php echo h(csrf_token()); ?>" />
+                <?php echo csrf_field(); ?>
                 <input type="hidden" name="action" value="revoke" />
                 <input type="hidden" name="id" value="<?php echo (int)$k['id']; ?>" />
                 <button class="text-red-700 hover:underline">Revoke</button>
