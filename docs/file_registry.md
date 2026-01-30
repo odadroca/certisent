@@ -1,4 +1,4 @@
-# File registry (v0.4)
+# File registry (v0.4.1)
 
 SHA-256 for all files in this release zip (excluding this file to avoid self-reference).
 
@@ -24,13 +24,13 @@ e45f93a1eaf5a4e2db148a4d05c45e657872edf73bc641815f42812e2f56a198  ./app/services
 207b77be26eda12f401e31a479041b464628470105cec210be0ed563cac83575  ./app/services/SmtpClient.php
 98688cf35404d59a7e38d456d0b8745e7fca65f3266bee9183b78bcf0cb6b43f  ./app/services/Worker.php
 b59bed1521b45d16a2509d942db79ec6dcab881eda97f9138cf28a03b6626034  ./app/ui.php
-ac58ff212d825cc94ba415e24c3b0aebc8d374b1129721deb413a859e6d73a26  ./docs/api.md
+1e969e593046a4b4accfce73d995d84150a8f6e7fabb0bf484efd698f8a82fd9  ./docs/api.md
 5f90ccc2ae9344790569dbf022c7af5f80e816f735cec7bc2074d427f222eea2  ./docs/architecture.md
 ebd287bbe7ac033454f2a8f711ee7de071e6bfcbdfba1926d8e0c2ff2f50061d  ./docs/deploy.md
 e1b845b5bbda126fa9ca3950c56c5279b082c4431c69745459c46f7db8a59627  ./docs/hostinger-checklist.md
 b22ab783f53ec3d1bba933bd0f07753ba2d6edcbbb7eb97076852f5f09cf0d66  ./docs/ops_runbook.md
 6659c65b484f5962b565fc98cee8e39ce2969c0a4e27c64f07e7fc9f50986d2f  ./docs/ui_map.md
-7b3794151464dfbb8fc3a5483102c3689eba1039b64b4ab584ec827dc4eabdcd  ./public/.htaccess
+5827b8b739595255bef8c033dc9e147b024ae0d1960955bbf21021a6c83ca49c  ./public/.htaccess
 aa27c55407f39f730107f720657521d71e63cdc38c8e1b9395737f5a8b428c1b  ./public/admin/api_keys.php
 27f6868ae9be946447e1ec80b9088ac41be918739ef9236419d7312e1a7cbf52  ./public/admin/audit.php
 5a08e925df5e8f18c892ac38d2aea7b0c037d9787976d3bc70bc4e50c630c762  ./public/admin/email.php

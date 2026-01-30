@@ -4,6 +4,14 @@ Authentication: `Authorization: Bearer <API_WORKER_KEY>` (shared secret from `.e
 
 Base path: `/public/api/v1/` (unless you set document root to `public/`).
 
+## Apache note: Authorization header forwarding
+
+Some Apache configurations do not pass the `Authorization` header through to PHP by default, which can cause `401 missing_bearer` even when your client sends the header.
+
+This release forwards `Authorization` in `public/.htaccess`. If you still see `missing_bearer`, verify that:
+- `mod_rewrite` is enabled, and
+- requests are hitting the `public/` folder (document root or `/public/` in the URL).
+
 ## Endpoints
 
 ### GET /api/v1/health

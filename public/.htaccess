@@ -2,6 +2,14 @@
 # Otherwise, access the app via /public/ in the URL.
 RewriteEngine On
 
+# Forward Authorization header to PHP (Bearer tokens).
+# Some Apache/PHP configurations drop this header unless explicitly forwarded.
+<IfModule mod_setenvif.c>
+  SetEnvIfNoCase Authorization "(.+)" HTTP_AUTHORIZATION=$1
+</IfModule>
+RewriteCond %{HTTP:Authorization} .
+RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
 # Block access to hidden files
 RewriteRule (^|/)\. - [F,L]
 
