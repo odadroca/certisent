@@ -1,4 +1,11 @@
-# Deployment and Upgrades (v0.4)
+# Deployment and Upgrades (v0.4.2)
+
+## Versioning: app vs DB schema
+- **App version** (code release): `app_version()` (shown in Admin → System), e.g. `0.4.2`.
+- **DB schema version** (database contract): `schema_version()` and `system_state.schema_version`, e.g. `0.4`.
+
+Patch releases in the `0.4.x` line are expected to keep the **same DB schema** (`system_state.schema_version=0.4`).
+Only run SQL migrations when upgrading across releases that change the schema.
 
 ## Fresh install
 1. Upload the project.
@@ -42,5 +49,5 @@ Use `sql/migrations/` in order.
 
 Example: v0.3.1 → v0.4
 1. Run `sql/migrations/v0.3.1_to_v0.4.sql` once.
-2. Confirm `system_state.schema_version` equals `0.4`.
+2. Confirm `system_state.schema_version` equals `0.4` (schema). Your app version may be `0.4.x`.
 3. Visit `/public/admin/system.php` to confirm schema + .env status.

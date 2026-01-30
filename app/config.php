@@ -7,6 +7,16 @@ declare(strict_types=1);
  */
 
 function app_version(): string {
+    return '0.4.2';
+}
+
+/**
+ * Database schema version.
+ *
+ * This value changes only when a SQL migration changes the schema.
+ * Patch releases (v0.4.x) should not require bumping schema_version.
+ */
+function schema_version(): string {
     return '0.4';
 }
 

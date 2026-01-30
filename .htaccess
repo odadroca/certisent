@@ -1,4 +1,4 @@
-#Certinel hardening (deny access to non-public directories/files)
+# Certinel hardening (deny access to non-public directories/files)
 RewriteEngine On
 RewriteRule ^(app|sql|scripts|docs)(/|$) - [F,L]
 RewriteRule ^\.env(\.example)?$ - [F,L]

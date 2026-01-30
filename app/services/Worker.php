@@ -33,7 +33,7 @@ final class Worker {
      * Create an async job to run checks for all enabled monitors.
      */
     public static function createRunAllJob(?int $requestedByUserId): int {
-        self::requireSchemaVersion(app_version());
+        self::requireSchemaVersion(schema_version());
         $now = db_now_utc();
         $st = db()->prepare("INSERT INTO worker_jobs (type, requested_by_user_id, status, total_processed, last_monitor_id, error, created_at, updated_at, started_at, finished_at)
                              VALUES ('run_all', :uid, 'pending', 0, NULL, NULL, :c, :u, NULL, NULL)");
@@ -45,7 +45,7 @@ final class Worker {
      * Cancel a job.
      */
     public static function cancelJob(int $jobId): bool {
-        self::requireSchemaVersion(app_version());
+        self::requireSchemaVersion(schema_version());
         $st = db()->prepare("UPDATE worker_jobs SET status='cancelled', updated_at=:u, finished_at=:u WHERE id=:id AND status IN ('pending','running')");
         $st->execute([':u'=>db_now_utc(), ':id'=>$jobId]);
         return $st->rowCount() > 0;
@@ -56,7 +56,7 @@ final class Worker {
      * @return array<string,mixed>|null
      */
     public static function getLatestJobForUser(int $userId): ?array {
-        self::requireSchemaVersion(app_version());
+        self::requireSchemaVersion(schema_version());
         $st = db()->prepare("SELECT * FROM worker_jobs WHERE requested_by_user_id=:uid ORDER BY created_at DESC LIMIT 1");
         $st->execute([':uid'=>$userId]);
         $r = $st->fetch();
@@ -69,7 +69,7 @@ final class Worker {
      * @return array<string,mixed>|null job summary or null if no job.
      */
     public static function processJobs(int $maxChecks = 25, int $maxSeconds = 20, ?int $onlyJobId = null): ?array {
-        self::requireSchemaVersion(app_version());
+        self::requireSchemaVersion(schema_version());
         $t0 = microtime(true);
 
         if ($onlyJobId !== null) {
@@ -159,7 +159,7 @@ final class Worker {
     }
 
     public static function runDueChecks(?int $limit = null): array {
-        self::requireSchemaVersion(app_version());
+        self::requireSchemaVersion(schema_version());
         $t0 = microtime(true);
         $sql = "SELECT m.id
                 FROM monitors m
@@ -194,7 +194,7 @@ final class Worker {
     }
 
     public static function runAllChecks(?int $limit = null): array {
-        self::requireSchemaVersion(app_version());
+        self::requireSchemaVersion(schema_version());
         $t0 = microtime(true);
         $st = db()->query("SELECT id FROM monitors WHERE enabled=1 ORDER BY updated_at DESC");
         $rows = $st->fetchAll();

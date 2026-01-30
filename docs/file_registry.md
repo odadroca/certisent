@@ -1,4 +1,4 @@
-# File registry (v0.4.1)
+# File registry (v0.4.2)
 
 SHA-256 for all files in this release zip (excluding this file to avoid self-reference).
 
@@ -7,11 +7,11 @@ SHA-256 for all files in this release zip (excluding this file to avoid self-ref
 3f6911b5852dcce1f1ad56eb68c3a60f06d9121f2601937dd882ebe79cf5d13b  ./.env.example
 902bc8daaaa14d9568054ab9ae342bbbe56ac0e4f410d8eb6ac74301e85f11a3  ./.htaccess
 677b0992eae535a57a2b98c512c5260366af7aa68f5009fbbc20ca42c138c700  ./LICENSE
-357298f49e7a7c06925d9b6810ebd2c92814c71529cf570c6b03ba8f6c80440d  ./README.md
+120573714621af0ebb510e8551681d62a48897f92dfdc5184ad95a0223877c8c  ./README.md
 f79595c80be1c0db24e18160eec86f41eb36dd4c9281c5e87a270eb9a2605e9d  ./app/api/Router.php
 20c31e1455fc949b183b3041a5e7f08f5eae5294332d8927ea1738e9f1ee4d92  ./app/auth.php
 bad07c21ad319fd6d4175d93c1b50c1900ec359f1321c4055ad10cac8a4ec9d6  ./app/bootstrap.php
-08588d40c30170bc80dd43f5582f899920e8207d66f9d7d9d79352cf9628f6e3  ./app/config.php
+e30026cb0ccd0ae08004400fc052c5b1f456b26b33b253def4b72c92f2d6eba6  ./app/config.php
 758ca4cc30a692f3ccd2cccc73b71c3fa160881a6d3cbecddabec3c5806781c1  ./app/csrf.php
 aecc90a04ebcad04406c415a4f84f801bd0fa9ce65e07eb486382417498ff70d  ./app/db.php
 9d5b5c1b775bac43a546b62242141389691b801a194db714af95f4e4f75b8fa9  ./app/logger.php
@@ -22,11 +22,11 @@ ef94d4c2ac2a038b6c2ae673d9573333a0a20f7fac9e2d75af11c6c387a157a3  ./app/logs/.ht
 e45f93a1eaf5a4e2db148a4d05c45e657872edf73bc641815f42812e2f56a198  ./app/services/MonitorService.php
 30610143a05bfe660778b5414dedd012d8edc7a541d5f7b8543a24669c81151b  ./app/services/Notifier.php
 207b77be26eda12f401e31a479041b464628470105cec210be0ed563cac83575  ./app/services/SmtpClient.php
-98688cf35404d59a7e38d456d0b8745e7fca65f3266bee9183b78bcf0cb6b43f  ./app/services/Worker.php
+3da8ca9f447f3cd509560d401c77a0e673b5af130d5f968eebc2f35583cad99c  ./app/services/Worker.php
 b59bed1521b45d16a2509d942db79ec6dcab881eda97f9138cf28a03b6626034  ./app/ui.php
 1e969e593046a4b4accfce73d995d84150a8f6e7fabb0bf484efd698f8a82fd9  ./docs/api.md
 5f90ccc2ae9344790569dbf022c7af5f80e816f735cec7bc2074d427f222eea2  ./docs/architecture.md
-ebd287bbe7ac033454f2a8f711ee7de071e6bfcbdfba1926d8e0c2ff2f50061d  ./docs/deploy.md
+e2b7e413f521c92a50be5bd1c968c55c90ae8194fb674f571cab57c16d090c32  ./docs/deploy.md
 e1b845b5bbda126fa9ca3950c56c5279b082c4431c69745459c46f7db8a59627  ./docs/hostinger-checklist.md
 b22ab783f53ec3d1bba933bd0f07753ba2d6edcbbb7eb97076852f5f09cf0d66  ./docs/ops_runbook.md
 6659c65b484f5962b565fc98cee8e39ce2969c0a4e27c64f07e7fc9f50986d2f  ./docs/ui_map.md
