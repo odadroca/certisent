@@ -7,7 +7,7 @@ declare(strict_types=1);
  */
 
 function app_version(): string {
-    return '0.4.2';
+    return '0.4.3';
 }
 
 /**

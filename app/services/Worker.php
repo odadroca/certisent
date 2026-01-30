@@ -161,20 +161,31 @@ final class Worker {
     public static function runDueChecks(?int $limit = null): array {
         self::requireSchemaVersion(schema_version());
         $t0 = microtime(true);
-        $sql = "SELECT m.id
+        // Fetch all information needed to decide whether each monitor is due in one query
+        // (avoid re-loading each monitor and its latest snapshot in a loop).
+        $sql = "SELECT
+                    m.id,
+                    m.last_checked_at,
+                    ms.check_frequency_minutes,
+                    ls.last_fetched_at
                 FROM monitors m
                 JOIN monitor_settings ms ON ms.monitor_id=m.id
+                LEFT JOIN (
+                    SELECT monitor_id, MAX(fetched_at) AS last_fetched_at
+                    FROM cert_snapshots
+                    GROUP BY monitor_id
+                ) ls ON ls.monitor_id=m.id
                 WHERE m.enabled=1
                 ORDER BY m.updated_at DESC";
-        $ids = db()->query($sql)->fetchAll();
+        $rows = db()->query($sql)->fetchAll();
         $done = 0;
         $results = ['checked'=>0,'errors'=>0,'changed'=>0,'renewed'=>0,'warned'=>0];
 
-        foreach ($ids as $row) {
+        foreach ($rows as $row) {
             if ($limit !== null && $done >= $limit) break;
             $monitorId = (int)$row['id'];
 
-            if (!self::isDue($monitorId)) continue;
+            if (!self::isDueRow($row)) continue;
 
             $r = self::checkOne($monitorId);
             $results['checked'] += 1;
@@ -216,16 +227,24 @@ final class Worker {
         return $results;
     }
 
-    private static function isDue(int $monitorId): bool {
-        $m = MonitorService::getMonitorById($monitorId);
-        if (!$m) return false;
-        $freq = max(5, (int)$m['check_frequency_minutes']); // safety clamp
-        $lastChecked = $m['last_checked_at'] ?? null;
+    /**
+     * Decide if a monitor is due based on a row from the runDueChecks() query.
+     *
+     * Semantics match the previous implementation:
+     * - frequency is clamped to >= 5 minutes
+     * - if last_checked_at is null, fall back to latest snapshot fetched_at
+     * - if there are no snapshots, the monitor is due
+     */
+    private static function isDueRow(array $row): bool {
+        $freq = max(5, (int)($row['check_frequency_minutes'] ?? 0)); // safety clamp
+
+        $lastChecked = $row['last_checked_at'] ?? null;
         if (!$lastChecked) {
-            $last = MonitorService::getLatestSnapshot($monitorId);
-            if (!$last) return true;
-            $lastChecked = (string)$last['fetched_at'];
+            $lastFetched = $row['last_fetched_at'] ?? null;
+            if (!$lastFetched) return true;
+            $lastChecked = (string)$lastFetched;
         }
+
         $lastTs = strtotime((string)$lastChecked . ' UTC');
         if ($lastTs === false) return true;
         return (time() - $lastTs) >= ($freq * 60);

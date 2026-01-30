@@ -1,4 +1,4 @@
-# File registry (v0.4.2)
+# File registry (v0.4.3)
 
 SHA-256 for all files in this release zip (excluding this file to avoid self-reference).
 
@@ -11,7 +11,7 @@ SHA-256 for all files in this release zip (excluding this file to avoid self-ref
 f79595c80be1c0db24e18160eec86f41eb36dd4c9281c5e87a270eb9a2605e9d  ./app/api/Router.php
 20c31e1455fc949b183b3041a5e7f08f5eae5294332d8927ea1738e9f1ee4d92  ./app/auth.php
 bad07c21ad319fd6d4175d93c1b50c1900ec359f1321c4055ad10cac8a4ec9d6  ./app/bootstrap.php
-e30026cb0ccd0ae08004400fc052c5b1f456b26b33b253def4b72c92f2d6eba6  ./app/config.php
+e0454b4d132d2c4f4c768ae0e68e28208adbf644279e0fa359dd55ee5af42c78  ./app/config.php
 758ca4cc30a692f3ccd2cccc73b71c3fa160881a6d3cbecddabec3c5806781c1  ./app/csrf.php
 aecc90a04ebcad04406c415a4f84f801bd0fa9ce65e07eb486382417498ff70d  ./app/db.php
 9d5b5c1b775bac43a546b62242141389691b801a194db714af95f4e4f75b8fa9  ./app/logger.php
@@ -22,7 +22,7 @@ ef94d4c2ac2a038b6c2ae673d9573333a0a20f7fac9e2d75af11c6c387a157a3  ./app/logs/.ht
 e45f93a1eaf5a4e2db148a4d05c45e657872edf73bc641815f42812e2f56a198  ./app/services/MonitorService.php
 30610143a05bfe660778b5414dedd012d8edc7a541d5f7b8543a24669c81151b  ./app/services/Notifier.php
 207b77be26eda12f401e31a479041b464628470105cec210be0ed563cac83575  ./app/services/SmtpClient.php
-3da8ca9f447f3cd509560d401c77a0e673b5af130d5f968eebc2f35583cad99c  ./app/services/Worker.php
+2edaed4ff3f5a97e34e2cd13a0bd726a3f60f37e93ea1ef5e44ca76d0114ebf7  ./app/services/Worker.php
 b59bed1521b45d16a2509d942db79ec6dcab881eda97f9138cf28a03b6626034  ./app/ui.php
 1e969e593046a4b4accfce73d995d84150a8f6e7fabb0bf484efd698f8a82fd9  ./docs/api.md
 5f90ccc2ae9344790569dbf022c7af5f80e816f735cec7bc2074d427f222eea2  ./docs/architecture.md
