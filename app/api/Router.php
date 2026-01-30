@@ -6,12 +6,6 @@ final class ApiRouter {
     public static function handle(): void {
         header('Content-Type: application/json; charset=utf-8');
 
-        if (!self::authOk()) {
-            http_response_code(401);
-            echo json_encode(['ok'=>false,'error'=>'unauthorized']);
-            return;
-        }
-
         $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
         $path = $_SERVER['REQUEST_URI'] ?? '/';
         // Strip query string
@@ -23,34 +17,23 @@ final class ApiRouter {
         $sub = '/' . ltrim($sub, '/');
 
         if ($method === 'POST' && $sub === '/worker/run') {
+            require_api_scope('run_worker');
             self::postWorkerRun();
             return;
         }
         if ($method === 'POST' && $sub === '/check') {
+            require_api_scope('check_monitor');
             self::postCheck();
             return;
         }
         if ($method === 'GET' && $sub === '/health') {
+            require_api_scope('run_worker');
             echo json_encode(['ok'=>true,'time_utc'=>db_now_utc(),'last_cron_run_at'=>Worker::getSystemState('last_cron_run_at')]);
             return;
         }
 
         http_response_code(404);
         echo json_encode(['ok'=>false,'error'=>'not_found','path'=>$sub]);
-    }
-
-    private static function authOk(): bool {
-        $key = cfg('API_WORKER_KEY', '');
-        if ($key === '') return false;
-
-        $hdr = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
-        if (!is_string($hdr) || $hdr === '') return false;
-
-        if (preg_match('/Bearer\s+(.*)$/i', $hdr, $m)) {
-            $sent = trim($m[1]);
-            return hash_equals($key, $sent);
-        }
-        return false;
     }
 
     private static function readJson(): array {

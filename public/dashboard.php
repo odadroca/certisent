@@ -46,19 +46,22 @@ $lastCron = Worker::getSystemState('last_cron_run_at');
           <th class="py-2 pr-3">Issuer</th>
           <th class="py-2 pr-3">Valid to</th>
           <th class="py-2 pr-3">Days left</th>
+          <th class="py-2 pr-3">Last checked</th>
+          <th class="py-2 pr-3">Next due</th>
           <th class="py-2 pr-3"></th>
         </tr>
       </thead>
       <tbody>
       <?php foreach ($monitors as $m): ?>
-        <?php $snap = MonitorService::getLatestSnapshot((int)$m['id']); ?>
-        <?php $displayStatus = $snap ? (string)($m['last_status'] ?? 'unknown') : 'not_checked'; ?>
+        <?php $displayStatus = $m['last_checked_at'] ? (string)($m['last_status'] ?? 'unknown') : 'not_checked'; ?>
         <tr class="border-b">
           <td class="py-2 pr-3"><?php echo badge_status($displayStatus); ?></td>
           <td class="py-2 pr-3 font-mono"><?php echo h($m['url']); ?></td>
-          <td class="py-2 pr-3"><?php echo h((string)($snap['issuer_cn'] ?? '—')); ?></td>
-          <td class="py-2 pr-3"><?php echo h((string)($snap['valid_to'] ?? '—')); ?><?php echo $snap ? ' UTC' : ''; ?></td>
-          <td class="py-2 pr-3"><?php echo h((string)($snap['days_remaining'] ?? '—')); ?></td>
+          <td class="py-2 pr-3"><?php echo h((string)($m['last_issuer_cn'] ?? '—')); ?></td>
+          <td class="py-2 pr-3"><?php echo h((string)($m['last_valid_to'] ?? '—')); ?><?php echo $m['last_valid_to'] ? ' UTC' : ''; ?></td>
+          <td class="py-2 pr-3"><?php echo h((string)($m['last_days_remaining'] ?? '—')); ?></td>
+          <td class="py-2 pr-3"><?php echo h((string)($m['last_checked_at'] ?? '—')); ?><?php echo $m['last_checked_at'] ? ' UTC' : ''; ?></td>
+          <td class="py-2 pr-3"><?php echo h((string)($m['next_due_at'] ?? '—')); ?><?php echo $m['next_due_at'] ? ' UTC' : ''; ?></td>
           <td class="py-2 pr-3">
             <a class="text-gray-800 hover:underline mr-3" href="monitor_view.php?id=<?php echo (int)$m['id']; ?>">View</a>
             <?php if (has_role($user,'viewer')): ?>
@@ -73,26 +76,29 @@ $lastCron = Worker::getSystemState('last_cron_run_at');
 <?php else: ?>
   <div class="grid md:grid-cols-2 gap-4">
     <?php foreach ($monitors as $m): ?>
-      <?php $snap = MonitorService::getLatestSnapshot((int)$m['id']); ?>
-      <?php $displayStatus = $snap ? (string)($m['last_status'] ?? 'unknown') : 'not_checked'; ?>
+      <?php $displayStatus = $m['last_checked_at'] ? (string)($m['last_status'] ?? 'unknown') : 'not_checked'; ?>
       <div class="bg-white text-black rounded-2xl p-5 shadow">
         <div class="flex items-start justify-between gap-3">
           <div>
             <div class="font-mono text-sm break-all"><?php echo h($m['url']); ?></div>
-            <div class="text-xs text-gray-600 mt-1">Issuer: <?php echo h((string)($snap['issuer_cn'] ?? '—')); ?></div>
+            <div class="text-xs text-gray-600 mt-1">Issuer: <?php echo h((string)($m['last_issuer_cn'] ?? '—')); ?></div>
           </div>
           <div><?php echo badge_status($displayStatus); ?></div>
         </div>
 
         <div class="mt-4 space-y-2">
           <div class="text-xs text-gray-600 flex justify-between">
-            <span>Valid from: <?php echo h((string)($snap['valid_from'] ?? '—')); ?><?php echo $snap ? ' UTC' : ''; ?></span>
-            <span>Valid to: <?php echo h((string)($snap['valid_to'] ?? '—')); ?><?php echo $snap ? ' UTC' : ''; ?></span>
+            <span>Valid from: <?php echo h((string)($m['last_valid_from'] ?? '—')); ?><?php echo $m['last_valid_from'] ? ' UTC' : ''; ?></span>
+            <span>Valid to: <?php echo h((string)($m['last_valid_to'] ?? '—')); ?><?php echo $m['last_valid_to'] ? ' UTC' : ''; ?></span>
           </div>
-          <?php echo progress_bar($snap ? (int)$snap['days_remaining'] : null, $snap['valid_from'] ?? null, $snap['valid_to'] ?? null); ?>
+          <?php echo progress_bar($m['last_days_remaining'] !== null ? (int)$m['last_days_remaining'] : null, $m['last_valid_from'] ?? null, $m['last_valid_to'] ?? null); ?>
           <div class="text-xs text-gray-700 flex justify-between">
-            <span>Days left: <span class="font-semibold"><?php echo h((string)($snap['days_remaining'] ?? '—')); ?></span></span>
+            <span>Days left: <span class="font-semibold"><?php echo h((string)($m['last_days_remaining'] ?? '—')); ?></span></span>
             <span>Warn threshold: <?php echo (int)$m['notify_days_before_expiry']; ?> days</span>
+          </div>
+          <div class="text-xs text-gray-600 flex justify-between">
+            <span>Last checked: <?php echo h((string)($m['last_checked_at'] ?? '—')); ?><?php echo $m['last_checked_at'] ? ' UTC' : ''; ?></span>
+            <span>Next due: <?php echo h((string)($m['next_due_at'] ?? '—')); ?><?php echo $m['next_due_at'] ? ' UTC' : ''; ?></span>
           </div>
         </div>
 

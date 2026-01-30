@@ -23,11 +23,21 @@ CREATE TABLE IF NOT EXISTS monitors (
   enabled TINYINT(1) NOT NULL DEFAULT 1,
   created_at DATETIME NOT NULL,
   updated_at DATETIME NOT NULL,
+  -- denormalized "last known" fields for fast UI queries
+  last_checked_at DATETIME NULL,
+  last_status ENUM('ok','warn','critical','unknown') NULL,
+  last_fingerprint_sha256 VARCHAR(128) NULL,
+  last_issuer_cn VARCHAR(255) NULL,
+  last_valid_from DATETIME NULL,
+  last_valid_to DATETIME NULL,
+  last_days_remaining INT NULL,
+  last_error VARCHAR(255) NULL,
   CONSTRAINT fk_monitors_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE INDEX idx_monitors_user ON monitors(user_id);
 CREATE INDEX idx_monitors_host ON monitors(host);
+CREATE INDEX idx_monitors_last_checked ON monitors(last_checked_at);
 
 CREATE TABLE IF NOT EXISTS monitor_settings (
   monitor_id INT PRIMARY KEY,
@@ -86,6 +96,41 @@ CREATE TABLE IF NOT EXISTS audit_log (
 
 CREATE INDEX idx_audit_time ON audit_log(created_at);
 CREATE INDEX idx_audit_actor_time ON audit_log(actor_user_id, created_at);
+
+-- API keys for worker access (store SHA-256 of token, never store plaintext)
+CREATE TABLE IF NOT EXISTS api_keys (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(128) NOT NULL,
+  token_hash_sha256 CHAR(64) NOT NULL UNIQUE,
+  scopes_json JSON NOT NULL,
+  is_active TINYINT(1) NOT NULL DEFAULT 1,
+  created_at DATETIME NOT NULL,
+  last_used_at DATETIME NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE INDEX idx_api_keys_active ON api_keys(is_active);
+
+-- Notification outbox for reliable delivery + retries
+CREATE TABLE IF NOT EXISTS notification_outbox (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL,
+  monitor_id INT NULL,
+  event_id BIGINT NULL,
+  channel ENUM('email','slack','teams') NOT NULL,
+  status ENUM('pending','sent','failed') NOT NULL DEFAULT 'pending',
+  attempts INT NOT NULL DEFAULT 0,
+  next_retry_at DATETIME NULL,
+  last_error VARCHAR(512) NULL,
+  dedupe_key CHAR(64) NOT NULL,
+  created_at DATETIME NOT NULL,
+  updated_at DATETIME NOT NULL,
+  CONSTRAINT fk_outbox_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  CONSTRAINT fk_outbox_monitor FOREIGN KEY (monitor_id) REFERENCES monitors(id) ON DELETE SET NULL,
+  CONSTRAINT fk_outbox_event FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE UNIQUE INDEX uq_outbox_dedupe ON notification_outbox(dedupe_key);
+CREATE INDEX idx_outbox_status_retry ON notification_outbox(status, next_retry_at);
 
 CREATE TABLE IF NOT EXISTS system_state (
   `key` VARCHAR(64) PRIMARY KEY,

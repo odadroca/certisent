@@ -17,6 +17,7 @@ final class Worker {
     }
 
     public static function runDueChecks(?int $limit = null): array {
+        $t0 = microtime(true);
         $sql = "SELECT m.id
                 FROM monitors m
                 JOIN monitor_settings ms ON ms.monitor_id=m.id
@@ -40,10 +41,17 @@ final class Worker {
         }
         self::setSystemState('last_cron_run_at', db_now_utc());
         self::setSystemState('last_cron_ok', '1');
+
+        // Process pending notifications (reliable delivery)
+        $outbox = Notifier::processOutbox(100);
+
+        $durationMs = (int)round((microtime(true) - $t0) * 1000);
+        self::createSystemEvent('worker_run', 'info', 'Worker run (due).', array_merge($results, ['mode'=>'due','duration_ms'=>$durationMs,'outbox'=>$outbox]));
         return $results;
     }
 
     public static function runAllChecks(?int $limit = null): array {
+        $t0 = microtime(true);
         $st = db()->query("SELECT id FROM monitors WHERE enabled=1 ORDER BY updated_at DESC");
         $rows = $st->fetchAll();
         $results = ['checked'=>0,'errors'=>0,'changed'=>0,'renewed'=>0,'warned'=>0];
@@ -57,6 +65,10 @@ final class Worker {
         }
         self::setSystemState('last_cron_run_at', db_now_utc());
         self::setSystemState('last_cron_ok', '1');
+
+        $outbox = Notifier::processOutbox(100);
+        $durationMs = (int)round((microtime(true) - $t0) * 1000);
+        self::createSystemEvent('worker_run', 'info', 'Worker run (all).', array_merge($results, ['mode'=>'all','duration_ms'=>$durationMs,'outbox'=>$outbox]));
         return $results;
     }
 
@@ -64,9 +76,13 @@ final class Worker {
         $m = MonitorService::getMonitorById($monitorId);
         if (!$m) return false;
         $freq = max(5, (int)$m['check_frequency_minutes']); // safety clamp
-        $last = MonitorService::getLatestSnapshot($monitorId);
-        if (!$last) return true;
-        $lastTs = strtotime((string)$last['fetched_at'] . ' UTC');
+        $lastChecked = $m['last_checked_at'] ?? null;
+        if (!$lastChecked) {
+            $last = MonitorService::getLatestSnapshot($monitorId);
+            if (!$last) return true;
+            $lastChecked = (string)$last['fetched_at'];
+        }
+        $lastTs = strtotime((string)$lastChecked . ' UTC');
         if ($lastTs === false) return true;
         return (time() - $lastTs) >= ($freq * 60);
     }
@@ -152,6 +168,21 @@ final class Worker {
             ':days'=>$daysRemaining,
         ]);
 
+        // Update monitor denormalized fields for fast UI queries
+        $up = db()->prepare('UPDATE monitors SET last_checked_at=:c, last_status=:st, last_fingerprint_sha256=:fp, last_issuer_cn=:issuer,
+                             last_valid_from=:vf, last_valid_to=:vt, last_days_remaining=:days, last_error=:err, updated_at=:u WHERE id=:id');
+        $up->execute([
+            ':c'=>$now,
+            ':st'=>$status,
+            ':fp'=>$finger,
+            ':issuer'=>$issuer,
+            ':vf'=>$validFrom,
+            ':vt'=>$validTo,
+            ':days'=>$daysRemaining,
+            ':err'=>$err,
+            ':u'=>$now,
+            ':id'=>$monitorId,
+        ]);
         $out = ['errors'=>0,'changed'=>0,'renewed'=>0,'warned'=>0];
 
         // Evaluate events
@@ -163,8 +194,10 @@ final class Worker {
 
         // Change/Renewal detection
         if ($prev && $finger && !empty($prev['fingerprint_sha256']) && $prev['fingerprint_sha256'] !== $finger) {
-            $samples = max(1, (int)cfg('TLS_SAMPLES_ON_CHANGE', 2));
-            $confirmOk = self::confirmChange($m, $finger);
+            $confirm = self::confirmChange($m, $finger);
+            $samples = (int)($confirm['samples'] ?? max(1, (int)cfg('TLS_SAMPLES_ON_CHANGE', 2)));
+            $observed = $confirm['observed_fingerprints'] ?? [];
+            $confirmOk = (bool)($confirm['confirmed'] ?? false);
             if ($confirmOk) {
                 $out['changed'] = 1;
 
@@ -184,6 +217,7 @@ final class Worker {
                     'new_valid_to' => $validTo,
                     'confirm_samples' => $samples,
                     'confirm_result' => 'confirmed',
+                    'observed_fingerprints' => $observed,
                 ];
 
                 if ($prevTo && $newFrom) {
@@ -203,7 +237,8 @@ final class Worker {
                     'prev_fingerprint'=>$prev['fingerprint_sha256'],
                     'new_fingerprint'=>$finger,
                     'confirm_samples' => $samples,
-                    'confirm_result' => 'unstable'
+                    'confirm_result' => 'unstable',
+                    'observed_fingerprints' => $observed,
                 ]);
             }
         }
@@ -227,14 +262,34 @@ final class Worker {
         return $out;
     }
 
-    private static function confirmChange(array $monitorRow, string $newFingerprint): bool {
+    /**
+     * Confirm certificate change across N samples, with a short delay between samples.
+     * Returns observed fingerprints to explain "unstable" endpoints.
+     * @return array{confirmed:bool,samples:int,observed_fingerprints:array<int,string>}
+     */
+    private static function confirmChange(array $monitorRow, string $newFingerprint): array {
         $samples = max(1, (int)cfg('TLS_SAMPLES_ON_CHANGE', 2));
+        $observed = [];
+        $confirmed = true;
+
         for ($i=0; $i<$samples; $i++) {
+            if ($i > 0) {
+                // Small delay reduces false positives on load-balanced endpoints.
+                usleep(2000000);
+            }
             $f = CertFetcher::fetch((string)$monitorRow['host'], (int)$monitorRow['port']);
-            if (!$f['ok'] || empty($f['fingerprint_sha256'])) return false;
-            if ($f['fingerprint_sha256'] !== $newFingerprint) return false;
+            if (!$f['ok'] || empty($f['fingerprint_sha256'])) {
+                $confirmed = false;
+                break;
+            }
+            $fp = (string)$f['fingerprint_sha256'];
+            $observed[] = $fp;
+            if ($fp !== $newFingerprint) {
+                $confirmed = false;
+            }
         }
-        return true;
+
+        return ['confirmed'=>$confirmed, 'samples'=>$samples, 'observed_fingerprints'=>$observed];
     }
 
     private static function createEvent(int $monitorId, string $type, string $severity, string $message, array $meta): void {
@@ -249,16 +304,24 @@ final class Worker {
             ':meta'=>json_encode($meta, JSON_UNESCAPED_SLASHES),
         ]);
 
-        // Notify monitor owner (and only owner in v0).
+        // Enqueue notifications for monitor owner.
+        $eventId = (int)db()->lastInsertId();
         $m = MonitorService::getMonitorById($monitorId);
         if ($m) {
-            Notifier::sendEvent((int)$m['user_id'], [
-                'type'=>$type,
-                'severity'=>$severity,
-                'message'=>$message,
-                'created_at'=>$created
-            ], $m);
+            Notifier::enqueueForEvent((int)$m['user_id'], $eventId, $monitorId, $type, $meta);
         }
+    }
+
+    private static function createSystemEvent(string $type, string $severity, string $message, array $meta): void {
+        $st = db()->prepare("INSERT INTO events (monitor_id, type, severity, message, created_at, meta_json)
+                              VALUES (NULL,:t,:s,:m,:c,:meta)");
+        $st->execute([
+            ':t'=>$type,
+            ':s'=>$severity,
+            ':m'=>$message,
+            ':c'=>db_now_utc(),
+            ':meta'=>json_encode($meta, JSON_UNESCAPED_SLASHES),
+        ]);
     }
 
     /**

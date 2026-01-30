@@ -82,6 +82,8 @@ function render_header(string $title, ?array $user = null): void {
             echo '<a class="text-green-400 hover:underline" href="'.h(url_for('admin/monitors.php')).'">Admin · Monitors</a>';
             echo '<a class="text-green-400 hover:underline" href="'.h(url_for('admin/users.php')).'">Admin · Users</a>';
             echo '<a class="text-green-400 hover:underline" href="'.h(url_for('admin/system.php')).'">Admin · System</a>';
+            echo '<a class="text-green-400 hover:underline" href="'.h(url_for('admin/api_keys.php')).'">Admin · API Keys</a>';
+            echo '<a class="text-green-400 hover:underline" href="'.h(url_for('admin/outbox.php')).'">Admin · Outbox</a>';
         }
         echo '</div>';
     }
@@ -107,7 +109,7 @@ function render_header(string $title, ?array $user = null): void {
 
 function render_footer(): void {
     echo '</div>'; // content wrapper
-    echo '<div class="mt-10 text-xs text-gray-500">Certinel v0.2 · UTC timestamps</div>';
+    echo '<div class="mt-10 text-xs text-gray-500">Certinel v0.3 · UTC timestamps</div>';
     echo '</div></body></html>';
 }
 
@@ -142,12 +144,34 @@ function format_event_meta(?string $metaJson): string {
     if (!$m) return '';
 
     $parts = [];
+
+    // Worker run summary
+    $hasRun = isset($m['checked']) || isset($m['errors']) || isset($m['changed']) || isset($m['renewed']) || isset($m['warned']);
+    if ($hasRun) {
+        $parts[] = 'checked=' . (int)($m['checked'] ?? 0);
+        $parts[] = 'errors=' . (int)($m['errors'] ?? 0);
+        $parts[] = 'changed=' . (int)($m['changed'] ?? 0);
+        $parts[] = 'renewed=' . (int)($m['renewed'] ?? 0);
+        $parts[] = 'warned=' . (int)($m['warned'] ?? 0);
+        if (isset($m['duration_ms'])) $parts[] = 'ms=' . (int)$m['duration_ms'];
+    }
+
+    // Change/renew confirmation
     if (isset($m['confirm_result'])) {
         $parts[] = 'confirm=' . (string)$m['confirm_result'];
     }
     if (isset($m['confirm_samples'])) {
         $parts[] = 'samples=' . (int)$m['confirm_samples'];
     }
+    if (isset($m['observed_fingerprints']) && is_array($m['observed_fingerprints'])) {
+        $fps = array_values(array_unique(array_map('strval', $m['observed_fingerprints'])));
+        $parts[] = 'observed_fp=' . count($fps);
+        $fps = array_slice($fps, 0, 3);
+        $short = array_map(function($x){ return substr($x, 0, 12) . '…'; }, $fps);
+        $parts[] = 'observed=' . implode(',', $short);
+    }
+
+    // Renewal timing
     if (isset($m['early_renewal_days'])) {
         $parts[] = 'early_renewal_days=' . (int)$m['early_renewal_days'];
     }
@@ -157,6 +181,8 @@ function format_event_meta(?string $metaJson): string {
     if (isset($m['new_valid_to'])) {
         $parts[] = 'new_valid_to=' . (string)$m['new_valid_to'];
     }
+
+    // Error (short)
     if (isset($m['error'])) {
         $parts[] = 'error=' . (string)$m['error'];
     }
@@ -169,7 +195,6 @@ function format_event_meta(?string $metaJson): string {
         $parts[] = 'new_fp=' . substr((string)$m['new_fingerprint'], 0, 12) . '…';
     }
 
-    // Fallback: if we didn't pick anything, show a compact JSON.
     if (!$parts) {
         $j = json_encode($m, JSON_UNESCAPED_SLASHES);
         return $j ? $j : '';

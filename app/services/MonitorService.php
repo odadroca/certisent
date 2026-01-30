@@ -96,18 +96,22 @@ final class MonitorService {
     public static function getMonitorsForUser(array $user): array {
         if ($user['role'] === 'admin' || $user['role'] === 'auditor') {
             $sql = "SELECT m.*, s.notify_days_before_expiry, s.check_frequency_minutes,
-                    (SELECT status FROM cert_snapshots cs WHERE cs.monitor_id=m.id ORDER BY cs.fetched_at DESC LIMIT 1) AS last_status,
-                    (SELECT days_remaining FROM cert_snapshots cs WHERE cs.monitor_id=m.id ORDER BY cs.fetched_at DESC LIMIT 1) AS last_days_remaining,
-                    (SELECT valid_to FROM cert_snapshots cs WHERE cs.monitor_id=m.id ORDER BY cs.fetched_at DESC LIMIT 1) AS last_valid_to
+                    m.last_status AS last_status,
+                    m.last_days_remaining AS last_days_remaining,
+                    m.last_valid_to AS last_valid_to,
+                    m.last_checked_at AS last_checked_at,
+                    CASE WHEN m.last_checked_at IS NULL THEN NULL ELSE DATE_ADD(m.last_checked_at, INTERVAL s.check_frequency_minutes MINUTE) END AS next_due_at
                     FROM monitors m
                     JOIN monitor_settings s ON s.monitor_id=m.id
                     ORDER BY m.updated_at DESC";
             return db()->query($sql)->fetchAll();
         }
         $st = db()->prepare("SELECT m.*, s.notify_days_before_expiry, s.check_frequency_minutes,
-                (SELECT status FROM cert_snapshots cs WHERE cs.monitor_id=m.id ORDER BY cs.fetched_at DESC LIMIT 1) AS last_status,
-                (SELECT days_remaining FROM cert_snapshots cs WHERE cs.monitor_id=m.id ORDER BY cs.fetched_at DESC LIMIT 1) AS last_days_remaining,
-                (SELECT valid_to FROM cert_snapshots cs WHERE cs.monitor_id=m.id ORDER BY cs.fetched_at DESC LIMIT 1) AS last_valid_to
+                m.last_status AS last_status,
+                m.last_days_remaining AS last_days_remaining,
+                m.last_valid_to AS last_valid_to,
+                m.last_checked_at AS last_checked_at,
+                CASE WHEN m.last_checked_at IS NULL THEN NULL ELSE DATE_ADD(m.last_checked_at, INTERVAL s.check_frequency_minutes MINUTE) END AS next_due_at
                 FROM monitors m
                 JOIN monitor_settings s ON s.monitor_id=m.id
                 WHERE m.user_id=:uid

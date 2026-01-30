@@ -1,4 +1,4 @@
-# Certinel v0.2 UI map
+# Certinel v0.3 UI map
 
 All routes are relative to the `/public/` folder.
 
@@ -79,3 +79,9 @@ All routes are relative to the `/public/` folder.
 
 - `/admin/system.php` (admin)
   - Operator diagnostics: worker heartbeat, event counts (last 24h), and recent system events.
+
+- `/admin/api_keys.php` (admin)
+  - Create/revoke scoped Bearer tokens for API/worker calls.
+
+- `/admin/outbox.php` (admin)
+  - Notification delivery queue: pending/sent/failed, attempts, next retry, last error.

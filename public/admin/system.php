@@ -13,6 +13,19 @@ $ageSeconds = ($lastCronTs !== false) ? max(0, $now - $lastCronTs) : null;
 
 $since24 = gmdate('Y-m-d H:i:s', $now - 24*3600);
 
+// Latest worker_run system event
+$stLastRun = db()->prepare("SELECT created_at, meta_json FROM events WHERE monitor_id IS NULL AND type='worker_run' ORDER BY created_at DESC LIMIT 1");
+$stLastRun->execute();
+$lastRun = $stLastRun->fetch();
+
+// Outbox counts
+$outboxCounts = ['pending'=>0,'sent'=>0,'failed'=>0];
+$stOut = db()->query("SELECT status, COUNT(*) c FROM notification_outbox GROUP BY status");
+foreach ($stOut->fetchAll() as $r) {
+    $k = (string)($r['status'] ?? '');
+    if (isset($outboxCounts[$k])) $outboxCounts[$k] = (int)$r['c'];
+}
+
 // Event counts by severity (last 24h)
 $stCounts = db()->prepare("SELECT severity, COUNT(*) AS c FROM events WHERE created_at >= :since GROUP BY severity");
 $stCounts->execute([':since' => $since24]);
@@ -37,6 +50,10 @@ render_header('Admin · System', $user);
   </div>
   <div class="text-sm">
     <a class="text-green-400 hover:underline" href="monitors.php">Monitors</a>
+    <span class="text-gray-600 mx-2">·</span>
+    <a class="text-green-400 hover:underline" href="outbox.php">Outbox</a>
+    <span class="text-gray-600 mx-2">·</span>
+    <a class="text-green-400 hover:underline" href="api_keys.php">API Keys</a>
     <span class="text-gray-600 mx-2">·</span>
     <a class="text-green-400 hover:underline" href="users.php">Users</a>
     <span class="text-gray-600 mx-2">·</span>
@@ -81,6 +98,24 @@ render_header('Admin · System', $user);
   </div>
 
   <div class="bg-white text-black rounded-2xl p-6 shadow">
+    <h2 class="font-semibold mb-3">Last worker run</h2>
+    <?php if (!$lastRun): ?>
+      <div class="text-sm text-gray-700">No worker_run event recorded yet.</div>
+    <?php else: ?>
+      <div class="text-sm text-gray-700">
+        <div><span class="text-gray-500">Time:</span> <span class="font-mono text-xs"><?php echo h((string)$lastRun['created_at']); ?> UTC</span></div>
+        <div class="mt-2 font-mono text-xs text-gray-700 break-all"><?php echo h(format_event_meta((string)($lastRun['meta_json'] ?? ''))); ?></div>
+        <?php if (!empty($lastRun['meta_json'])): ?>
+          <details class="mt-2">
+            <summary class="cursor-pointer text-xs text-gray-600">raw</summary>
+            <pre class="mt-2 p-2 bg-gray-100 rounded text-xs overflow-x-auto"><?php echo h((string)$lastRun['meta_json']); ?></pre>
+          </details>
+        <?php endif; ?>
+      </div>
+    <?php endif; ?>
+  </div>
+
+  <div class="bg-white text-black rounded-2xl p-6 shadow">
     <h2 class="font-semibold mb-3">Events (last 24h)</h2>
     <div class="text-sm text-gray-700 space-y-2">
       <div><span class="text-gray-500">Critical:</span> <?php echo (int)$counts['critical']; ?></div>
@@ -89,6 +124,18 @@ render_header('Admin · System', $user);
     </div>
     <div class="mt-4 text-sm">
       <a class="text-green-700 hover:underline" href="<?php echo h(url_for('history.php?severity=critical')); ?>">View critical events</a>
+    </div>
+  </div>
+
+  <div class="bg-white text-black rounded-2xl p-6 shadow">
+    <h2 class="font-semibold mb-3">Outbox</h2>
+    <div class="text-sm text-gray-700 space-y-2">
+      <div><span class="text-gray-500">Pending:</span> <?php echo (int)$outboxCounts['pending']; ?></div>
+      <div><span class="text-gray-500">Failed:</span> <?php echo (int)$outboxCounts['failed']; ?></div>
+      <div><span class="text-gray-500">Sent:</span> <?php echo (int)$outboxCounts['sent']; ?></div>
+    </div>
+    <div class="mt-4 text-sm">
+      <a class="text-green-700 hover:underline" href="outbox.php">View outbox</a>
     </div>
   </div>
 </div>
