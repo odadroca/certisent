@@ -103,6 +103,40 @@ function certinel_is_https(): bool {
     return certinel_https_from_proxy_headers();
 }
 
+
+function certinel_apply_security_headers(bool $isHttps): void {
+    if (php_sapi_name() === 'cli') return;
+    if (headers_sent()) return;
+
+    // Baseline headers.
+    header('X-Content-Type-Options: nosniff');
+    header('Referrer-Policy: strict-origin-when-cross-origin');
+    header('X-Frame-Options: DENY');
+
+    // Content Security Policy: report-only by default to avoid UI breakage.
+    $mode = strtolower(trim((string)cfg('CSP_MODE', 'report_only')));
+    $policy = trim((string)cfg('CSP_POLICY', ''));
+    if ($policy !== '' && $mode !== 'off') {
+        $reportUri = trim((string)cfg('CSP_REPORT_URI', ''));
+        if ($reportUri !== '' && stripos($policy, 'report-uri') === false && stripos($policy, 'report-to') === false) {
+            $policy .= '; report-uri ' . $reportUri;
+        }
+        if ($mode === 'enforce') header('Content-Security-Policy: ' . $policy);
+        else header('Content-Security-Policy-Report-Only: ' . $policy);
+    }
+
+    // HSTS: only send when HTTPS is confirmed (including proxy mode from v0.5.5).
+    $hstsEnabled = certinel_parse_bool((string)cfg('HSTS_ENABLED', 'true'));
+    if ($isHttps && $hstsEnabled) {
+        $maxAge = (int)cfg('HSTS_MAX_AGE', 15552000);
+        if ($maxAge < 0) $maxAge = 0;
+        $hsts = 'max-age=' . $maxAge;
+        if (certinel_parse_bool((string)cfg('HSTS_INCLUDE_SUBDOMAINS', 'false'))) $hsts .= '; includeSubDomains';
+        if (certinel_parse_bool((string)cfg('HSTS_PRELOAD', 'false'))) $hsts .= '; preload';
+        header('Strict-Transport-Security: ' . $hsts);
+    }
+}
+
 $isHttps = certinel_is_https();
 session_set_cookie_params([
     'lifetime' => 0,
@@ -112,6 +146,8 @@ session_set_cookie_params([
     'samesite' => 'Lax',
 ]);
 session_start();
+
+certinel_apply_security_headers($isHttps);
 
 require_once __DIR__ . '/logger.php';
 

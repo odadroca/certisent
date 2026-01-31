@@ -2,6 +2,21 @@
 
 This file tracks security hardening changes introduced across the v0.5.x line.
 
+
+## v0.5.8 — Baseline security headers (safe defaults)
+
+- Added baseline browser security headers on all HTTP responses:
+  - `X-Content-Type-Options: nosniff`
+  - `Referrer-Policy: strict-origin-when-cross-origin`
+  - `X-Frame-Options: DENY`
+- Added CSP support:
+  - Default `CSP_MODE=report_only` to avoid UI breakage.
+  - Configure policy via `CSP_POLICY`; optional `CSP_REPORT_URI`.
+- Added HSTS support:
+  - Sent only when HTTPS is confirmed (including proxy mode from v0.5.5).
+  - Configurable via `HSTS_ENABLED`, `HSTS_MAX_AGE`, `HSTS_INCLUDE_SUBDOMAINS`, `HSTS_PRELOAD`.
+
+
 ## v0.5.7 — Rate limiting (coarse, defaults high)
 
 - Added coarse rate limiting (defaults are intentionally high):

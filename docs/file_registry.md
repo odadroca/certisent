@@ -1,20 +1,20 @@
-# File registry (v0.5.7)
+# File registry (v0.5.8)
 
 This file is used for integrity checks and change auditing.
 
-Generated: 2026-01-31 01:24:39 UTC
+Generated: 2026-01-31 01:42:37 UTC
 
 ```
-d8b18adde5c980526e7575a88a7d9b2eacb2926a3dcc4beec208f3287c7c0168  ./.env.example
+b86b3ba178bf09eff78353c8f91a13c1c04a0f5208f77a4289825fb138716683  ./.env.example
 902bc8daaaa14d9568054ab9ae342bbbe56ac0e4f410d8eb6ac74301e85f11a3  ./.htaccess
 f068c6196ca35260c316d3f8b0f179e736eb7d0bf125bd92bee432b195d0497e  ./CODE_OF_CONDUCT.md
 ee2eed0d3dbebba268cdc1f99d8791ba3cca78a7f22946d9c180e3174e3e2108  ./CONTRIBUTING.md
 d5010198d478747fe2ec481da8e9a8fb8949ffc20f8a51666cb8956145f5ad51  ./LICENSE.md
-1831da6129b85d7866b08da37affe0064673d0777036cfb71028cae00d8bd729  ./README.md
+36538458d8031ab7332a888d3e8d2f9884c5c74b19da2e32a97d707a9e8fd2e5  ./README.md
 d154165b908b6678f3df3b5dd2a4f0b74e325318d6851e62485fbd15fc31bf90  ./app/api/Router.php
 91e699a51355c613c8a142a3b96f1ac080662a859c1f4a0ac8ddf2b09153521f  ./app/auth.php
-661fb00c0a2ce250c29be80f7a4a9666a6b94e8fb688fd77f16229ce8a8d3dc0  ./app/bootstrap.php
-e2e8e8cf7efbf041147fcf38286364a09e72b5487161b3ced49c566b7ccb1a79  ./app/config.php
+617621f9f2bedcad56f4e3324f6894b0b4dca705fb677c17e0a0bd376c08058f  ./app/bootstrap.php
+d42b64350acc8e124a9cf7028958ece8d957256da28d5b39af0b3fed1d3b41f4  ./app/config.php
 758ca4cc30a692f3ccd2cccc73b71c3fa160881a6d3cbecddabec3c5806781c1  ./app/csrf.php
 ff011230ab48305a0a98c260b429c01c5df58d6ca39a17d2f26f563fe55f7f1e  ./app/db.php
 1f67cf5003423cbfbc94ef69d00bcf44092d4bbd082408dea02ef691cbeb50b8  ./app/logger.php
@@ -34,10 +34,10 @@ bbb5ec6a12edbcc13541c21792f5ba28e98e1b07f5416abf8e0ef89d05b0d102  ./assets/certi
 828ddb5b83c393ecc392e632da75fd6f7496111eaedb3103d93e1f5638a85abc  ./docs/api.md
 5f90ccc2ae9344790569dbf022c7af5f80e816f735cec7bc2074d427f222eea2  ./docs/architecture.md
 0b7457f93e1ef91d489b01f0073c5be2acc8bb47ffa0a430e06e5e3c52103462  ./docs/deploy.md
-fc45b84adc58f2b6d7c60e2cb54e5858ed4d24c1eb4256c0c8fdd537eaa50c18  ./docs/file_registry.md.new
+94d63dd03e0a9d77a287f865602ee07e3b01707e76b901cb560bb292ea3c0e17  ./docs/file_registry.md.new
 9af54e5b29ecbdc20f12ca9a785cd22d311f447a89255c97768b500094111130  ./docs/ops_runbook.md
 4c4094b15e887dffb7ac9f0e39a9ead8afb5f0d29c6e2f6f367f1f40f2372fca  ./docs/release_notes_v0.4.x.md
-f5feb10e050cd3d7ce9849e08b658c064b9d6e1d0c2a5179f26e475ea58503d1  ./docs/release_notes_v0.5.x.md
+77ba340f9b9c453f83aed3ff3aa579e6b9ce90e2a19bfde70d942c139882c528  ./docs/release_notes_v0.5.x.md
 6659c65b484f5962b565fc98cee8e39ce2969c0a4e27c64f07e7fc9f50986d2f  ./docs/ui_map.md
 5827b8b739595255bef8c033dc9e147b024ae0d1960955bbf21021a6c83ca49c  ./public/.htaccess
 e72971067fa50cdbd679766f9e589d54904860647fb12bad3e97e14779eacd66  ./public/admin/api_keys.php

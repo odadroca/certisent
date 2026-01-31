@@ -7,7 +7,7 @@ declare(strict_types=1);
  */
 
 function app_version(): string {
-    return '0.5.7';
+    return '0.5.8';
 }
 
 /**
@@ -174,6 +174,20 @@ function cfg(string $key, $default = null) {
             'RATE_LIMIT_API_IP_WINDOW_SEC' => (int)env('RATE_LIMIT_API_IP_WINDOW_SEC', '60'),
             'RATE_LIMIT_API_TOKEN_MAX' => (int)env('RATE_LIMIT_API_TOKEN_MAX', '1200'),
             'RATE_LIMIT_API_TOKEN_WINDOW_SEC' => (int)env('RATE_LIMIT_API_TOKEN_WINDOW_SEC', '60'),
+
+            // v0.5.8 Baseline security headers (safe defaults).
+            // CSP_MODE: report_only (default), enforce, off.
+            // CSP_POLICY: Content-Security-Policy value (without the header name).
+            // CSP_REPORT_URI: optional report endpoint (appended as `; report-uri <url>`).
+            // HSTS is sent only when HTTPS is confirmed (including proxy mode from v0.5.5).
+            'CSP_MODE' => (string)env('CSP_MODE', 'report_only'),
+            'CSP_POLICY' => (string)env('CSP_POLICY', "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; connect-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"),
+            'CSP_REPORT_URI' => (string)env('CSP_REPORT_URI', ''),
+            'HSTS_ENABLED' => (string)env('HSTS_ENABLED', 'true'),
+            'HSTS_MAX_AGE' => (int)env('HSTS_MAX_AGE', '15552000'),
+            'HSTS_INCLUDE_SUBDOMAINS' => (string)env('HSTS_INCLUDE_SUBDOMAINS', 'false'),
+            'HSTS_PRELOAD' => (string)env('HSTS_PRELOAD', 'false'),
+
 
             // v0.5.3 Registration bootstrap hardening.
             // REGISTRATION_MODE: open (default), invite, closed.
