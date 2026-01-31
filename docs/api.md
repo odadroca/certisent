@@ -1,16 +1,16 @@
-# API (v0)
+# API (v0.5.9)
 
 Authentication:
 - Preferred: create an API key in the admin UI (Admin → API Keys) and use `Authorization: Bearer <token>`.
 - Legacy fallback: `.env` `API_WORKER_KEY` is still accepted and is treated as full-scope (`*`) for upgrade safety.
 
-Base path: `/public/api/v1/` (unless you set document root to `public/`).
+Base path: `/api/v1/` (if your web root is `public/`) or `/public/api/v1/` (if you serve the project root and keep `public/` in the URL).
 
 ## Scopes
 
 - `run_worker`: POST `/api/v1/worker/run`
 - `check_monitor`: POST `/api/v1/check`
-- `read_health`: GET `/api/v1/health` (new in v0.4.5; `run_worker` is still accepted for backward compatibility)
+- `read_health`: GET `/api/v1/health` (requires `read_health`; `run_worker` is also accepted for backward compatibility)
 
 
 ## Apache note: Authorization header forwarding

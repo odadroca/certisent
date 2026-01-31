@@ -1,4 +1,4 @@
-# Release notes — v0.4.x patch line
+# Release notes — v0.4.x patch line (legacy)
 
 This document summarizes the v0.4.x patch releases. The DB schema version remains **0.4** across all versions listed here.
 

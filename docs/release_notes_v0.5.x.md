@@ -98,3 +98,12 @@ This file tracks security hardening changes introduced across the v0.5.x line.
 - Enforced for:
   - Monitor certificate fetch targets
   - `/api/v1/check` URL-based checks
+
+## DB migrations shipped in v0.5.x
+
+- Fresh installs use `sql/schema.sql` (already includes v0.5.x tables/columns).
+- Upgrades may require running specific migrations once:
+  - `v0.5.5_to_v0.5.6.sql` (adds API key ownership columns)
+  - `v0.5.6_to_v0.5.7.sql` (adds `rate_limits` table)
+
+See `docs/deploy.md` for upgrade paths and when to apply them.

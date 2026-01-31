@@ -2,15 +2,14 @@
 
 This file is used for integrity checks and change auditing.
 
-Generated: 2026-01-31 09:02:56 UTC
+Generated: 2026-01-31 15:11:50 UTC
 
 ```
 b86b3ba178bf09eff78353c8f91a13c1c04a0f5208f77a4289825fb138716683  ./.env.example
-902bc8daaaa14d9568054ab9ae342bbbe56ac0e4f410d8eb6ac74301e85f11a3  ./.htaccess
 f068c6196ca35260c316d3f8b0f179e736eb7d0bf125bd92bee432b195d0497e  ./CODE_OF_CONDUCT.md
 ee2eed0d3dbebba268cdc1f99d8791ba3cca78a7f22946d9c180e3174e3e2108  ./CONTRIBUTING.md
 d5010198d478747fe2ec481da8e9a8fb8949ffc20f8a51666cb8956145f5ad51  ./LICENSE.md
-bdd81983ac6b4b1e4263c8b06688d6be27fc871a0528b47453426da9bd51a88a  ./README.md
+d39e9b884f1bf06ee20ab733578739cbcbfc24ec7f0aab2a2b452698d0965128  ./README.md
 94ac2a04d228c537ca836df3d21070415ef28206b1a666e1b88627d16ec77b11  ./SECURITY.md
 d154165b908b6678f3df3b5dd2a4f0b74e325318d6851e62485fbd15fc31bf90  ./app/api/Router.php
 91e699a51355c613c8a142a3b96f1ac080662a859c1f4a0ac8ddf2b09153521f  ./app/auth.php
@@ -30,17 +29,14 @@ e45f93a1eaf5a4e2db148a4d05c45e657872edf73bc641815f42812e2f56a198  ./app/services
 7044f46f01e81ce16fede471458aed6f5268bd8da9fe6b35c3eb55c44c027544  ./app/services/SsrfPolicy.php
 b2187b16acc5dce55c4729434f97c4ef5db6917bf9d42c0cffb604d413a8802b  ./app/services/Worker.php
 2ea9b22976662a4ead3b81bfce23ee1efb5437460b7b3437f3adf859bf1ec610  ./app/ui.php
-d27088d39b5e61ae9d998fe4588231b83fada16de524ae2ef0ffa51917033d3a  ./assets/certinel-neg.png
-bbb5ec6a12edbcc13541c21792f5ba28e98e1b07f5416abf8e0ef89d05b0d102  ./assets/certinel-pos.png
-828ddb5b83c393ecc392e632da75fd6f7496111eaedb3103d93e1f5638a85abc  ./docs/api.md
-5f90ccc2ae9344790569dbf022c7af5f80e816f735cec7bc2074d427f222eea2  ./docs/architecture.md
-0b7457f93e1ef91d489b01f0073c5be2acc8bb47ffa0a430e06e5e3c52103462  ./docs/deploy.md
-b61ffb55251d526da1fb46acd6b07b44f84b3f9f3b22446f0231e745c4544246  ./docs/file_registry.md
-d919ca42ce63b29e8dc70264a69220474010260dc064ea3ea12481eed66ca155  ./docs/file_registry.md.new
-9af54e5b29ecbdc20f12ca9a785cd22d311f447a89255c97768b500094111130  ./docs/ops_runbook.md
-4c4094b15e887dffb7ac9f0e39a9ead8afb5f0d29c6e2f6f367f1f40f2372fca  ./docs/release_notes_v0.4.x.md
-da1c3d3d5d978fac6590365060f3fee86ec8d853c2363349d5702b376b25eef5  ./docs/release_notes_v0.5.x.md
-6659c65b484f5962b565fc98cee8e39ce2969c0a4e27c64f07e7fc9f50986d2f  ./docs/ui_map.md
+c5c1eceef729199e4190f8ce2fd2ad5e70da282a61cdfa79fbfcb223ff89a2c9  ./docs/api.md
+07813974bdc9d929ba77cd5123a29fea8e977669f1f6d97105456f6925614900  ./docs/architecture.md
+d28c9516e462f1853ea88251cedec7c3520f40d25b45c2c1b647d659fc5a7550  ./docs/deploy.md
+2df986e0b48e1ad361ab664adac335e40aad39f29d1d2ab633d9ca179f23ea9e  ./docs/file_registry.md
+1bb6a8ff1a3d9f01c44f4e09f7a3755812c9565f19da6c3c4606a926ede34213  ./docs/ops_runbook.md
+390ccf000909949af4d31e851a95144ac6e34d4130054824b9fab2c82d2fcd74  ./docs/release_notes_v0.4.x.md
+ab32aeadea51617ea392207b5d0e21a7cfbef6963ad4a2791b5a57f5386c5775  ./docs/release_notes_v0.5.x.md
+55a9216d4a2c0c9e738413aeab7b06368cb6b910218310e68768b13a6516f7fa  ./docs/ui_map.md
 5827b8b739595255bef8c033dc9e147b024ae0d1960955bbf21021a6c83ca49c  ./public/.htaccess
 e72971067fa50cdbd679766f9e589d54904860647fb12bad3e97e14779eacd66  ./public/admin/api_keys.php
 27f6868ae9be946447e1ec80b9088ac41be918739ef9236419d7312e1a7cbf52  ./public/admin/audit.php
@@ -49,7 +45,7 @@ e72971067fa50cdbd679766f9e589d54904860647fb12bad3e97e14779eacd66  ./public/admin
 97dfb6c5a9f813fd6d38059659ac1a8450bcffeb1550ae16aa9cdc895ba6b769  ./public/admin/monitors.php
 69312d911548cf26b8b5eb98a0173a8e782b74ae58d6147c16de386929a5f4f0  ./public/admin/outbox.php
 120476e502ba3d87917b7219a6884891c44a66f5b87ddaeec6c65df2dadcef37  ./public/admin/outbox_run.php
-50369c5b67bf376754c91a43bc85b6725e210bac964aec85173528a1be1df488  ./public/admin/system.php
+c8d5afd1824cc687239073c8f9ab437a61b843507248a9198be84ffe45ec0eab  ./public/admin/system.php
 e177f0c84d944524e099ba262dbb02abc67567bad6be4eb77033b8d220fb1266  ./public/admin/user_edit.php
 46c122df3d3aa650c68d47256d7c8e54a6748413315a445117a08d32886aada9  ./public/admin/users.php
 59e6232d80876d09457849368908fcd60a552b5843b15d5b9ce54eeb72eec0da  ./public/api/v1/index.php
