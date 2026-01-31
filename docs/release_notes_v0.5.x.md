@@ -2,6 +2,16 @@
 
 This file tracks security hardening changes introduced across the v0.5.x line.
 
+## v0.5.7 — Rate limiting (coarse, defaults high)
+
+- Added coarse rate limiting (defaults are intentionally high):
+  - Login: per-IP throttling.
+  - API: per-IP and per-Bearer-token throttling for `/api/v1/*`.
+- New DB table `rate_limits` (requires migration): `sql/migrations/v0.5.6_to_v0.5.7.sql`.
+- Admin → System shows minimal diagnostics: total blocks and recent block keys.
+- When limited, the API returns `429` with `{ok:false,error:"rate_limited",scope,...,retry_after}`.
+
+
 ## v0.5.6 — API key ownership + least privilege (opt-in)
 
 - Added optional API key ownership fields (requires DB migration):

@@ -1,12 +1,12 @@
 <p align="center"><img src="https://i.postimg.cc/qMpPkTVz/certinel-neg.png" alt="Certinel" width="200" height="200"></p>
 
-# Certinel (Certificate Sentinel) - v0.5.6
+# Certinel (Certificate Sentinel) - v0.5.7
 Certinel is a lightweight TLS/SSL certificate monitoring service that **live-fetches** the certificate presented by an endpoint (SNI-capable), stores immutable snapshots, detects changes (renewals/rotations), and notifies interested parties before outages happen.
 
 It is designed to be simple to host (shared hosting or VPS), easy to operate (cron-driven worker), and explicit about what it is observing: **the certificate the endpoint actually serves**.
 
 ## Quick start (shared hosting)
-1. Upload the contents of this zip to your hosting under `public_html/certinel/` (or similar).
+1. Upload the contents of the zip to your hosting under `public_html/certinel/` (or similar).
 2. Copy `.env.example` to `.env` and set values.
 3. Create the MySQL DB + user, then import `sql/schema.sql`.
 4. Visit `/public/` and create the first admin user (first registered user becomes admin).
@@ -146,6 +146,7 @@ This project is licensed under the **Apache License 2.0** (see `LICENSE.md`).
 - odadroca@acordado.addy.io
 
 ## Acknowledgments
+
 - Contributors: 
 - Inspirations: Norges Bank - it seems that every time someone sneezes there, a new certificate is issued.
 - Libraries / tools:

@@ -84,6 +84,13 @@ Notes (v0.5.6 API key ownership):
 - If the Bearer token corresponds to a **user-scoped** API key, `POST /api/v1/check` with `monitor_id` enforces monitor ownership.
 - Possible errors: `api_key_owner_required`, `forbidden_monitor`.
 
+Notes (v0.5.7 rate limiting):
+- If request volume is excessive, the API returns `429`:
+  ```json
+  {"ok":false,"error":"rate_limited","scope":"api_ip","retry_after":60}
+  ```
+  `scope` is `api_ip` or `api_token`. Limits are configurable via `RATE_LIMIT_*` env vars.
+
 ## Status vocabulary used by the system
 - `ok`: certificate valid; days_remaining > notify threshold
 - `warn`: certificate valid but within notify threshold

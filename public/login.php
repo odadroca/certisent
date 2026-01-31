@@ -9,8 +9,16 @@ if ($user) { header('Location: dashboard.php'); exit; }
 $err = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_verify();
-    $email = trim((string)($_POST['email'] ?? ''));
-    $pass = (string)($_POST['password'] ?? '');
+
+    // v0.5.7: coarse per-IP login throttling (defaults high).
+    $rl = RateLimiter::checkLoginIp(client_ip());
+    if (!$rl['allowed']) {
+        $err = 'Too many login attempts. Try again later.';
+    }
+
+    if (!$err) {
+        $email = trim((string)($_POST['email'] ?? ''));
+        $pass = (string)($_POST['password'] ?? '');
 
     $st = db()->prepare("SELECT * FROM users WHERE email=:e");
     $st->execute([':e'=>$email]);
@@ -41,6 +49,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             header('Location: dashboard.php');
             exit;
         }
+    }
+
     }
 }
 

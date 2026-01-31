@@ -7,7 +7,7 @@ declare(strict_types=1);
  */
 
 function app_version(): string {
-    return '0.5.6';
+    return '0.5.7';
 }
 
 /**
@@ -165,6 +165,15 @@ function cfg(string $key, $default = null) {
             'TRUST_PROXY_HEADERS' => (string)env('TRUST_PROXY_HEADERS', 'false'),
             'TRUSTED_PROXY_CIDRS' => (string)env('TRUSTED_PROXY_CIDRS', ''),
             'FORCE_SECURE_COOKIES' => (string)env('FORCE_SECURE_COOKIES', 'false'),
+
+            // v0.5.7 Coarse rate limiting (defaults are intentionally high).
+            // Set max<=0 or window<=0 to disable a limiter.
+            'RATE_LIMIT_LOGIN_MAX' => (int)env('RATE_LIMIT_LOGIN_MAX', '60'),
+            'RATE_LIMIT_LOGIN_WINDOW_SEC' => (int)env('RATE_LIMIT_LOGIN_WINDOW_SEC', '900'),
+            'RATE_LIMIT_API_IP_MAX' => (int)env('RATE_LIMIT_API_IP_MAX', '600'),
+            'RATE_LIMIT_API_IP_WINDOW_SEC' => (int)env('RATE_LIMIT_API_IP_WINDOW_SEC', '60'),
+            'RATE_LIMIT_API_TOKEN_MAX' => (int)env('RATE_LIMIT_API_TOKEN_MAX', '1200'),
+            'RATE_LIMIT_API_TOKEN_WINDOW_SEC' => (int)env('RATE_LIMIT_API_TOKEN_WINDOW_SEC', '60'),
 
             // v0.5.3 Registration bootstrap hardening.
             // REGISTRATION_MODE: open (default), invite, closed.

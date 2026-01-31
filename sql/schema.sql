@@ -155,6 +155,19 @@ CREATE TABLE IF NOT EXISTS worker_jobs (
 
 CREATE INDEX idx_jobs_status_updated ON worker_jobs(status, updated_at);
 
+-- Coarse rate limiting (v0.5.7)
+CREATE TABLE IF NOT EXISTS rate_limits (
+  `key` VARCHAR(190) NOT NULL,
+  window_start DATETIME NOT NULL,
+  window_seconds INT NOT NULL,
+  `count` INT NOT NULL,
+  blocked_until DATETIME NULL,
+  last_block_at DATETIME NULL,
+  blocked_count INT NOT NULL DEFAULT 0,
+  updated_at DATETIME NOT NULL,
+  PRIMARY KEY (`key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 CREATE TABLE IF NOT EXISTS system_state (
   `key` VARCHAR(64) PRIMARY KEY,
   `value` VARCHAR(1024) NOT NULL,

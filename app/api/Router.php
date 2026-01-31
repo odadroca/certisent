@@ -16,6 +16,19 @@ final class ApiRouter {
         $sub = $idx === false ? '/' : substr($path, $idx + strlen('/api/v1/'));
         $sub = '/' . ltrim($sub, '/');
 
+        // v0.5.7: coarse rate limiting (defaults high). Applies to all /api/v1/*.
+        $rl = RateLimiter::checkApi(client_ip(), bearer_token_from_headers());
+        if (!$rl['allowed']) {
+            http_response_code(429);
+            echo json_encode([
+                'ok' => false,
+                'error' => 'rate_limited',
+                'scope' => $rl['scope'] ?? 'api',
+                'retry_after' => (int)($rl['retry_after'] ?? 1),
+            ], JSON_UNESCAPED_SLASHES);
+            return;
+        }
+
         if ($method === 'POST' && $sub === '/worker/run') {
             require_api_scope('run_worker');
             self::postWorkerRun();

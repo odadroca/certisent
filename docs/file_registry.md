@@ -1,19 +1,20 @@
-# File registry (v0.5.6)
+# File registry (v0.5.7)
 
-SHA-256 for all files in this release zip (excluding this file to avoid self-reference).
+This file is used for integrity checks and change auditing.
 
-## Files
+Generated: 2026-01-31 01:24:39 UTC
 
-c1302a86dd6c44f3ed183a8ae83014d0076e4e2986f8ad1cdfcb22cb88c77082  ./.env.example
+```
+d8b18adde5c980526e7575a88a7d9b2eacb2926a3dcc4beec208f3287c7c0168  ./.env.example
 902bc8daaaa14d9568054ab9ae342bbbe56ac0e4f410d8eb6ac74301e85f11a3  ./.htaccess
 f068c6196ca35260c316d3f8b0f179e736eb7d0bf125bd92bee432b195d0497e  ./CODE_OF_CONDUCT.md
 ee2eed0d3dbebba268cdc1f99d8791ba3cca78a7f22946d9c180e3174e3e2108  ./CONTRIBUTING.md
 d5010198d478747fe2ec481da8e9a8fb8949ffc20f8a51666cb8956145f5ad51  ./LICENSE.md
-bd196cc1678b36233acc0a2e2576d3034580920a829173a6e7e6421a281ac9d9  ./README.md
-64af6eb0be6d6c0b3a3fb0aef3e33400ce5000b3b1fe28dbc4b4d8480fc71248  ./app/api/Router.php
+1831da6129b85d7866b08da37affe0064673d0777036cfb71028cae00d8bd729  ./README.md
+d154165b908b6678f3df3b5dd2a4f0b74e325318d6851e62485fbd15fc31bf90  ./app/api/Router.php
 91e699a51355c613c8a142a3b96f1ac080662a859c1f4a0ac8ddf2b09153521f  ./app/auth.php
-415e6f390416a3f3ebee145e3fa62b3053fcc22ce89d6b9e1846a85cc1e3c600  ./app/bootstrap.php
-b9d906e69704446929bf4fa12744d0b2ee4e26f9ecca672a6ff8cc19cfd37723  ./app/config.php
+661fb00c0a2ce250c29be80f7a4a9666a6b94e8fb688fd77f16229ce8a8d3dc0  ./app/bootstrap.php
+e2e8e8cf7efbf041147fcf38286364a09e72b5487161b3ced49c566b7ccb1a79  ./app/config.php
 758ca4cc30a692f3ccd2cccc73b71c3fa160881a6d3cbecddabec3c5806781c1  ./app/csrf.php
 ff011230ab48305a0a98c260b429c01c5df58d6ca39a17d2f26f563fe55f7f1e  ./app/db.php
 1f67cf5003423cbfbc94ef69d00bcf44092d4bbd082408dea02ef691cbeb50b8  ./app/logger.php
@@ -23,19 +24,20 @@ ef94d4c2ac2a038b6c2ae673d9573333a0a20f7fac9e2d75af11c6c387a157a3  ./app/logs/.ht
 0d3e8a2a204574c55410dd208aeb30591353a53d4b4649905f33b60ffb2c2e59  ./app/services/Emailer.php
 e45f93a1eaf5a4e2db148a4d05c45e657872edf73bc641815f42812e2f56a198  ./app/services/MonitorService.php
 0897ad3678068fe6c24168136fafab0726db27831c8394b67c5f9462d85f07f9  ./app/services/Notifier.php
+1921b62f19be32069890df3789304bd3326c1a8c34ff6938f98c0cfb9101e82a  ./app/services/RateLimiter.php
 207b77be26eda12f401e31a479041b464628470105cec210be0ed563cac83575  ./app/services/SmtpClient.php
 7044f46f01e81ce16fede471458aed6f5268bd8da9fe6b35c3eb55c44c027544  ./app/services/SsrfPolicy.php
 b2187b16acc5dce55c4729434f97c4ef5db6917bf9d42c0cffb604d413a8802b  ./app/services/Worker.php
 8aa0ee279edee02df536527218d438aab351f7cf2e3e6763dc7d6e0728b696c0  ./app/ui.php
 d27088d39b5e61ae9d998fe4588231b83fada16de524ae2ef0ffa51917033d3a  ./assets/certinel-neg.png
 bbb5ec6a12edbcc13541c21792f5ba28e98e1b07f5416abf8e0ef89d05b0d102  ./assets/certinel-pos.png
-13866259a90a941670307904e30dc75cd73d2b7245d6531bfca6671c43bd4a06  ./docs/api.md
+828ddb5b83c393ecc392e632da75fd6f7496111eaedb3103d93e1f5638a85abc  ./docs/api.md
 5f90ccc2ae9344790569dbf022c7af5f80e816f735cec7bc2074d427f222eea2  ./docs/architecture.md
 0b7457f93e1ef91d489b01f0073c5be2acc8bb47ffa0a430e06e5e3c52103462  ./docs/deploy.md
-4d3923f5ed68bc58c8bd636c7643d73aeaa71febe25f2788df5eea3f6fe69255  ./docs/file_registry.md.new
+fc45b84adc58f2b6d7c60e2cb54e5858ed4d24c1eb4256c0c8fdd537eaa50c18  ./docs/file_registry.md.new
 9af54e5b29ecbdc20f12ca9a785cd22d311f447a89255c97768b500094111130  ./docs/ops_runbook.md
 4c4094b15e887dffb7ac9f0e39a9ead8afb5f0d29c6e2f6f367f1f40f2372fca  ./docs/release_notes_v0.4.x.md
-4a222deba80a8b3d493e5f445c85f033227d91b55768e04dd4512c3d7ecc428a  ./docs/release_notes_v0.5.x.md
+f5feb10e050cd3d7ce9849e08b658c064b9d6e1d0c2a5179f26e475ea58503d1  ./docs/release_notes_v0.5.x.md
 6659c65b484f5962b565fc98cee8e39ce2969c0a4e27c64f07e7fc9f50986d2f  ./docs/ui_map.md
 5827b8b739595255bef8c033dc9e147b024ae0d1960955bbf21021a6c83ca49c  ./public/.htaccess
 e72971067fa50cdbd679766f9e589d54904860647fb12bad3e97e14779eacd66  ./public/admin/api_keys.php
@@ -45,7 +47,7 @@ e72971067fa50cdbd679766f9e589d54904860647fb12bad3e97e14779eacd66  ./public/admin
 97dfb6c5a9f813fd6d38059659ac1a8450bcffeb1550ae16aa9cdc895ba6b769  ./public/admin/monitors.php
 69312d911548cf26b8b5eb98a0173a8e782b74ae58d6147c16de386929a5f4f0  ./public/admin/outbox.php
 120476e502ba3d87917b7219a6884891c44a66f5b87ddaeec6c65df2dadcef37  ./public/admin/outbox_run.php
-964949a348b4646303e0e7a14c49a244b604c89df894ada95fb18f19362bd260  ./public/admin/system.php
+50369c5b67bf376754c91a43bc85b6725e210bac964aec85173528a1be1df488  ./public/admin/system.php
 e177f0c84d944524e099ba262dbb02abc67567bad6be4eb77033b8d220fb1266  ./public/admin/user_edit.php
 46c122df3d3aa650c68d47256d7c8e54a6748413315a445117a08d32886aada9  ./public/admin/users.php
 59e6232d80876d09457849368908fcd60a552b5843b15d5b9ce54eeb72eec0da  ./public/api/v1/index.php
@@ -55,7 +57,7 @@ a928c12deeca11e03d37d6b2587ff962cc4eecb2cab58a122e0137b927cb9d6d  ./public/dashb
 91a4e802395d978631bb78f5d46e8010cbe27a0736864750c890f6d418e70616  ./public/events.php
 90b58c93bb88dcaa3b3cd3940148e24387b7504e1f9ad8e8b43e6cd473998cac  ./public/history.php
 da6724f23df478641462006f9caec1881b32548b4dd5a6a9d4ff9024678629b2  ./public/index.php
-bafb8738a7fee572408b11b572769818c2a1f61cba5506985958451a1d1372c5  ./public/login.php
+d1a6716f100784f3467e049b0f3bb34ab30459826a458cdea18e6b5b7e713e80  ./public/login.php
 232945d16650c5f9dd4eec4684460a4f351fed7b61519c3cc9454482b8a3dc1e  ./public/logout.php
 db8f9749c62c0e77ef5df5e90002b9638d17d2105500181945ec2ef5719d0275  ./public/monitor_add.php
 9b65ab72c22827c1d4a609f3cdcfc75deaf2fc305f5a243356f83aee89dcdfdd  ./public/monitor_check.php
@@ -70,4 +72,6 @@ ab2856f49d677ba7ceef867cde767637a222f99562ca4ba4491fb615125f4e86  ./sql/migratio
 1b9f7b774851865c9d55ab0276b5af747979248e97b173dbdc76097d9815479c  ./sql/migrations/v0.3.1_to_v0.4.sql
 27e1a529a6e8a234962d94d01e9309cf337193ef22d433fe9a6a84710b790ac4  ./sql/migrations/v0.3_to_v0.3.1.sql
 a33274bc05956f8c1e7cd188f6d338c7edab59095e24d397f3f8f96e79182f3d  ./sql/migrations/v0.5.5_to_v0.5.6.sql
-876e476d0fa8121a85dd5365fe16e34eddf43ca0efafb1241b05ea14ee28768a  ./sql/schema.sql
+7bc78afc36e27b71ed1573e4ed73d2e64104a34953b1f19b49c637ef8462fb1d  ./sql/migrations/v0.5.6_to_v0.5.7.sql
+b4da8f03b5c0fe6b61442afc35d7c3448c29184a2516be45718cea102a91f5c5  ./sql/schema.sql
+```

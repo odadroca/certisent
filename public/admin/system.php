@@ -71,6 +71,33 @@ $stJobs = db()->prepare("SELECT j.*, u.email AS requested_by_email FROM worker_j
 $stJobs->execute();
 $jobs = $stJobs->fetchAll();
 
+// v0.5.7: rate limit diagnostics (best-effort; if migration not applied, section hides).
+$rateLimitSummary = null;
+$rateLimitRecentBlocks = [];
+try {
+    $rateLimitSummary = [
+        'login_ip' => ['blocks'=>0,'last_block_at'=>null],
+        'api_ip' => ['blocks'=>0,'last_block_at'=>null],
+        'api_token' => ['blocks'=>0,'last_block_at'=>null],
+    ];
+    $q1 = db()->prepare("SELECT SUM(blocked_count) AS blocks, MAX(last_block_at) AS last_block_at FROM rate_limits WHERE `key` LIKE :p");
+    foreach (['login_ip'=>'login_ip:%','api_ip'=>'api_ip:%','api_token'=>'api_token:%'] as $k => $p) {
+        $q1->execute([':p'=>$p]);
+        $r = $q1->fetch();
+        $rateLimitSummary[$k] = [
+            'blocks' => (int)($r['blocks'] ?? 0),
+            'last_block_at' => ($r && !empty($r['last_block_at'])) ? (string)$r['last_block_at'] : null,
+        ];
+    }
+
+    $stRL = db()->prepare("SELECT `key`, blocked_count, last_block_at, blocked_until FROM rate_limits WHERE blocked_count > 0 ORDER BY last_block_at DESC LIMIT 20");
+    $stRL->execute();
+    $rateLimitRecentBlocks = $stRL->fetchAll();
+} catch (Throwable $e) {
+    $rateLimitSummary = null;
+    $rateLimitRecentBlocks = [];
+}
+
 render_header('Admin · System', $user);
 
 $schemaVersion = Worker::getSystemState('schema_version') ?? '';
@@ -216,6 +243,49 @@ $schemaOk = ($schemaVersion === '' || $schemaVersion === $appVersion);
       </form>
     </div>
   </div>
+
+  <?php if ($rateLimitSummary !== null): ?>
+  <div class="bg-white text-black rounded-2xl p-6 shadow">
+    <h2 class="font-semibold mb-3">Rate limiting</h2>
+    <div class="text-sm text-gray-700 space-y-2">
+      <div><span class="text-gray-500">Login blocks:</span> <?php echo (int)$rateLimitSummary['login_ip']['blocks']; ?><?php echo $rateLimitSummary['login_ip']['last_block_at'] ? ' <span class="text-gray-500">(last:</span> <span class="font-mono text-xs">' . h((string)$rateLimitSummary['login_ip']['last_block_at']) . ' UTC</span><span class="text-gray-500">)</span>' : ''; ?></div>
+      <div><span class="text-gray-500">API blocks (IP):</span> <?php echo (int)$rateLimitSummary['api_ip']['blocks']; ?><?php echo $rateLimitSummary['api_ip']['last_block_at'] ? ' <span class="text-gray-500">(last:</span> <span class="font-mono text-xs">' . h((string)$rateLimitSummary['api_ip']['last_block_at']) . ' UTC</span><span class="text-gray-500">)</span>' : ''; ?></div>
+      <div><span class="text-gray-500">API blocks (token):</span> <?php echo (int)$rateLimitSummary['api_token']['blocks']; ?><?php echo $rateLimitSummary['api_token']['last_block_at'] ? ' <span class="text-gray-500">(last:</span> <span class="font-mono text-xs">' . h((string)$rateLimitSummary['api_token']['last_block_at']) . ' UTC</span><span class="text-gray-500">)</span>' : ''; ?></div>
+    </div>
+
+    <?php if (!empty($rateLimitRecentBlocks)): ?>
+      <details class="mt-4">
+        <summary class="cursor-pointer text-sm text-gray-600">Recent blocks (20)</summary>
+        <div class="mt-2 overflow-x-auto">
+          <table class="min-w-full text-xs">
+            <thead>
+              <tr class="text-left border-b">
+                <th class="py-2 pr-3">Key</th>
+                <th class="py-2 pr-3">Blocks</th>
+                <th class="py-2 pr-3">Last block</th>
+                <th class="py-2 pr-3">Blocked until</th>
+              </tr>
+            </thead>
+            <tbody>
+              <?php foreach ($rateLimitRecentBlocks as $b): ?>
+                <tr class="border-b">
+                  <td class="py-2 pr-3 font-mono break-all"><?php echo h((string)$b['key']); ?></td>
+                  <td class="py-2 pr-3"><?php echo (int)($b['blocked_count'] ?? 0); ?></td>
+                  <td class="py-2 pr-3 font-mono"><?php echo h((string)($b['last_block_at'] ?? '')); ?><?php echo !empty($b['last_block_at']) ? ' UTC' : ''; ?></td>
+                  <td class="py-2 pr-3 font-mono"><?php echo h((string)($b['blocked_until'] ?? '')); ?><?php echo !empty($b['blocked_until']) ? ' UTC' : ''; ?></td>
+                </tr>
+              <?php endforeach; ?>
+            </tbody>
+          </table>
+        </div>
+      </details>
+    <?php endif; ?>
+
+    <div class="mt-4 text-xs text-gray-600">
+      Limits are configured via <span class="font-mono">RATE_LIMIT_*</span> env vars. Defaults are high.
+    </div>
+  </div>
+  <?php endif; ?>
 </div>
 
 <div class="mt-6 bg-white text-black rounded-2xl p-6 shadow overflow-x-auto">
