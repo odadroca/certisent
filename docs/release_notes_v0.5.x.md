@@ -2,6 +2,16 @@
 
 This file tracks security hardening changes introduced across the v0.5.x line.
 
+## v0.5.5 — Session/cookie hardening for proxy deployments (opt-in)
+
+- Added `TRUST_PROXY_HEADERS=false` (default).
+  - When enabled, the app honors `X-Forwarded-Proto` / `Forwarded` for HTTPS detection.
+- Added optional `TRUSTED_PROXY_CIDRS` (comma-separated CIDRs/IPs).
+  - If set, proxy headers are trusted only when `REMOTE_ADDR` matches one of these entries.
+  - If `TRUST_PROXY_HEADERS=true` and `TRUSTED_PROXY_CIDRS` is empty, any proxy is trusted.
+- Added `FORCE_SECURE_COOKIES=false` (default).
+  - When enabled, session cookies are always marked `Secure`.
+
 ## v0.5.4 — Error page detail reduction (safe default)
 
 - Added `ERROR_DETAIL_MODE=full|safe` (default `safe`).

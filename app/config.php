@@ -7,7 +7,7 @@ declare(strict_types=1);
  */
 
 function app_version(): string {
-    return '0.5.4';
+    return '0.5.5';
 }
 
 /**
@@ -152,6 +152,15 @@ function cfg(string $key, $default = null) {
             // - safe (default): unauthenticated error pages show only a correlation id.
             // - full: include config/DB details on error pages (not recommended on public instances).
             'ERROR_DETAIL_MODE' => (string)env('ERROR_DETAIL_MODE', 'safe'),
+
+            // v0.5.5 Session/cookie hardening for reverse proxy deployments.
+            // - TRUST_PROXY_HEADERS: when enabled, allow X-Forwarded-* to influence HTTPS detection.
+            // - TRUSTED_PROXY_CIDRS: optional comma-separated CIDRs/IPs for proxies allowed to supply headers.
+            //   If TRUST_PROXY_HEADERS=true and TRUSTED_PROXY_CIDRS is empty, any proxy is trusted.
+            // - FORCE_SECURE_COOKIES: force Secure cookies even if HTTPS detection fails.
+            'TRUST_PROXY_HEADERS' => (string)env('TRUST_PROXY_HEADERS', 'false'),
+            'TRUSTED_PROXY_CIDRS' => (string)env('TRUSTED_PROXY_CIDRS', ''),
+            'FORCE_SECURE_COOKIES' => (string)env('FORCE_SECURE_COOKIES', 'false'),
 
             // v0.5.3 Registration bootstrap hardening.
             // REGISTRATION_MODE: open (default), invite, closed.
