@@ -30,6 +30,14 @@ function log_error(string $level, string $message, array $context = []): string 
     return $cid;
 }
 
+function error_detail_mode(): string {
+    $mode = 'safe';
+    if (function_exists('cfg')) {
+        $mode = strtolower(trim((string)cfg('ERROR_DETAIL_MODE', 'safe')));
+    }
+    return in_array($mode, ['full','safe'], true) ? $mode : 'safe';
+}
+
 function render_internal_error(string $cid): void {
     http_response_code(500);
     $msg = 'Internal Server Error. Ref: ' . $cid;
@@ -41,8 +49,21 @@ function render_internal_error(string $cid): void {
     echo '</div></body></html>';
 }
 
-function render_config_error(array $details): void {
+function render_config_error(string $cid, array $details): void {
     http_response_code(500);
+    $mode = error_detail_mode();
+
+    if ($mode === 'safe') {
+        $msg = 'Configuration error. Ref: ' . $cid;
+        echo '<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>500</title></head>';
+        echo '<body style="font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:#000;color:#fff;padding:24px">';
+        echo '<div style="max-width:860px;margin:0 auto">';
+        echo '<h1 style="font-size:20px;margin:0 0 12px 0">500</h1>';
+        echo '<div style="opacity:.8">'.htmlspecialchars($msg, ENT_QUOTES, 'UTF-8').'</div>';
+        echo '</div></body></html>';
+        return;
+    }
+
     $missing = $details['missing'] ?? [];
     $searched = $details['searched'] ?? [];
     $loaded = (string)($details['loaded_from'] ?? '');
@@ -52,6 +73,7 @@ function render_config_error(array $details): void {
     echo '<body style="font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:#000;color:#fff;padding:24px">';
     echo '<div style="max-width:860px;margin:0 auto">';
     echo '<h1 style="font-size:20px;margin:0 0 12px 0">Configuration missing</h1>';
+    echo '<div style="opacity:.9;margin-bottom:10px">Ref: <b>'.htmlspecialchars($cid, ENT_QUOTES, 'UTF-8').'</b></div>';
     echo '<div style="opacity:.9;margin-bottom:10px">Missing required keys: <b>'.htmlspecialchars($missingStr, ENT_QUOTES, 'UTF-8').'</b></div>';
     echo '<div style="opacity:.8;margin-bottom:10px">Loaded .env from: <code>'.htmlspecialchars($loaded === '' ? '(none)' : $loaded, ENT_QUOTES, 'UTF-8').'</code></div>';
     echo '<div style="opacity:.8">Searched paths:</div>';
@@ -67,6 +89,19 @@ function render_config_error(array $details): void {
 
 function render_db_error(string $cid, array $details): void {
     http_response_code(500);
+    $mode = error_detail_mode();
+
+    if ($mode === 'safe') {
+        $msg = 'Database unavailable. Ref: ' . $cid;
+        echo '<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>500</title></head>';
+        echo '<body style="font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:#000;color:#fff;padding:24px">';
+        echo '<div style="max-width:860px;margin:0 auto">';
+        echo '<h1 style="font-size:20px;margin:0 0 12px 0">500</h1>';
+        echo '<div style="opacity:.8">'.htmlspecialchars($msg, ENT_QUOTES, 'UTF-8').'</div>';
+        echo '</div></body></html>';
+        return;
+    }
+
     $dbHost = (string)($details['db_host'] ?? '');
     $dbName = (string)($details['db_name'] ?? '');
     $loaded = (string)($details['loaded_from'] ?? '');

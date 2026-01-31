@@ -68,7 +68,12 @@ register_shutdown_function(function(): void {
 $missing = missing_config_keys();
 if (count($missing) > 0) {
     if (!headers_sent()) {
-        render_config_error([
+        $cid = log_error('config', 'missing_config_keys', [
+            'missing' => $missing,
+            'searched' => env_searched_paths(),
+            'loaded_from' => env_loaded_from(),
+        ]);
+        render_config_error($cid, [
             'missing' => $missing,
             'searched' => env_searched_paths(),
             'loaded_from' => env_loaded_from(),

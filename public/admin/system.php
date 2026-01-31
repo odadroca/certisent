@@ -130,7 +130,7 @@ $schemaOk = ($schemaVersion === '' || $schemaVersion === $appVersion);
 
       <?php if ($ageSeconds !== null && $ageSeconds > 12*3600): ?>
         <div class="mt-4 p-3 rounded bg-red-100 text-red-800 text-sm">
-          Heartbeat is older than 12h. If cron is configured, check Hostinger cron logs and PHP runtime errors.
+          Heartbeat is older than 12h. If cron is configured, check cron logs and PHP runtime errors.
         </div>
       <?php endif; ?>
     <?php endif; ?>

@@ -2,6 +2,15 @@
 
 This file tracks security hardening changes introduced across the v0.5.x line.
 
+## v0.5.4 — Error page detail reduction (safe default)
+
+- Added `ERROR_DETAIL_MODE=full|safe` (default `safe`).
+- In `safe` mode:
+  - Unauthenticated config/DB error pages show only a correlation id.
+  - Full error details are kept in `app/logs/app.log` keyed by the same correlation id.
+- In `full` mode:
+  - Config/DB error pages include diagnostic detail (not recommended for public instances).
+
 ## v0.5.3 — Admin bootstrap hardening
 
 - Added `REGISTRATION_MODE=open|invite|closed` (default `open`).
@@ -12,10 +21,6 @@ This file tracks security hardening changes introduced across the v0.5.x line.
   - On a fresh install (no users yet), only `ADMIN_EMAIL` can claim the first admin (if `ADMIN_EMAIL` is set).
 - Added Admin → System control to disable/enable registrations post-setup (DB flag `system_state.registrations_disabled`).
 - Audit logging: `admin.registration.toggle`.
-
-Upgrade notes:
-- Existing installs (already have users) are unaffected unless you explicitly set `REGISTRATION_MODE` or use the Admin → System registration toggle.
-- If you use `ADMIN_EMAIL` only for notifications and do not want it to gate the first admin on a fresh install, leave it empty until after the first admin is created.
 
 ## v0.5.2 — RSS tenancy hardening (safe default)
 

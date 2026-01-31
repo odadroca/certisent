@@ -1,60 +1,7 @@
-<p align="center"><img src="https://i.postimg.cc/qMpPkTVz/certinel-neg.png" alt="Certinel" width="200" height="200"></p>
-
-# Certinel (certificate sentinel) — v0.5.3
+# Certinel (certificate sentinel) — v0.5.4
 Certinel is a lightweight TLS/SSL certificate monitoring service that **live-fetches** the certificate presented by an endpoint (SNI-capable), stores immutable snapshots, detects changes (renewals/rotations), and notifies interested parties before outages happen.
 
 It is designed to be simple to host (shared hosting or VPS), easy to operate (cron-driven worker), and explicit about what it is observing: **the certificate the endpoint actually serves**.
-
-## Highlights (v0.5.3)
-- Added an SSRF policy framework for outbound TLS checks (opt-in):
-  - `SSRF_MODE=legacy` (default) preserves v0.4.x behavior (no SSRF blocking).
-  - `SSRF_MODE=public_only` blocks private/reserved IP ranges.
-  - `SSRF_MODE=allowlist_private` blocks private/reserved ranges unless allowlisted.
-- Added allowlist primitives: `SSRF_ALLOW_CIDRS`, `SSRF_ALLOW_HOSTS`, `SSRF_ALLOW_PORTS`.
-- Policy enforced for: monitor checks, quick checks, and `/api/v1/check` URL-based checks.
-
-- Webhook egress hardening (opt-in):
-  - `WEBHOOK_MODE=legacy` (default) preserves v0.4.x behavior.
-  - `WEBHOOK_MODE=public_only` requires `https://` and blocks private/reserved IP ranges.
-  - `WEBHOOK_MODE=allowlist` requires `https://` and allows private/reserved targets only if allowlisted via `SSRF_ALLOW_*`.
-  - Redirect following is disabled to prevent redirect-based bypass.
-
-- RSS tenancy hardening (safe default):
-  - Non-admin RSS tokens no longer receive system/global events (`monitor_id IS NULL`).
-  - `RSS_INCLUDE_SYSTEM_EVENTS=false` by default; only `admin`/`auditor` RSS tokens may include system events when enabled.
-
-- Admin bootstrap hardening (v0.5.3, safe defaults):
-  - `REGISTRATION_MODE=open|invite|closed` (default `open`).
-  - Optional `SETUP_ADMIN_TOKEN`: required to claim the first admin (and required for all registrations in `invite` mode).
-  - Optional `ADMIN_EMAIL`: on a fresh install (no users yet), only this email can claim the first admin.
-  - Admin → System: button to disable/enable registrations post-setup (DB flag).
-
-## Notes / limitations
-- API auth:
-  - Preferred: API keys created in the admin UI (stored hashed in `api_keys`).
-  - Legacy: `.env` `API_WORKER_KEY` is still accepted and is treated as full-scope (`*`) for upgrade safety.
-- No automated test suite is shipped yet (manual verification required for changes).
-- App version vs DB schema version:
-  - App version may advance in patch releases.
-  - DB schema version remains `0.4` unless you apply a future migration.
-- Notifications: email (PHP `mail()`) + optional Slack/Teams webhooks (basic POST). RSS is read-only.
-- Registration (v0.5.3):
-  - `REGISTRATION_MODE=closed` disables new registrations.
-  - Admin can also disable registrations via Admin → System (DB flag).
-  - `SETUP_ADMIN_TOKEN` and `ADMIN_EMAIL` only affect fresh installs (first admin claim).
-
-- RSS (v0.5.2):
-  - Non-admin RSS tokens only return events for monitors owned by that user.
-  - System/global events are excluded unless `RSS_INCLUDE_SYSTEM_EVENTS=true` and the token belongs to an `admin`/`auditor`.
-- “False positives” are mitigated with a confirm re-check on certificate change (configurable sample count).
-- No background job queue; worker sends notifications inline.
-- SSRF policy (v0.5):
-  - Only applies in non-`legacy` modes.
-  - `public_only` and `allowlist_private` may block targets that resolve to private/reserved IPs.
-  - When blocked, checks return errors like `ssrf_blocked: <reason>`.
-- Webhook policy (v0.5.1):
-  - Only applies in non-`legacy` `WEBHOOK_MODE`.
-  - When blocked, webhook delivery may record errors like `webhook_ssrf_blocked: <reason>`.
 
 ## Quick start (shared hosting)
 1. Upload the contents of this zip to your hosting under `public_html/certinel/` (or similar).
@@ -196,9 +143,8 @@ This project is licensed under the **Apache License 2.0** (see `LICENSE.md`).
 - odadroca@acordado.addy.io
 
 ## Acknowledgments
-
 - Contributors: 
-- Inspirations: Norges Bank - it seems that every time someone sneezes there, a new certificate is issued - *"bless you"*.
+- Inspirations: Norges Bank - it seems that every time someone sneezes there, a new certificate is issued.
 - Libraries / tools:
   - PHP (built-in networking + OpenSSL)
   - MySQL / MariaDB

@@ -15,7 +15,6 @@ This document summarizes the v0.4.x patch releases. The DB schema version remain
 
 ## v0.4.6
 - Documentation consolidation for operations clarity (Apache Authorization forwarding, versioning contract, patch upgrade expectations).
-- Removed `docs/hostinger-checklist.md` from the distribution.
 - Project license clarified as **Apache-2.0**.
 
 ## v0.4.5

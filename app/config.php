@@ -7,7 +7,7 @@ declare(strict_types=1);
  */
 
 function app_version(): string {
-    return '0.5.3';
+    return '0.5.4';
 }
 
 /**
@@ -147,6 +147,11 @@ function cfg(string $key, $default = null) {
             // v0.5.2 RSS tenancy hardening.
             // Default false: do not include system/global events for non-admin RSS tokens.
             'RSS_INCLUDE_SYSTEM_EVENTS' => (string)env('RSS_INCLUDE_SYSTEM_EVENTS', 'false'),
+
+            // v0.5.4 Error page detail control.
+            // - safe (default): unauthenticated error pages show only a correlation id.
+            // - full: include config/DB details on error pages (not recommended on public instances).
+            'ERROR_DETAIL_MODE' => (string)env('ERROR_DETAIL_MODE', 'safe'),
 
             // v0.5.3 Registration bootstrap hardening.
             // REGISTRATION_MODE: open (default), invite, closed.
