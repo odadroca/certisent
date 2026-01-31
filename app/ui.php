@@ -65,11 +65,11 @@ function render_header(string $title, ?array $user = null): void {
     echo '<div class="text-sm">';
     if ($user) {
         echo '<span class="text-gray-300 mr-3">'.h($user['email']).' ('.h($user['role']).')</span>';
-        echo '<form class="inline" method="post" action="'.h(url_for('logout.php')).'">'; echo csrf_field(); echo '<button class="accent hover:underline" type="submit">Sign out</button>'; echo '</form>';
+        echo '<form class="inline" method="post" action="'.h(url_for('logout.php')).'">'; echo csrf_field(); echo '<button class="accent hover:underline" type="submit">'.h(function_exists('t') ? t('nav.sign_out') : 'Sign out').'</button>'; echo '</form>';
 
     } else {
-        echo '<a class="accent hover:underline mr-3" href="'.h(url_for('login.php')).'">Sign in</a>';
-        echo '<a class="accent hover:underline" href="'.h(url_for('register.php')).'">Register</a>';
+        echo '<a class="accent hover:underline mr-3" href="'.h(url_for('login.php')).'">'.h(function_exists('t') ? t('nav.sign_in') : 'Sign in').'</a>';
+        echo '<a class="accent hover:underline" href="'.h(url_for('register.php')).'">'.h(function_exists('t') ? t('nav.register') : 'Register').'</a>';
     }
     echo '</div>';
     echo '</div>';
@@ -77,17 +77,17 @@ function render_header(string $title, ?array $user = null): void {
     // Signed-in navigation
     if ($user) {
         echo '<div class="mt-4 flex flex-wrap gap-3 text-sm">';
-        echo '<a class="accent hover:underline" href="'.h(url_for('dashboard.php')).'">Dashboard</a>';
-        echo '<a class="accent hover:underline" href="'.h(url_for('history.php')).'">History</a>';
-        echo '<a class="accent hover:underline" href="'.h(url_for('settings.php')).'">Settings</a>';
-        echo '<a class="accent hover:underline" href="'.h(url_for('index.php')).'">Quick check</a>';
+        echo '<a class="accent hover:underline" href="'.h(url_for('dashboard.php')).'">'.h(function_exists('t') ? t('nav.dashboard') : 'Dashboard').'</a>';
+        echo '<a class="accent hover:underline" href="'.h(url_for('history.php')).'">'.h(function_exists('t') ? t('nav.history') : 'History').'</a>';
+        echo '<a class="accent hover:underline" href="'.h(url_for('settings.php')).'">'.h(function_exists('t') ? t('nav.settings') : 'Settings').'</a>';
+        echo '<a class="accent hover:underline" href="'.h(url_for('index.php')).'">'.h(function_exists('t') ? t('nav.quick_check') : 'Quick check').'</a>';
         if (($user['role'] ?? '') === 'admin') {
-            echo '<a class="accent hover:underline" href="'.h(url_for('admin/monitors.php')).'">Admin · Monitors</a>';
-            echo '<a class="accent hover:underline" href="'.h(url_for('admin/users.php')).'">Admin · Users</a>';
-            echo '<a class="accent hover:underline" href="'.h(url_for('admin/system.php')).'">Admin · System</a>';
-            echo '<a class="accent hover:underline" href="'.h(url_for('admin/email.php')).'">Admin · Email</a>';
-            echo '<a class="accent hover:underline" href="'.h(url_for('admin/api_keys.php')).'">Admin · API Keys</a>';
-            echo '<a class="accent hover:underline" href="'.h(url_for('admin/outbox.php')).'">Admin · Outbox</a>';
+            echo '<a class="accent hover:underline" href="'.h(url_for('admin/monitors.php')).'">'.h(function_exists('t') ? t('nav.admin_monitors') : 'Admin · Monitors').'</a>';
+            echo '<a class="accent hover:underline" href="'.h(url_for('admin/users.php')).'">'.h(function_exists('t') ? t('nav.admin_users') : 'Admin · Users').'</a>';
+            echo '<a class="accent hover:underline" href="'.h(url_for('admin/system.php')).'">'.h(function_exists('t') ? t('nav.admin_system') : 'Admin · System').'</a>';
+            echo '<a class="accent hover:underline" href="'.h(url_for('admin/email.php')).'">'.h(function_exists('t') ? t('nav.admin_email') : 'Admin · Email').'</a>';
+            echo '<a class="accent hover:underline" href="'.h(url_for('admin/api_keys.php')).'">'.h(function_exists('t') ? t('nav.admin_api_keys') : 'Admin · API Keys').'</a>';
+            echo '<a class="accent hover:underline" href="'.h(url_for('admin/outbox.php')).'">'.h(function_exists('t') ? t('nav.admin_outbox') : 'Admin · Outbox').'</a>';
         }
         echo '</div>';
     }
@@ -221,3 +221,14 @@ function progress_bar(?int $daysRemaining, ?string $validFrom, ?string $validTo)
     $pct = max(0, min(100, $pct));
     return '<div class="h-2 bg-gray-800 rounded overflow-hidden"><div class="h-2 bg-green-400" style="width: '.$pct.'%"></div></div>';
 }
+
+/**
+ * Flash message using a translation key.
+ * Additive helper: preserves flash_set() for existing callers.
+ */
+function flash_set_key(string $type, string $key, array $params = []): void {
+    $msg = function_exists('t') ? t($key, $params) : $key;
+    flash_set($type, $msg);
+}
+
+

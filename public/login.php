@@ -13,7 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // v0.5.7: coarse per-IP login throttling (defaults high).
     $rl = RateLimiter::checkLoginIp(client_ip());
     if (!$rl['allowed']) {
-        $err = 'Too many login attempts. Try again later.';
+        $err = function_exists('t') ? t('auth.err.too_many_login_attempts') : 'Too many login attempts. Try again later.';
     }
 
     if (!$err) {
@@ -25,11 +25,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $u = $st->fetch();
 
     if (!$u) {
-        $err = 'Invalid credentials.';
+        $err = function_exists('t') ? t('auth.err.invalid_credentials') : 'Invalid credentials.';
     } else {
         $lockedUntil = $u['locked_until'] ? strtotime($u['locked_until'].' UTC') : null;
         if ($lockedUntil && time() < $lockedUntil) {
-            $err = 'Account locked. Try again later.';
+            $err = function_exists('t') ? t('auth.err.account_locked') : 'Account locked. Try again later.';
         } elseif (!password_verify($pass, (string)$u['password_hash'])) {
             $fail = (int)$u['failed_login_count'] + 1;
             $locked = null;
@@ -39,7 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
             $st2 = db()->prepare("UPDATE users SET failed_login_count=:f, locked_until=:l WHERE id=:id");
             $st2->execute([':f'=>$fail, ':l'=>$locked, ':id'=>$u['id']]);
-            $err = 'Invalid credentials.';
+            $err = function_exists('t') ? t('auth.err.invalid_credentials') : 'Invalid credentials.';
             Audit::log(null, 'user.login_failed', 'user', (int)$u['id'], []);
         } else {
             $st2 = db()->prepare("UPDATE users SET failed_login_count=0, locked_until=NULL, last_login_at=:t WHERE id=:id");
@@ -54,25 +54,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-render_header('Sign in');
+$title = function_exists('t') ? t('auth.sign_in') : 'Sign in';
+render_header($title);
 ?>
 <div class="bg-white text-black rounded-2xl p-6 shadow max-w-lg">
-  <h1 class="text-xl font-semibold mb-4">Sign in</h1>
+  <h1 class="text-xl font-semibold mb-4"><?php echo h(function_exists('t') ? t('auth.sign_in') : 'Sign in'); ?></h1>
   <?php if ($err): ?>
     <div class="mb-3 p-3 rounded bg-red-100 text-red-800 text-sm"><?php echo h($err); ?></div>
   <?php endif; ?>
   <form method="post" class="space-y-3">
     <?php echo csrf_field(); ?>
     <div>
-      <label class="text-sm">Email</label>
+      <label class="text-sm"><?php echo h(function_exists('t') ? t('auth.email') : 'Email'); ?></label>
       <input name="email" class="w-full border rounded px-3 py-2" value="<?php echo h($_POST['email'] ?? ''); ?>" />
     </div>
     <div>
-      <label class="text-sm">Password</label>
+      <label class="text-sm"><?php echo h(function_exists('t') ? t('auth.password') : 'Password'); ?></label>
       <input type="password" name="password" class="w-full border rounded px-3 py-2" />
     </div>
-    <button class="bg-green-700 text-white px-4 py-2 rounded">Sign in</button>
-    <div class="text-sm text-gray-700">No account? <a class="text-green-700 hover:underline" href="register.php">Register</a></div>
+    <button class="bg-green-700 text-white px-4 py-2 rounded"><?php echo h(function_exists('t') ? t('auth.sign_in') : 'Sign in'); ?></button>
+    <div class="text-sm text-gray-700"><?php echo h(function_exists('t') ? t('auth.no_account') : 'No account?'); ?> <a class="text-green-700 hover:underline" href="register.php"><?php echo h(function_exists('t') ? t('nav.register') : 'Register'); ?></a></div>
   </form>
 </div>
 <?php render_footer(); ?>

@@ -2,6 +2,19 @@
 
 This document tracks patch releases in the v0.6 series.
 
+## v0.6.2 (2026-01-31)
+
+### Added / Changed
+- Localization expansion (default-preserving):
+  - Wrapped shared layout/navigation strings in `app/ui.php` using `t()` with English fallback.
+  - Added additive helper `flash_set_key()` (preserves `flash_set()`).
+  - Localized guest/auth pages: `public/index.php`, `public/login.php`, `public/register.php`.
+  - Expanded locale catalogs: `app/locales/en.php`, `app/locales/pt.php`.
+
+### Upgrade notes
+- No schema changes beyond v0.6.1; `users.locale` remains the only required column for per-user language preference.
+- English remains the default (`en`) when unset or unsupported.
+
 ## v0.6.1 (2026-01-31)
 
 ### Added

@@ -1,8 +1,8 @@
-# File registry (v0.6.1)
+# File registry (v0.6.2)
 
 This file lists repository files for change auditing.
 
-Generated: 2026-01-31 18:11:59 UTC
+Generated: 2026-01-31 19:35:54 UTC
 
 ```
 ./.env.example
