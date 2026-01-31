@@ -9,28 +9,28 @@ Worker::cronHealthCheck();
 $view = (string)($_GET['view'] ?? 'cards');
 $monitors = MonitorService::getMonitorsForUser($user);
 
-render_header('Dashboard', $user);
+render_header(t('page.dashboard.title'), $user);
 ?>
 <div class="flex items-center justify-between mb-4">
   <div>
-    <div class="text-lg font-semibold">Dashboard</div>
-    <div class="text-xs text-gray-400">Monitors: <?php echo count($monitors); ?></div>
+    <div class="text-lg font-semibold"><?php echo t('page.dashboard.title'); ?></div>
+    <div class="text-xs text-gray-400"><?php echo t('dashboard.monitors'); ?>: <?php echo count($monitors); ?></div>
   </div>
   <div class="flex gap-3 items-center">
     <?php if ($user['role']==='admin'): ?>
-      <a class="text-xs text-green-400 hover:underline" href="admin/users.php">Admin</a>
+      <a class="text-xs text-green-400 hover:underline" href="admin/users.php"><?php echo t('dashboard.admin'); ?></a>
     <?php endif; ?>
     <a class="text-xs text-green-400 hover:underline" href="dashboard.php?view=<?php echo $view==='list'?'cards':'list'; ?>">
-      Toggle <?php echo $view==='list'?'cards':'list'; ?> view
+      <?php echo t('dashboard.toggle_view', ['view' => $view==='list' ? t('dashboard.view.cards') : t('dashboard.view.list')]); ?>
     </a>
     <?php if (has_role($user,'viewer')): ?>
-      <a class="bg-green-700 text-white px-3 py-2 rounded" href="monitor_add.php">Add to monitor</a>
+      <a class="bg-green-700 text-white px-3 py-2 rounded" href="monitor_add.php"><?php echo t('dashboard.add_to_monitor'); ?></a>
     <?php endif; ?>
     <form method="post" action="check_now_all.php" class="inline">
       <?php echo csrf_field(); ?>
-      <button class="bg-green-700 text-white px-3 py-2 rounded" type="submit">Check now (all)</button>
+      <button class="bg-green-700 text-white px-3 py-2 rounded" type="submit"><?php echo t('dashboard.check_now_all'); ?></button>
     </form>
-    <a class="bg-white text-black px-3 py-2 rounded" href="index.php">Quick check</a>
+    <a class="bg-white text-black px-3 py-2 rounded" href="index.php"><?php echo t('nav.quick_check'); ?></a>
   </div>
 </div>
 
@@ -38,11 +38,11 @@ render_header('Dashboard', $user);
 // Show last cron heartbeat (for operators)
 $lastCron = Worker::getSystemState('last_cron_run_at');
 ?>
-<div class="text-xs text-gray-400 mb-6">Worker heartbeat: <?php echo $lastCron ? h($lastCron).' UTC' : 'unknown'; ?></div>
+<div class="text-xs text-gray-400 mb-6"><?php echo t('dashboard.worker_heartbeat'); ?>: <?php echo $lastCron ? h($lastCron).' UTC' : t('common.unknown'); ?></div>
 
 <?php $job = Worker::getLatestJobForUser((int)$user['id']); ?>
 <div class="text-xs text-gray-400 mb-6">
-  Last check-now job: <?php echo $job ? ('#'.(int)$job['id'].' · '.h((string)$job['status']).' · processed='.(int)$job['total_processed']) : 'none'; ?>
+  <?php echo t('dashboard.last_check_now_job'); ?>: <?php echo $job ? ('#'.(int)$job['id'].' · '.h((string)$job['status']).' · '.t('dashboard.job.processed').'='.(int)$job['total_processed']) : t('common.none'); ?>
 </div>
 
 <?php if ($view === 'list'): ?>
@@ -50,13 +50,13 @@ $lastCron = Worker::getSystemState('last_cron_run_at');
     <table class="min-w-full text-sm">
       <thead>
         <tr class="text-left border-b">
-          <th class="py-2 pr-3">Status</th>
-          <th class="py-2 pr-3">URL</th>
-          <th class="py-2 pr-3">Issuer</th>
-          <th class="py-2 pr-3">Valid to</th>
-          <th class="py-2 pr-3">Days left</th>
-          <th class="py-2 pr-3">Last checked</th>
-          <th class="py-2 pr-3">Next due</th>
+          <th class="py-2 pr-3"><?php echo t('dashboard.table.status'); ?></th>
+          <th class="py-2 pr-3"><?php echo t('dashboard.table.url'); ?></th>
+          <th class="py-2 pr-3"><?php echo t('dashboard.table.issuer'); ?></th>
+          <th class="py-2 pr-3"><?php echo t('dashboard.table.valid_to'); ?></th>
+          <th class="py-2 pr-3"><?php echo t('dashboard.table.days_left'); ?></th>
+          <th class="py-2 pr-3"><?php echo t('dashboard.table.last_checked'); ?></th>
+          <th class="py-2 pr-3"><?php echo t('dashboard.table.next_due'); ?></th>
           <th class="py-2 pr-3"></th>
         </tr>
       </thead>
@@ -72,9 +72,9 @@ $lastCron = Worker::getSystemState('last_cron_run_at');
           <td class="py-2 pr-3"><?php echo h((string)($m['last_checked_at'] ?? '—')); ?><?php echo $m['last_checked_at'] ? ' UTC' : ''; ?></td>
           <td class="py-2 pr-3"><?php echo h((string)($m['next_due_at'] ?? '—')); ?><?php echo $m['next_due_at'] ? ' UTC' : ''; ?></td>
           <td class="py-2 pr-3">
-            <a class="text-gray-800 hover:underline mr-3" href="monitor_view.php?id=<?php echo (int)$m['id']; ?>">View</a>
+            <a class="text-gray-800 hover:underline mr-3" href="monitor_view.php?id=<?php echo (int)$m['id']; ?>"><?php echo t('common.view'); ?></a>
             <?php if (has_role($user,'viewer')): ?>
-              <a class="text-green-700 hover:underline" href="monitor_edit.php?id=<?php echo (int)$m['id']; ?>">Edit</a>
+              <a class="text-green-700 hover:underline" href="monitor_edit.php?id=<?php echo (int)$m['id']; ?>"><?php echo t('common.edit'); ?></a>
             <?php endif; ?>
           </td>
         </tr>
@@ -90,37 +90,37 @@ $lastCron = Worker::getSystemState('last_cron_run_at');
         <div class="flex items-start justify-between gap-3">
           <div>
             <div class="font-mono text-sm break-all"><?php echo h($m['url']); ?></div>
-            <div class="text-xs text-gray-600 mt-1">Issuer: <?php echo h((string)($m['last_issuer_cn'] ?? '—')); ?></div>
+            <div class="text-xs text-gray-600 mt-1"><?php echo t('dashboard.issuer'); ?>: <?php echo h((string)($m['last_issuer_cn'] ?? '—')); ?></div>
           </div>
           <div><?php echo badge_status($displayStatus); ?></div>
         </div>
 
         <div class="mt-4 space-y-2">
           <div class="text-xs text-gray-600 flex justify-between">
-            <span>Valid from: <?php echo h((string)($m['last_valid_from'] ?? '—')); ?><?php echo $m['last_valid_from'] ? ' UTC' : ''; ?></span>
-            <span>Valid to: <?php echo h((string)($m['last_valid_to'] ?? '—')); ?><?php echo $m['last_valid_to'] ? ' UTC' : ''; ?></span>
+            <span><?php echo t('dashboard.valid_from'); ?>: <?php echo h((string)($m['last_valid_from'] ?? '—')); ?><?php echo $m['last_valid_from'] ? ' UTC' : ''; ?></span>
+            <span><?php echo t('dashboard.valid_to'); ?>: <?php echo h((string)($m['last_valid_to'] ?? '—')); ?><?php echo $m['last_valid_to'] ? ' UTC' : ''; ?></span>
           </div>
           <?php echo progress_bar($m['last_days_remaining'] !== null ? (int)$m['last_days_remaining'] : null, $m['last_valid_from'] ?? null, $m['last_valid_to'] ?? null); ?>
           <div class="text-xs text-gray-700 flex justify-between">
-            <span>Days left: <span class="font-semibold"><?php echo h((string)($m['last_days_remaining'] ?? '—')); ?></span></span>
-            <span>Warn threshold: <?php echo (int)$m['notify_days_before_expiry']; ?> days</span>
+            <span><?php echo t('dashboard.days_left'); ?>: <span class="font-semibold"><?php echo h((string)($m['last_days_remaining'] ?? '—')); ?></span></span>
+            <span><?php echo t('dashboard.warn_threshold'); ?>: <?php echo (int)$m['notify_days_before_expiry']; ?> <?php echo t('common.days'); ?></span>
           </div>
           <div class="text-xs text-gray-600 flex justify-between">
-            <span>Last checked: <?php echo h((string)($m['last_checked_at'] ?? '—')); ?><?php echo $m['last_checked_at'] ? ' UTC' : ''; ?></span>
-            <span>Next due: <?php echo h((string)($m['next_due_at'] ?? '—')); ?><?php echo $m['next_due_at'] ? ' UTC' : ''; ?></span>
+            <span><?php echo t('dashboard.last_checked'); ?>: <?php echo h((string)($m['last_checked_at'] ?? '—')); ?><?php echo $m['last_checked_at'] ? ' UTC' : ''; ?></span>
+            <span><?php echo t('dashboard.next_due'); ?>: <?php echo h((string)($m['next_due_at'] ?? '—')); ?><?php echo $m['next_due_at'] ? ' UTC' : ''; ?></span>
           </div>
         </div>
 
         <div class="mt-4 flex gap-3 text-sm">
           <?php if (has_role($user,'viewer')): ?>
-            <a class="text-gray-800 hover:underline" href="monitor_view.php?id=<?php echo (int)$m['id']; ?>">View</a>
-            <a class="text-green-700 hover:underline" href="monitor_edit.php?id=<?php echo (int)$m['id']; ?>">Edit</a>
-            <a class="text-red-700 hover:underline" href="monitor_delete.php?id=<?php echo (int)$m['id']; ?>">Delete</a>
+            <a class="text-gray-800 hover:underline" href="monitor_view.php?id=<?php echo (int)$m['id']; ?>"><?php echo t('common.view'); ?></a>
+            <a class="text-green-700 hover:underline" href="monitor_edit.php?id=<?php echo (int)$m['id']; ?>"><?php echo t('common.edit'); ?></a>
+            <a class="text-red-700 hover:underline" href="monitor_delete.php?id=<?php echo (int)$m['id']; ?>"><?php echo t('common.delete'); ?></a>
           <?php endif; ?>
           <?php if (!has_role($user,'viewer')): ?>
-            <a class="text-gray-800 hover:underline" href="monitor_view.php?id=<?php echo (int)$m['id']; ?>">View</a>
+            <a class="text-gray-800 hover:underline" href="monitor_view.php?id=<?php echo (int)$m['id']; ?>"><?php echo t('common.view'); ?></a>
           <?php endif; ?>
-          <a class="text-gray-800 hover:underline" href="events.php?monitor_id=<?php echo (int)$m['id']; ?>">Events</a>
+          <a class="text-gray-800 hover:underline" href="events.php?monitor_id=<?php echo (int)$m['id']; ?>"><?php echo t('common.events'); ?></a>
         </div>
       </div>
     <?php endforeach; ?>

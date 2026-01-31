@@ -1,6 +1,6 @@
 <p align="center"><img src="https://i.postimg.cc/qMpPkTVz/certinel-neg.png" alt="Certinel" width="200" height="200"></p>
 
-# Certinel — TLS/SSL Certificate Monitoring (Beta) - v0.6.2
+# Certinel — TLS/SSL Certificate Monitoring (Beta) - v0.6.3
 
 Certinel is a lightweight TLS/SSL certificate monitoring service that **live-fetches** the certificate presented by an endpoint (SNI-capable), stores immutable snapshots, detects changes (renewals/rotations), and notifies before outages happen.
 
@@ -41,9 +41,10 @@ Docs: `docs/deploy.md`, `docs/ops_runbook.md`.
 - **Heartbeat**: Admin → System shows last worker run time (UTC).
 - **Upgrade approach**: replace code, keep `.env` + DB; run SQL migrations only when required (see `docs/deploy.md`).
 
-## Localization (v0.6.2)
+## Localization (v0.6.3)
 - Per-user UI language preference is stored in `users.locale` (default: `en`).
 - Configure via **Settings → Language**.
+- v0.6.3 localizes the core monitoring UI (dashboard, monitor CRUD, events/history pages).
 - Upgrade note: existing deployments must apply `sql/migrations/v0.6_to_v0.6.1.sql` to add the column.
 
 ## Security baseline (documented behaviors)

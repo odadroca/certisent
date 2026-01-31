@@ -2,6 +2,24 @@
 
 This document tracks patch releases in the v0.6 series.
 
+## v0.6.3 (2026-01-31)
+
+### Added / Changed
+- Localization expansion (default-preserving):
+  - Localized core monitoring UI pages using `t()` with English fallback:
+    - `public/dashboard.php`
+    - `public/monitor_add.php`
+    - `public/monitor_edit.php`
+    - `public/monitor_view.php`
+    - `public/monitor_delete.php`
+    - `public/events.php`
+    - `public/history.php`
+  - Expanded locale catalogs: `app/locales/en.php`, `app/locales/pt.php`.
+
+### Upgrade notes
+- No schema changes in v0.6.3.
+- English remains the default (`en`) when unset or unsupported.
+
 ## v0.6.2 (2026-01-31)
 
 ### Added / Changed
