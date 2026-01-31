@@ -149,4 +149,13 @@ return [
     'history.scope_global' => ' (global)',
     'history.scope_yours' => ' (os seus monitores)',
     'history.type_placeholder' => 'expiry_warning',
+    'notify.email.subject' => '[Certinel] {severity} {type} — {host}',
+    'notify.email.line.event' => 'Evento: {type} ({severity})',
+    'notify.email.line.time' => 'Hora: {time} UTC',
+    'notify.email.line.target' => 'Alvo: {target}',
+    'notify.email.line.meta' => 'Meta: {meta}',
+    'notify.email.signature' => 'Certinel',
+    'notify.webhook.text' => '{severity} {type} — {target} — {message} (UTC {time}){meta_part}',
+    'notify.teams.summary' => 'Alerta Certinel',
+    'notify.teams.title' => 'Certinel: {type}',
 ];

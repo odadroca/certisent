@@ -149,4 +149,13 @@ return [
     'history.scope_global' => ' (global)',
     'history.scope_yours' => ' (your monitors)',
     'history.type_placeholder' => 'expiry_warning',
+    'notify.email.subject' => '[Certinel] {severity} {type} — {host}',
+    'notify.email.line.event' => 'Event: {type} ({severity})',
+    'notify.email.line.time' => 'Time: {time} UTC',
+    'notify.email.line.target' => 'Target: {target}',
+    'notify.email.line.meta' => 'Meta: {meta}',
+    'notify.email.signature' => 'Certinel',
+    'notify.webhook.text' => '{severity} {type} — {target} — {message} (UTC {time}){meta_part}',
+    'notify.teams.summary' => 'Certinel alert',
+    'notify.teams.title' => 'Certinel: {type}',
 ];

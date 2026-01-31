@@ -67,7 +67,7 @@ final class Notifier {
     public static function processOutbox(int $limit = 100): array {
         $now = db_now_utc();
         $limit = max(1, min(1000, $limit));
-        $sql = "SELECT o.*, u.email, u.notify_channels_json
+        $sql = "SELECT o.*, u.email, u.notify_channels_json, u.locale
                              FROM notification_outbox o
                              JOIN users u ON u.id=o.user_id
                              WHERE o.status='pending'
@@ -94,11 +94,19 @@ final class Notifier {
 
                 $ch = (string)$r['channel'];
 
+                $loc = 'en';
+                if (isset($r['locale']) && function_exists('normalize_locale')) {
+                    $loc = normalize_locale((string)$r['locale']);
+                } elseif (isset($r['locale'])) {
+                    $loc = (string)$r['locale'];
+                }
+                $loc = is_string($loc) && $loc !== '' ? $loc : 'en';
+
                 if ($ch === 'email') {
                     if (empty($r['email'])) {
                         $err = 'missing_email';
                     } else {
-                        $send = Emailer::sendText((string)$r['email'], self::emailSubject($event, $monitor), self::renderEmailBody($event, $monitor));
+                        $send = Emailer::sendText((string)$r['email'], self::emailSubject($event, $monitor, $loc), self::renderEmailBody($event, $monitor, $loc));
                         $ok = (bool)($send['ok'] ?? false);
                         if (!$ok) $err = (string)($send['error'] ?? 'mail_failed');
                     }
@@ -107,7 +115,7 @@ final class Notifier {
                     if ($url === '') {
                         $err = 'missing_slack_webhook';
                     } else {
-                        [$ok, $err] = self::sendWebhook($url, ['text' => self::renderWebhookText($event, $monitor)]);
+                        [$ok, $err] = self::sendWebhook($url, ['text' => self::renderWebhookText($event, $monitor, $loc)]);
                     }
                 } elseif ($ch === 'teams') {
                     $url = (string)($channels['teams_webhook'] ?? '');
@@ -117,9 +125,9 @@ final class Notifier {
                         $payload = [
                             '@type' => 'MessageCard',
                             '@context' => 'http://schema.org/extensions',
-                            'summary' => 'Certinel alert',
-                            'title' => 'Certinel: '.($event['type'] ?? 'event'),
-                            'text' => self::renderWebhookText($event, $monitor),
+                            'summary' => self::tr('notify.teams.summary', [], $loc, 'Certinel alert'),
+                            'title' => self::tr('notify.teams.title', ['type' => (string)($event['type'] ?? 'event')], $loc, 'Certinel: '.(string)($event['type'] ?? 'event')),
+                            'text' => self::renderWebhookText($event, $monitor, $loc),
                         ];
                         [$ok, $err] = self::sendWebhook($url, $payload);
                     }
@@ -201,9 +209,29 @@ final class Notifier {
         return $r;
     }
 
-    private static function emailSubject(array $event, ?array $monitor): string {
-        $host = $monitor['host'] ?? 'system';
-        return "[Certinel] {$event['severity']} {$event['type']} — {$host}";
+
+private static function tr(string $key, array $params, string $locale, string $fallback): string {
+    if (function_exists('t')) {
+        try {
+            return t($key, $params, $locale);
+        } catch (Throwable $e) {
+            // Fall through to fallback.
+        }
+    }
+    $s = $fallback;
+    foreach ($params as $k => $v) {
+        $s = str_replace('{' . (string)$k . '}', (string)$v, $s);
+    }
+    return $s;
+}
+
+    private static function emailSubject(array $event, ?array $monitor, string $locale = 'en'): string {
+        $host = (string)($monitor['host'] ?? 'system');
+        return self::tr('notify.email.subject', [
+            'severity' => (string)($event['severity'] ?? 'info'),
+            'type' => (string)($event['type'] ?? 'event'),
+            'host' => $host,
+        ], $locale, "[Certinel] ".(string)($event['severity'] ?? 'info')." ".(string)($event['type'] ?? 'event')." — {$host}");
     }
 
     /**
@@ -254,29 +282,54 @@ final class Notifier {
         return [true, null];
     }
 
-    private static function renderEmailBody(array $event, ?array $monitor): string {
-        $lines = [];
-        $lines[] = "Event: {$event['type']} ({$event['severity']})";
-        $lines[] = "Time: {$event['created_at']} UTC";
-        if ($monitor) {
-            $lines[] = "Target: {$monitor['url']}";
-        }
-        $lines[] = "";
-        $lines[] = (string)($event['message'] ?? '');
-        $meta = format_event_meta($event['meta_json'] ?? null);
-        if ($meta !== '') {
-            $lines[] = "";
-            $lines[] = "Meta: {$meta}";
-        }
-        $lines[] = "";
-        $lines[] = "Certinel";
-        return implode("\n", $lines);
+    private static function renderEmailBody(array $event, ?array $monitor, string $locale = 'en'): string {
+    $lines = [];
+    $lines[] = self::tr('notify.email.line.event', [
+        'type' => (string)($event['type'] ?? 'event'),
+        'severity' => (string)($event['severity'] ?? 'info'),
+    ], $locale, "Event: ".(string)($event['type'] ?? 'event')." (".(string)($event['severity'] ?? 'info').")");
+
+    $lines[] = self::tr('notify.email.line.time', [
+        'time' => (string)($event['created_at'] ?? db_now_utc()),
+    ], $locale, "Time: ".(string)($event['created_at'] ?? db_now_utc())." UTC");
+
+    if ($monitor) {
+        $lines[] = self::tr('notify.email.line.target', [
+            'target' => (string)($monitor['url'] ?? ''),
+        ], $locale, "Target: ".(string)($monitor['url'] ?? ''));
     }
 
-    private static function renderWebhookText(array $event, ?array $monitor): string {
-        $target = $monitor ? (string)$monitor['url'] : 'system';
-        $meta = format_event_meta($event['meta_json'] ?? null);
-        $metaPart = $meta ? " | {$meta}" : '';
-        return "{$event['severity']} {$event['type']} — {$target} — {$event['message']} (UTC {$event['created_at']}){$metaPart}";
+    $lines[] = "";
+    $lines[] = (string)($event['message'] ?? '');
+
+    $meta = format_event_meta($event['meta_json'] ?? null);
+    if ($meta !== '') {
+        $lines[] = "";
+        $lines[] = self::tr('notify.email.line.meta', [
+            'meta' => (string)$meta,
+        ], $locale, "Meta: {$meta}");
     }
+
+    $lines[] = "";
+    $lines[] = self::tr('notify.email.signature', [], $locale, 'Certinel');
+
+    return implode("\n", $lines);
+}
+
+
+    private static function renderWebhookText(array $event, ?array $monitor, string $locale = 'en'): string {
+    $target = $monitor ? (string)($monitor['url'] ?? '') : 'system';
+    $meta = format_event_meta($event['meta_json'] ?? null);
+    $metaPart = $meta ? " | {$meta}" : '';
+
+    return self::tr('notify.webhook.text', [
+        'severity' => (string)($event['severity'] ?? 'info'),
+        'type' => (string)($event['type'] ?? 'event'),
+        'target' => $target,
+        'message' => (string)($event['message'] ?? ''),
+        'time' => (string)($event['created_at'] ?? db_now_utc()),
+        'meta_part' => $metaPart,
+    ], $locale, (string)($event['severity'] ?? 'info')." ".(string)($event['type'] ?? 'event')." — {$target} — ".(string)($event['message'] ?? '')." (UTC ".(string)($event['created_at'] ?? db_now_utc())."){$metaPart}");
+}
+
 }

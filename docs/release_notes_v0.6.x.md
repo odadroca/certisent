@@ -2,6 +2,18 @@
 
 This document tracks patch releases in the v0.6 series.
 
+## v0.6.4 (2026-01-31)
+
+### Added / Changed
+- Localized notification content (default-preserving):
+  - Email subject/body generated via `t()` using recipient `users.locale` (fallback `en`).
+  - Slack/Teams webhook text generated via `t()` using recipient `users.locale` (fallback `en`).
+  - Added notification template keys in `app/locales/en.php` and `app/locales/pt.php`.
+
+### Upgrade notes
+- No schema changes in v0.6.4.
+- English remains the default.
+
 ## v0.6.3 (2026-01-31)
 
 ### Added / Changed
