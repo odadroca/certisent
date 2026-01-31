@@ -82,6 +82,7 @@ This creates the `rate_limits` table (idempotent via `CREATE TABLE IF NOT EXISTS
 
 If you are upgrading from v0.6 and want the per-user UI language preference, run once:
 - `sql/migrations/v0.6_to_v0.6.1.sql`
+- `sql/migrations/v0.6.6_to_v0.6.7.sql`
 
 This adds `users.locale` (default: `en`).
 

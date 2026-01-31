@@ -196,7 +196,6 @@ $schemaOk = ($schemaVersion === '' || $schemaVersion === $appVersion);
     </div>
   </div>
 
-</div>
 
   <div class="bg-white text-black rounded-2xl p-6 shadow">
     <h2 class="font-semibold mb-3"><?php echo h(t('admin.system.h1_last_worker_run')); ?></h2>

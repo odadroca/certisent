@@ -2,6 +2,21 @@
 
 This document tracks patch releases in the v0.6 series.
 
+## v0.6.7 (2026-01-31)
+
+### Added / Changed
+- Settings: added per-user **Notification repeats** control (default 1) to send each notification N times (1–5) for redundancy.
+  - DB: new `users.notify_repeat_count` column (default: 1).
+  - Notifier: enqueues up to N outbox entries per event/channel using dedupe keys that preserve previous behavior when N=1.
+
+### Fixed
+- Admin → Monitors: fixed empty-looking **Status filter** dropdown (option labels were not rendered due to malformed `<option>` markup).
+- Admin → System: fixed overlapping card layout by keeping diagnostic cards within the same grid container.
+
+### Upgrade notes
+- Schema change in v0.6.7: apply `sql/migrations/v0.6.6_to_v0.6.7.sql`.
+
+
 ## v0.6.6 (2026-01-31)
 
 ### Fixed

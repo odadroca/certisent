@@ -3,6 +3,23 @@ declare(strict_types=1);
 
 final class Notifier {
 
+    private static ?bool $hasRepeatCountCol = null;
+
+    private static function hasRepeatCountColumn(): bool {
+        if (self::$hasRepeatCountCol !== null) return self::$hasRepeatCountCol;
+        if (function_exists('db_has_column')) {
+            try {
+                self::$hasRepeatCountCol = (bool)db_has_column('users', 'notify_repeat_count');
+            } catch (Throwable $e) {
+                self::$hasRepeatCountCol = false;
+            }
+        } else {
+            self::$hasRepeatCountCol = false;
+        }
+        return self::$hasRepeatCountCol;
+    }
+
+
     /**
      * Enqueue notifications for a given event (reliable delivery).
      *
@@ -34,29 +51,42 @@ final class Notifier {
         elseif (isset($meta['fingerprint'])) $keyMaterial = (string)$meta['fingerprint'];
         elseif (isset($meta['valid_to'])) $keyMaterial = (string)$meta['valid_to'];
 
-        foreach ($enabled as $ch) {
-            $dedupeKey = hash('sha256', implode('|', [
-                (string)$userId,
-                $ch,
-                (string)($monitorId ?? 0),
-                $eventType,
-                $keyMaterial,
-            ]));
+        $repeat = 1;
+        if (isset($user['notify_repeat_count'])) {
+            $repeat = (int)$user['notify_repeat_count'];
+        }
+        $repeat = max(1, min(5, $repeat));
 
-            $now = db_now_utc();
-            $st = db()->prepare('INSERT IGNORE INTO notification_outbox
-                (user_id, monitor_id, event_id, channel, status, attempts, next_retry_at, last_error, dedupe_key, created_at, updated_at)
-                VALUES
-                (:uid,:mid,:eid,:ch,\'pending\',0,NULL,NULL,:dk,:c,:u)');
-            $st->execute([
-                ':uid'=>$userId,
-                ':mid'=>$monitorId,
-                ':eid'=>$eventId,
-                ':ch'=>$ch,
-                ':dk'=>$dedupeKey,
-                ':c'=>$now,
-                ':u'=>$now,
-            ]);
+        foreach ($enabled as $ch) {
+            for ($i = 1; $i <= $repeat; $i++) {
+                $parts = [
+                    (string)$userId,
+                    $ch,
+                    (string)($monitorId ?? 0),
+                    $eventType,
+                    $keyMaterial,
+                ];
+                if ($repeat > 1) {
+                    $parts[] = 'repeat=' . (string)$i;
+                }
+
+                $dedupeKey = hash('sha256', implode('|', $parts));
+
+                $now = db_now_utc();
+                $st = db()->prepare('INSERT IGNORE INTO notification_outbox
+                    (user_id, monitor_id, event_id, channel, status, attempts, next_retry_at, last_error, dedupe_key, created_at, updated_at)
+                    VALUES
+                    (:uid,:mid,:eid,:ch,\'pending\',0,NULL,NULL,:dk,:c,:u)');
+                $st->execute([
+                    ':uid'=>$userId,
+                    ':mid'=>$monitorId,
+                    ':eid'=>$eventId,
+                    ':ch'=>$ch,
+                    ':dk'=>$dedupeKey,
+                    ':c'=>$now,
+                    ':u'=>$now,
+                ]);
+            }
         }
     }
 
@@ -195,7 +225,11 @@ final class Notifier {
     }
 
     private static function getUser(int $id): ?array {
-        $st = db()->prepare('SELECT id,email,role,notify_channels_json FROM users WHERE id=:id');
+        $cols = 'id,email,role,notify_channels_json';
+        if (self::hasRepeatCountColumn()) {
+            $cols .= ',notify_repeat_count';
+        }
+        $st = db()->prepare('SELECT ' . $cols . ' FROM users WHERE id=:id');
         $st->execute([':id'=>$id]);
         $r = $st->fetch();
         return $r ?: null;

@@ -6,7 +6,8 @@ require_once __DIR__ . '/../app/ui.php';
 $user = require_login();
 
 $hasLocale = db_has_column('users', 'locale');
-$select = 'SELECT id,email,role,notify_channels_json,rss_token' . ($hasLocale ? ',locale' : '') . ' FROM users WHERE id=:id';
+$hasRepeat = db_has_column('users', 'notify_repeat_count');
+$select = 'SELECT id,email,role,notify_channels_json,rss_token' . ($hasLocale ? ',locale' : '') . ($hasRepeat ? ',notify_repeat_count' : '') . ' FROM users WHERE id=:id';
 $st = db()->prepare($select);
 $st->execute([':id'=>(int)$user['id']]);
 $u = $st->fetch();
@@ -20,6 +21,9 @@ $teamsWebhook = (string)($channels['teams_webhook'] ?? '');
 
 $locale = $hasLocale ? (string)($u['locale'] ?? 'en') : 'en';
 $locale = function_exists('normalize_locale') ? normalize_locale($locale) : 'en';
+
+$repeatCount = $hasRepeat ? (int)($u['notify_repeat_count'] ?? 1) : 1;
+$repeatCount = max(1, min(5, $repeatCount));
 
 $oldSlackWebhook = $slackWebhook;
 $oldTeamsWebhook = $teamsWebhook;
@@ -44,12 +48,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $teamsWebhook = trim((string)($_POST['teams_webhook'] ?? ''));
     $postedLocale = trim((string)($_POST['locale'] ?? $locale));
     $postedLocale = function_exists('normalize_locale') ? normalize_locale($postedLocale) : 'en';
+    if ($hasRepeat) {
+        $postedRepeat = (string)($_POST['notify_repeat_count'] ?? (string)$repeatCount);
+        $postedRepeat = trim($postedRepeat);
+        if ($postedRepeat === '' || !ctype_digit($postedRepeat)) {
+            $err = 'Notification repeats must be an integer (1-5).';
+        } else {
+            $repeatCount = (int)$postedRepeat;
+            $repeatCount = max(1, min(5, $repeatCount));
+        }
+    } else {
+        $repeatCount = 1;
+    }
 
     // Basic validation: allow empty or plausible URL.
-    foreach (['Slack'=>$slackWebhook, 'Teams'=>$teamsWebhook] as $name=>$val) {
+    if ($err === '') {
+        foreach (['Slack'=>$slackWebhook, 'Teams'=>$teamsWebhook] as $name=>$val) {
         if ($val !== '' && !filter_var($val, FILTER_VALIDATE_URL)) {
             $err = $name.' webhook must be a valid URL (or empty).';
             break;
+        }
         }
     }
 
@@ -59,6 +77,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stL->execute([':l'=>$postedLocale, ':id'=>(int)$user['id']]);
             $_SESSION['locale'] = $postedLocale;
         }
+
+        if ($hasRepeat) {
+            $stR = db()->prepare('UPDATE users SET notify_repeat_count=:n WHERE id=:id');
+            $stR->execute([':n'=>$repeatCount, ':id'=>(int)$user['id']]);
+        }
+
 
         $new = [
             'email' => $emailEnabled,
@@ -159,6 +183,13 @@ render_header('Settings', $user);
         <input type="checkbox" name="email_enabled" <?php echo $emailEnabled ? 'checked' : ''; ?> />
         Enable email notifications
       </label>
+      <div class="mt-3">
+        <label class="block text-xs text-gray-600">Send each notification this many times (1-5)</label>
+        <input type="number" min="1" max="5" name="notify_repeat_count" class="border rounded px-3 py-2 text-sm w-28" value="<?php echo (int)$repeatCount; ?>" <?php echo $hasRepeat ? '' : 'disabled'; ?> />
+        <?php if (!$hasRepeat): ?>
+          <div class="text-xs text-gray-600 mt-1">DB migration required (adds users.notify_repeat_count).</div>
+        <?php endif; ?>
+      </div>
       <div class="text-xs text-gray-600 mt-1">Email is sent to your account email address.</div>
     </div>
 

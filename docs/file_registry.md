@@ -1,8 +1,8 @@
-# File registry (v0.6.6)
+# File registry (v0.6.7)
 
 This file lists repository files for change auditing.
 
-Generated: 2026-01-31 20:58:44 UTC
+Generated: 2026-01-31 21:36:04 UTC
 
 ```
 ./.env.example
@@ -88,6 +88,7 @@ Generated: 2026-01-31 20:58:44 UTC
 ./sql/migrations/v0.3_to_v0.3.1.sql
 ./sql/migrations/v0.5.5_to_v0.5.6.sql
 ./sql/migrations/v0.5.6_to_v0.5.7.sql
+./sql/migrations/v0.6.6_to_v0.6.7.sql
 ./sql/migrations/v0.6_to_v0.6.1.sql
 ./sql/schema.sql
 ```

@@ -6,7 +6,7 @@ declare(strict_types=1);
  * v0.3.1: searches multiple candidate locations to reduce accidental misplacement outages.
  */
 
-function app_version(): string { return '0.6.6'; }
+function app_version(): string { return '0.6.7'; }
 
 /**
  * Database schema version.

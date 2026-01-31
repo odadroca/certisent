@@ -68,11 +68,11 @@ render_header(t('admin.monitors.page_title'), $user);
     <div>
       <label class="block text-xs text-gray-600"><?php echo h(t('admin.monitors.label_status_filter')); ?></label>
       <select name="status" class="border rounded px-2 py-1">
-        <option value="" <?php echo $statusFilter===''?'selected':''; ?><?php echo h(t('admin.monitors.opt_all')); ?></option>
-        <option value="ok" <?php echo $statusFilter==='ok'?'selected':''; ?><?php echo h(t('admin.monitors.opt_ok')); ?></option>
-        <option value="warn" <?php echo $statusFilter==='warn'?'selected':''; ?><?php echo h(t('admin.monitors.opt_warn')); ?></option>
-        <option value="critical" <?php echo $statusFilter==='critical'?'selected':''; ?><?php echo h(t('admin.monitors.opt_critical')); ?></option>
-        <option value="unknown" <?php echo $statusFilter==='unknown'?'selected':''; ?><?php echo h(t('admin.monitors.opt_unknown')); ?></option>
+        <option value="" <?php echo $statusFilter===''?'selected':''; ?>><?php echo h(t('admin.monitors.opt_all')); ?></option>
+        <option value="ok" <?php echo $statusFilter==='ok'?'selected':''; ?>><?php echo h(t('admin.monitors.opt_ok')); ?></option>
+        <option value="warn" <?php echo $statusFilter==='warn'?'selected':''; ?>><?php echo h(t('admin.monitors.opt_warn')); ?></option>
+        <option value="critical" <?php echo $statusFilter==='critical'?'selected':''; ?>><?php echo h(t('admin.monitors.opt_critical')); ?></option>
+        <option value="unknown" <?php echo $statusFilter==='unknown'?'selected':''; ?>><?php echo h(t('admin.monitors.opt_unknown')); ?></option>
       </select>
     </div>
     <button class="bg-green-700 text-white px-3 py-2 rounded">Apply</button>

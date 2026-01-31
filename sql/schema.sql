@@ -11,6 +11,8 @@ CREATE TABLE IF NOT EXISTS users (
   created_at DATETIME NOT NULL,
   last_login_at DATETIME NULL,
   notify_channels_json JSON NULL,
+  -- v0.6.7: send each notification multiple times (default 1)
+  notify_repeat_count INT NOT NULL DEFAULT 1,
   rss_token VARCHAR(64) NOT NULL,
   failed_login_count INT NOT NULL DEFAULT 0,
   locked_until DATETIME NULL
