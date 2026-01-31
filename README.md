@@ -1,6 +1,6 @@
-<p align="center"><img src="https://i.postimg.cc/qMpPkTVz/certinel-neg.png" alt="Certinel" width="200" height="200"></p>
+<p align="center"><img src="https://i.postimg.cc/qMpPkTVz/certinel-neg.png" alt="Certinel" width="200" height="200" border="0"></p>
 
-# Certinel (Certificate Sentinel) - v0.5.7
+# Certinel (Certificate Sentinel) - v0.5.8
 Certinel is a lightweight TLS/SSL certificate monitoring service that **live-fetches** the certificate presented by an endpoint (SNI-capable), stores immutable snapshots, detects changes (renewals/rotations), and notifies interested parties before outages happen.
 
 It is designed to be simple to host (shared hosting or VPS), easy to operate (cron-driven worker), and explicit about what it is observing: **the certificate the endpoint actually serves**.
