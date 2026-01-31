@@ -64,7 +64,8 @@ function render_header(string $title, ?array $user = null): void {
     echo '<div class="text-sm">';
     if ($user) {
         echo '<span class="text-gray-300 mr-3">'.h($user['email']).' ('.h($user['role']).')</span>';
-        echo '<a class="accent hover:underline" href="'.h(url_for('logout.php')).'">Sign out</a>';
+        echo '<form class="inline" method="post" action="'.h(url_for('logout.php')).'">'; echo csrf_field(); echo '<button class="accent hover:underline" type="submit">Sign out</button>'; echo '</form>';
+
     } else {
         echo '<a class="accent hover:underline mr-3" href="'.h(url_for('login.php')).'">Sign in</a>';
         echo '<a class="accent hover:underline" href="'.h(url_for('register.php')).'">Register</a>';

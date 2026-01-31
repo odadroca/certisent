@@ -1,6 +1,6 @@
-<p align="center"><img src="https://i.postimg.cc/qMpPkTVz/certinel-neg.png" alt="Certinel" width="200" height="200" border="0"></p>
+<p align="center"><img src="https://i.postimg.cc/qMpPkTVz/certinel-neg.png" alt="Certinel" width="200" height="200"></p>
 
-# Certinel (Certificate Sentinel) - v0.5.8
+# Certinel (Certificate Sentinel) - v0.5.9
 Certinel is a lightweight TLS/SSL certificate monitoring service that **live-fetches** the certificate presented by an endpoint (SNI-capable), stores immutable snapshots, detects changes (renewals/rotations), and notifies interested parties before outages happen.
 
 It is designed to be simple to host (shared hosting or VPS), easy to operate (cron-driven worker), and explicit about what it is observing: **the certificate the endpoint actually serves**.
@@ -18,6 +18,7 @@ Detailed steps: see `docs/deploy.md` and `docs/ops_runbook.md`.
 ## Security baseline
 - Password hashing (`password_hash` / `password_verify`)
 - CSRF tokens on mutating forms
+- Logout (v0.5.9): UI uses POST+CSRF; direct GET requests show a confirmation page.
 - Prepared statements (PDO)
 - Role checks on every action
 - Session hardening (`SameSite`, `HttpOnly`, `Secure` when HTTPS; proxy-aware options in v0.5.5)

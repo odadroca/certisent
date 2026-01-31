@@ -3,6 +3,14 @@
 This file tracks security hardening changes introduced across the v0.5.x line.
 
 
+## v0.5.9 — Hardening polish: logout POST+CSRF; Apache deny compatibility; SECURITY.md
+
+- Logout is now a **POST** with CSRF verification.
+  - `GET /logout.php` remains supported as a transitional confirmation page (non-side-effecting).
+- Updated `app/logs/.htaccess` to support Apache 2.4+ (`Require all denied`) while retaining Apache 2.2 compatibility.
+- Added `SECURITY.md` with vulnerability reporting guidance.
+
+
 ## v0.5.8 — Baseline security headers (safe defaults)
 
 - Added baseline browser security headers on all HTTP responses:

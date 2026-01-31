@@ -1,1 +1,7 @@
-Deny from all
+# Protect log files (Apache 2.2 + 2.4+ compatible)
+<IfModule mod_authz_core.c>
+  Require all denied
+</IfModule>
+<IfModule !mod_authz_core.c>
+  Deny from all
+</IfModule>

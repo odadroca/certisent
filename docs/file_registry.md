@@ -1,8 +1,8 @@
-# File registry (v0.5.8)
+# File registry (v0.5.9)
 
 This file is used for integrity checks and change auditing.
 
-Generated: 2026-01-31 01:42:37 UTC
+Generated: 2026-01-31 09:02:56 UTC
 
 ```
 b86b3ba178bf09eff78353c8f91a13c1c04a0f5208f77a4289825fb138716683  ./.env.example
@@ -10,15 +10,16 @@ b86b3ba178bf09eff78353c8f91a13c1c04a0f5208f77a4289825fb138716683  ./.env.example
 f068c6196ca35260c316d3f8b0f179e736eb7d0bf125bd92bee432b195d0497e  ./CODE_OF_CONDUCT.md
 ee2eed0d3dbebba268cdc1f99d8791ba3cca78a7f22946d9c180e3174e3e2108  ./CONTRIBUTING.md
 d5010198d478747fe2ec481da8e9a8fb8949ffc20f8a51666cb8956145f5ad51  ./LICENSE.md
-36538458d8031ab7332a888d3e8d2f9884c5c74b19da2e32a97d707a9e8fd2e5  ./README.md
+bdd81983ac6b4b1e4263c8b06688d6be27fc871a0528b47453426da9bd51a88a  ./README.md
+94ac2a04d228c537ca836df3d21070415ef28206b1a666e1b88627d16ec77b11  ./SECURITY.md
 d154165b908b6678f3df3b5dd2a4f0b74e325318d6851e62485fbd15fc31bf90  ./app/api/Router.php
 91e699a51355c613c8a142a3b96f1ac080662a859c1f4a0ac8ddf2b09153521f  ./app/auth.php
 617621f9f2bedcad56f4e3324f6894b0b4dca705fb677c17e0a0bd376c08058f  ./app/bootstrap.php
-d42b64350acc8e124a9cf7028958ece8d957256da28d5b39af0b3fed1d3b41f4  ./app/config.php
+1cdb459554e01b6a6b51587093850ff8816866cd714ad98f0685cc5c9c66b130  ./app/config.php
 758ca4cc30a692f3ccd2cccc73b71c3fa160881a6d3cbecddabec3c5806781c1  ./app/csrf.php
 ff011230ab48305a0a98c260b429c01c5df58d6ca39a17d2f26f563fe55f7f1e  ./app/db.php
 1f67cf5003423cbfbc94ef69d00bcf44092d4bbd082408dea02ef691cbeb50b8  ./app/logger.php
-ef94d4c2ac2a038b6c2ae673d9573333a0a20f7fac9e2d75af11c6c387a157a3  ./app/logs/.htaccess
+d7eef8c9e4b084042a1483437dc133b46ea0d7705967fb53f7702004220b7500  ./app/logs/.htaccess
 5e92a0d79abf10af238786f2dd0caa8541e580595f0e9aa68a580703f2c0bfe0  ./app/services/Audit.php
 3f9ed99d4bb3accd3f45951f9f04e5dac488289fe7eea598d9ae8f6615a2253c  ./app/services/CertFetcher.php
 0d3e8a2a204574c55410dd208aeb30591353a53d4b4649905f33b60ffb2c2e59  ./app/services/Emailer.php
@@ -28,16 +29,17 @@ e45f93a1eaf5a4e2db148a4d05c45e657872edf73bc641815f42812e2f56a198  ./app/services
 207b77be26eda12f401e31a479041b464628470105cec210be0ed563cac83575  ./app/services/SmtpClient.php
 7044f46f01e81ce16fede471458aed6f5268bd8da9fe6b35c3eb55c44c027544  ./app/services/SsrfPolicy.php
 b2187b16acc5dce55c4729434f97c4ef5db6917bf9d42c0cffb604d413a8802b  ./app/services/Worker.php
-8aa0ee279edee02df536527218d438aab351f7cf2e3e6763dc7d6e0728b696c0  ./app/ui.php
+2ea9b22976662a4ead3b81bfce23ee1efb5437460b7b3437f3adf859bf1ec610  ./app/ui.php
 d27088d39b5e61ae9d998fe4588231b83fada16de524ae2ef0ffa51917033d3a  ./assets/certinel-neg.png
 bbb5ec6a12edbcc13541c21792f5ba28e98e1b07f5416abf8e0ef89d05b0d102  ./assets/certinel-pos.png
 828ddb5b83c393ecc392e632da75fd6f7496111eaedb3103d93e1f5638a85abc  ./docs/api.md
 5f90ccc2ae9344790569dbf022c7af5f80e816f735cec7bc2074d427f222eea2  ./docs/architecture.md
 0b7457f93e1ef91d489b01f0073c5be2acc8bb47ffa0a430e06e5e3c52103462  ./docs/deploy.md
-94d63dd03e0a9d77a287f865602ee07e3b01707e76b901cb560bb292ea3c0e17  ./docs/file_registry.md.new
+b61ffb55251d526da1fb46acd6b07b44f84b3f9f3b22446f0231e745c4544246  ./docs/file_registry.md
+d919ca42ce63b29e8dc70264a69220474010260dc064ea3ea12481eed66ca155  ./docs/file_registry.md.new
 9af54e5b29ecbdc20f12ca9a785cd22d311f447a89255c97768b500094111130  ./docs/ops_runbook.md
 4c4094b15e887dffb7ac9f0e39a9ead8afb5f0d29c6e2f6f367f1f40f2372fca  ./docs/release_notes_v0.4.x.md
-77ba340f9b9c453f83aed3ff3aa579e6b9ce90e2a19bfde70d942c139882c528  ./docs/release_notes_v0.5.x.md
+da1c3d3d5d978fac6590365060f3fee86ec8d853c2363349d5702b376b25eef5  ./docs/release_notes_v0.5.x.md
 6659c65b484f5962b565fc98cee8e39ce2969c0a4e27c64f07e7fc9f50986d2f  ./docs/ui_map.md
 5827b8b739595255bef8c033dc9e147b024ae0d1960955bbf21021a6c83ca49c  ./public/.htaccess
 e72971067fa50cdbd679766f9e589d54904860647fb12bad3e97e14779eacd66  ./public/admin/api_keys.php
@@ -58,7 +60,7 @@ a928c12deeca11e03d37d6b2587ff962cc4eecb2cab58a122e0137b927cb9d6d  ./public/dashb
 90b58c93bb88dcaa3b3cd3940148e24387b7504e1f9ad8e8b43e6cd473998cac  ./public/history.php
 da6724f23df478641462006f9caec1881b32548b4dd5a6a9d4ff9024678629b2  ./public/index.php
 d1a6716f100784f3467e049b0f3bb34ab30459826a458cdea18e6b5b7e713e80  ./public/login.php
-232945d16650c5f9dd4eec4684460a4f351fed7b61519c3cc9454482b8a3dc1e  ./public/logout.php
+7e4fda9361ac8506f312cf693d65b27ee5012e92f9d88cf34f3700ff2f42fcb8  ./public/logout.php
 db8f9749c62c0e77ef5df5e90002b9638d17d2105500181945ec2ef5719d0275  ./public/monitor_add.php
 9b65ab72c22827c1d4a609f3cdcfc75deaf2fc305f5a243356f83aee89dcdfdd  ./public/monitor_check.php
 2e767c4ebaa6bed1149a482cca184b98428d63cb475169ee3923eaa7980510ee  ./public/monitor_delete.php
