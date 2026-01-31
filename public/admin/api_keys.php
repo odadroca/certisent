@@ -27,20 +27,57 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         })));
         if (!$scopes) $scopes = ['run_worker'];
 
+        $keyType = trim((string)($_POST['key_type'] ?? ''));
+        if ($keyType === '') $keyType = (cfg('API_KEYS_REQUIRE_OWNER','false') === 'true') ? 'user' : 'system';
+        if (!in_array($keyType, ['system','user'], true)) $keyType = 'system';
+
+        $ownerUserId = isset($_POST['owner_user_id']) ? (int)$_POST['owner_user_id'] : 0;
+        $hasOwnerCols = db_has_column('api_keys', 'owner_user_id') && db_has_column('api_keys', 'key_type');
+
+        if (($keyType === 'user' || cfg('API_KEYS_REQUIRE_OWNER','false') === 'true') && $ownerUserId <= 0) {
+            flash_set('error', 'Owner user is required for user-scoped API keys.');
+            header('Location: api_keys.php');
+            exit;
+        }
+        if (($keyType === 'user') && !$hasOwnerCols) {
+            flash_set('error', 'DB schema missing api_keys owner columns. Apply v0.5.6 migration first.');
+            header('Location: api_keys.php');
+            exit;
+        }
+
+
         // Generate token: base64url
         $raw = random_bytes(24);
         $token = rtrim(strtr(base64_encode($raw), '+/', '-_'), '=');
         $hash = hash('sha256', $token);
 
         $now = db_now_utc();
-        $st = db()->prepare('INSERT INTO api_keys (name, token_hash_sha256, scopes_json, is_active, created_at, updated_at) VALUES (:n,:h,:s,1,:c,:u)');
-        $st->execute([
-            ':n' => $name,
-            ':h' => $hash,
-            ':s' => json_encode($scopes, JSON_UNESCAPED_SLASHES),
-            ':c' => $now,
-            ':u' => $now,
-        ]);
+
+        $hasOwnerCols = db_has_column('api_keys', 'owner_user_id') && db_has_column('api_keys', 'key_type');
+
+        if ($hasOwnerCols) {
+            $st = db()->prepare('INSERT INTO api_keys (name, token_hash_sha256, scopes_json, is_active, created_at, updated_at, key_type, owner_user_id) VALUES (:n,:h,:s,1,:c,:u,:kt,:ou)');
+            $st->execute([
+                ':n' => $name,
+                ':h' => $hash,
+                ':s' => json_encode($scopes, JSON_UNESCAPED_SLASHES),
+                ':c' => $now,
+                ':u' => $now,
+                ':kt' => $keyType,
+                ':ou' => $ownerUserId > 0 ? $ownerUserId : null,
+            ]);
+        } else {
+            // Upgrade-safe fallback (system keys only).
+            $st = db()->prepare('INSERT INTO api_keys (name, token_hash_sha256, scopes_json, is_active, created_at, updated_at) VALUES (:n,:h,:s,1,:c,:u)');
+            $st->execute([
+                ':n' => $name,
+                ':h' => $hash,
+                ':s' => json_encode($scopes, JSON_UNESCAPED_SLASHES),
+                ':c' => $now,
+                ':u' => $now,
+            ]);
+        }
+
 
         // Store token for one-time display after redirect (do NOT store in DB).
         $_SESSION['created_token_once'] = $token;
@@ -67,7 +104,12 @@ if (isset($_SESSION['created_token_once']) && is_string($_SESSION['created_token
     unset($_SESSION['created_token_once']);
 }
 
-$keys = db()->query('SELECT id,name,scopes_json,is_active,created_at,last_used_at FROM api_keys ORDER BY id DESC')->fetchAll();
+$hasOwnerCols = db_has_column('api_keys', 'owner_user_id') && db_has_column('api_keys', 'key_type');
+if ($hasOwnerCols) {
+    $keys = db()->query('SELECT k.id,k.name,k.scopes_json,k.is_active,k.created_at,k.last_used_at,k.key_type,k.owner_user_id,u.email AS owner_email FROM api_keys k LEFT JOIN users u ON u.id = k.owner_user_id ORDER BY k.id DESC')->fetchAll();
+} else {
+    $keys = db()->query('SELECT id,name,scopes_json,is_active,created_at,last_used_at FROM api_keys ORDER BY id DESC')->fetchAll();
+}
 
 render_header('Admin · API Keys', $user);
 ?>
@@ -105,6 +147,34 @@ if ($createdToken !== null) {
       <input name="name" class="w-full border rounded px-3 py-2" placeholder="worker" />
     </div>
 
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div>
+        <label class="block text-sm text-gray-700">Key type</label>
+        <select name="key_type" class="w-full border rounded px-3 py-2">
+          <option value="system">system (legacy)</option>
+          <option value="user">user-scoped</option>
+        </select>
+        <div class="text-xs text-gray-500 mt-1">
+          User-scoped keys enforce monitor ownership on <code>/api/v1/check</code> when using <code>monitor_id</code>.
+        </div>
+      </div>
+      <div>
+        <label class="block text-sm text-gray-700">Owner user</label>
+        <select name="owner_user_id" class="w-full border rounded px-3 py-2">
+          <option value="0">(none)</option>
+          <?php foreach (db()->query('SELECT id,email,role FROM users ORDER BY email ASC')->fetchAll() as $uu): ?>
+            <option value="<?php echo (int)$uu['id']; ?>">
+              <?php echo htmlspecialchars($uu['email']); ?> (<?php echo htmlspecialchars($uu['role']); ?>)
+            </option>
+          <?php endforeach; ?>
+        </select>
+        <div class="text-xs text-gray-500 mt-1">
+          Requires DB migration for storage; system keys ignore owner.
+        </div>
+      </div>
+    </div>
+
     <div>
       <div class="text-sm text-gray-700 mb-2">Scopes</div>
       <label class="flex items-center gap-2 text-sm"><input type="checkbox" name="scopes[]" value="run_worker" checked /> run_worker</label>
@@ -123,6 +193,10 @@ if ($createdToken !== null) {
       <tr class="text-left border-b">
         <th class="py-2 pr-3">ID</th>
         <th class="py-2 pr-3">Name</th>
+        <?php if ($hasOwnerCols): ?>
+          <th class="py-2 pr-3">Type</th>
+          <th class="py-2 pr-3">Owner</th>
+        <?php endif; ?>
         <th class="py-2 pr-3">Scopes</th>
         <th class="py-2 pr-3">Active</th>
         <th class="py-2 pr-3">Created (UTC)</th>

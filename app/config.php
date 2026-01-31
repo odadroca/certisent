@@ -7,7 +7,7 @@ declare(strict_types=1);
  */
 
 function app_version(): string {
-    return '0.5.5';
+    return '0.5.6';
 }
 
 /**
@@ -125,6 +125,10 @@ function cfg(string $key, $default = null) {
             'MAIL_API_URL' => (string)env('MAIL_API_URL', ''),
             'MAIL_API_TOKEN' => (string)env('MAIL_API_TOKEN', ''),
             'ADMIN_EMAIL' => (string)env('ADMIN_EMAIL', ''),
+            // Legacy fallback. Prefer scoped API keys stored in DB (v0.3+).
+            // v0.5.6 API key ownership (opt-in).
+            // Default false: existing keys remain system-scoped; ownership enforced only for user-scoped keys.
+            'API_KEYS_REQUIRE_OWNER' => (string)env('API_KEYS_REQUIRE_OWNER', 'false'),
             // Legacy fallback. Prefer scoped API keys stored in DB (v0.3+).
             'API_WORKER_KEY' => (string)env('API_WORKER_KEY', ''),
             'TLS_CONNECT_TIMEOUT_SECS' => (int)env('TLS_CONNECT_TIMEOUT_SECS', '7'),

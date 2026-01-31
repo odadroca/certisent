@@ -104,11 +104,16 @@ CREATE TABLE IF NOT EXISTS api_keys (
   token_hash_sha256 CHAR(64) NOT NULL UNIQUE,
   scopes_json JSON NOT NULL,
   is_active TINYINT(1) NOT NULL DEFAULT 1,
+  -- v0.5.6: system (legacy) or user (least-privilege)
+  key_type VARCHAR(16) NOT NULL DEFAULT 'system',
+  owner_user_id INT NULL,
   created_at DATETIME NOT NULL,
+  updated_at DATETIME NOT NULL,
   last_used_at DATETIME NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE INDEX idx_api_keys_active ON api_keys(is_active);
+CREATE INDEX idx_api_keys_owner ON api_keys(owner_user_id);
 
 -- Notification outbox for reliable delivery + retries
 CREATE TABLE IF NOT EXISTS notification_outbox (

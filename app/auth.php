@@ -103,7 +103,7 @@ function require_api_any_scope(array $scopesWanted): array {
     // Legacy fallback (kept for upgrade safety) — treated as full-scope.
     $legacy = (string)cfg('API_WORKER_KEY', '');
     if ($legacy !== '' && hash_equals($legacy, $token)) {
-        return ['id'=>0,'name'=>'legacy','scopes_json'=>json_encode(['*'])];
+        return ['id'=>0,'name'=>'legacy','scopes_json'=>json_encode(['*']),'key_type'=>'system','owner_user_id'=>null];
     }
 
     $hash = hash('sha256', $token);

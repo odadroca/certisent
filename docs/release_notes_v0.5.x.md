@@ -2,6 +2,17 @@
 
 This file tracks security hardening changes introduced across the v0.5.x line.
 
+## v0.5.6 — API key ownership + least privilege (opt-in)
+
+- Added optional API key ownership fields (requires DB migration):
+  - `api_keys.key_type` (`system` default; `user` for least privilege)
+  - `api_keys.owner_user_id` (nullable)
+  - Migration: `sql/migrations/v0.5.5_to_v0.5.6.sql`
+- Added `API_KEYS_REQUIRE_OWNER=false` (default).
+- Enforcement (non-breaking):
+  - Existing keys remain `system` scope.
+  - For `user` keys, `POST /api/v1/check` with `monitor_id` requires the monitor to be owned by the key owner.
+
 ## v0.5.5 — Session/cookie hardening for proxy deployments (opt-in)
 
 - Added `TRUST_PROXY_HEADERS=false` (default).

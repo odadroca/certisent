@@ -22,8 +22,8 @@ final class ApiRouter {
             return;
         }
         if ($method === 'POST' && $sub === '/check') {
-            require_api_scope('check_monitor');
-            self::postCheck();
+            $apiKey = require_api_scope('check_monitor');
+            self::postCheck($apiKey);
             return;
         }
         if ($method === 'GET' && $sub === '/health') {
@@ -63,12 +63,35 @@ final class ApiRouter {
         }
     }
 
-    private static function postCheck(): void {
+    private static function postCheck(array $apiKey): void {
         $d = self::readJson();
         $monitorId = isset($d['monitor_id']) ? (int)$d['monitor_id'] : null;
         $url = isset($d['url']) ? (string)$d['url'] : null;
 
         if ($monitorId) {
+            // v0.5.6: user-scoped API keys must only operate on monitors owned by the key owner.
+            $keyType = (string)($apiKey['key_type'] ?? 'system');
+            $ownerId = isset($apiKey['owner_user_id']) ? (int)$apiKey['owner_user_id'] : 0;
+            if ($keyType === 'user' || $keyType === 'user_scoped') {
+                if ($ownerId <= 0) {
+                    http_response_code(403);
+                    echo json_encode(['ok'=>false,'error'=>'api_key_owner_required']);
+                    return;
+                }
+                $st = db()->prepare('SELECT user_id FROM monitors WHERE id = :id LIMIT 1');
+                $st->execute([':id'=>$monitorId]);
+                $m = $st->fetch();
+                if (!$m) {
+                    http_response_code(404);
+                    echo json_encode(['ok'=>false,'error'=>'monitor_not_found']);
+                    return;
+                }
+                if ((int)$m['user_id'] !== $ownerId) {
+                    http_response_code(403);
+                    echo json_encode(['ok'=>false,'error'=>'forbidden_monitor']);
+                    return;
+                }
+            }
             $out = Worker::checkOne($monitorId);
             echo json_encode(['ok'=>true,'monitor_id'=>$monitorId,'result'=>$out], JSON_UNESCAPED_SLASHES);
             return;
