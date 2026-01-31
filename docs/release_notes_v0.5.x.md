@@ -3,7 +3,7 @@
 This file tracks security hardening changes introduced across the v0.5.x line.
 
 
-## v0.5.9 — Hardening polish: logout POST+CSRF; Apache deny compatibility; SECURITY.md
+## v0.6 — Hardening polish: logout POST+CSRF; Apache deny compatibility; SECURITY.md
 
 - Logout is now a **POST** with CSRF verification.
   - `GET /logout.php` remains supported as a transitional confirmation page (non-side-effecting).

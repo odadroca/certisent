@@ -1,75 +1,72 @@
-# File registry (v0.5.9)
+# File registry (v0.6)
 
-This file is used for integrity checks and change auditing.
+This file lists repository files for change auditing.
 
-Generated: 2026-01-31 15:11:50 UTC
+Generated: 2026-01-31 16:18:36 UTC
 
 ```
-b86b3ba178bf09eff78353c8f91a13c1c04a0f5208f77a4289825fb138716683  ./.env.example
-f068c6196ca35260c316d3f8b0f179e736eb7d0bf125bd92bee432b195d0497e  ./CODE_OF_CONDUCT.md
-ee2eed0d3dbebba268cdc1f99d8791ba3cca78a7f22946d9c180e3174e3e2108  ./CONTRIBUTING.md
-d5010198d478747fe2ec481da8e9a8fb8949ffc20f8a51666cb8956145f5ad51  ./LICENSE.md
-d39e9b884f1bf06ee20ab733578739cbcbfc24ec7f0aab2a2b452698d0965128  ./README.md
-94ac2a04d228c537ca836df3d21070415ef28206b1a666e1b88627d16ec77b11  ./SECURITY.md
-d154165b908b6678f3df3b5dd2a4f0b74e325318d6851e62485fbd15fc31bf90  ./app/api/Router.php
-91e699a51355c613c8a142a3b96f1ac080662a859c1f4a0ac8ddf2b09153521f  ./app/auth.php
-617621f9f2bedcad56f4e3324f6894b0b4dca705fb677c17e0a0bd376c08058f  ./app/bootstrap.php
-1cdb459554e01b6a6b51587093850ff8816866cd714ad98f0685cc5c9c66b130  ./app/config.php
-758ca4cc30a692f3ccd2cccc73b71c3fa160881a6d3cbecddabec3c5806781c1  ./app/csrf.php
-ff011230ab48305a0a98c260b429c01c5df58d6ca39a17d2f26f563fe55f7f1e  ./app/db.php
-1f67cf5003423cbfbc94ef69d00bcf44092d4bbd082408dea02ef691cbeb50b8  ./app/logger.php
-d7eef8c9e4b084042a1483437dc133b46ea0d7705967fb53f7702004220b7500  ./app/logs/.htaccess
-5e92a0d79abf10af238786f2dd0caa8541e580595f0e9aa68a580703f2c0bfe0  ./app/services/Audit.php
-3f9ed99d4bb3accd3f45951f9f04e5dac488289fe7eea598d9ae8f6615a2253c  ./app/services/CertFetcher.php
-0d3e8a2a204574c55410dd208aeb30591353a53d4b4649905f33b60ffb2c2e59  ./app/services/Emailer.php
-e45f93a1eaf5a4e2db148a4d05c45e657872edf73bc641815f42812e2f56a198  ./app/services/MonitorService.php
-0897ad3678068fe6c24168136fafab0726db27831c8394b67c5f9462d85f07f9  ./app/services/Notifier.php
-1921b62f19be32069890df3789304bd3326c1a8c34ff6938f98c0cfb9101e82a  ./app/services/RateLimiter.php
-207b77be26eda12f401e31a479041b464628470105cec210be0ed563cac83575  ./app/services/SmtpClient.php
-7044f46f01e81ce16fede471458aed6f5268bd8da9fe6b35c3eb55c44c027544  ./app/services/SsrfPolicy.php
-b2187b16acc5dce55c4729434f97c4ef5db6917bf9d42c0cffb604d413a8802b  ./app/services/Worker.php
-2ea9b22976662a4ead3b81bfce23ee1efb5437460b7b3437f3adf859bf1ec610  ./app/ui.php
-c5c1eceef729199e4190f8ce2fd2ad5e70da282a61cdfa79fbfcb223ff89a2c9  ./docs/api.md
-07813974bdc9d929ba77cd5123a29fea8e977669f1f6d97105456f6925614900  ./docs/architecture.md
-d28c9516e462f1853ea88251cedec7c3520f40d25b45c2c1b647d659fc5a7550  ./docs/deploy.md
-2df986e0b48e1ad361ab664adac335e40aad39f29d1d2ab633d9ca179f23ea9e  ./docs/file_registry.md
-1bb6a8ff1a3d9f01c44f4e09f7a3755812c9565f19da6c3c4606a926ede34213  ./docs/ops_runbook.md
-390ccf000909949af4d31e851a95144ac6e34d4130054824b9fab2c82d2fcd74  ./docs/release_notes_v0.4.x.md
-ab32aeadea51617ea392207b5d0e21a7cfbef6963ad4a2791b5a57f5386c5775  ./docs/release_notes_v0.5.x.md
-55a9216d4a2c0c9e738413aeab7b06368cb6b910218310e68768b13a6516f7fa  ./docs/ui_map.md
-5827b8b739595255bef8c033dc9e147b024ae0d1960955bbf21021a6c83ca49c  ./public/.htaccess
-e72971067fa50cdbd679766f9e589d54904860647fb12bad3e97e14779eacd66  ./public/admin/api_keys.php
-27f6868ae9be946447e1ec80b9088ac41be918739ef9236419d7312e1a7cbf52  ./public/admin/audit.php
-5a08e925df5e8f18c892ac38d2aea7b0c037d9787976d3bc70bc4e50c630c762  ./public/admin/email.php
-786bcad0ad55d26fb95e443c2cfd1290c15a71ff5adc7a58c6734ae084b3d5c4  ./public/admin/job_cancel.php
-97dfb6c5a9f813fd6d38059659ac1a8450bcffeb1550ae16aa9cdc895ba6b769  ./public/admin/monitors.php
-69312d911548cf26b8b5eb98a0173a8e782b74ae58d6147c16de386929a5f4f0  ./public/admin/outbox.php
-120476e502ba3d87917b7219a6884891c44a66f5b87ddaeec6c65df2dadcef37  ./public/admin/outbox_run.php
-c8d5afd1824cc687239073c8f9ab437a61b843507248a9198be84ffe45ec0eab  ./public/admin/system.php
-e177f0c84d944524e099ba262dbb02abc67567bad6be4eb77033b8d220fb1266  ./public/admin/user_edit.php
-46c122df3d3aa650c68d47256d7c8e54a6748413315a445117a08d32886aada9  ./public/admin/users.php
-59e6232d80876d09457849368908fcd60a552b5843b15d5b9ce54eeb72eec0da  ./public/api/v1/index.php
-471dbc4c7081a8a512801868a7c8261bdf7650c704bb5d36a5d5275249d67a97  ./public/check_now.php
-c114df6a25073e834c22d7117cc76e9d22884dd1a690b75ec1bfcdcb846538d2  ./public/check_now_all.php
-a928c12deeca11e03d37d6b2587ff962cc4eecb2cab58a122e0137b927cb9d6d  ./public/dashboard.php
-91a4e802395d978631bb78f5d46e8010cbe27a0736864750c890f6d418e70616  ./public/events.php
-90b58c93bb88dcaa3b3cd3940148e24387b7504e1f9ad8e8b43e6cd473998cac  ./public/history.php
-da6724f23df478641462006f9caec1881b32548b4dd5a6a9d4ff9024678629b2  ./public/index.php
-d1a6716f100784f3467e049b0f3bb34ab30459826a458cdea18e6b5b7e713e80  ./public/login.php
-7e4fda9361ac8506f312cf693d65b27ee5012e92f9d88cf34f3700ff2f42fcb8  ./public/logout.php
-db8f9749c62c0e77ef5df5e90002b9638d17d2105500181945ec2ef5719d0275  ./public/monitor_add.php
-9b65ab72c22827c1d4a609f3cdcfc75deaf2fc305f5a243356f83aee89dcdfdd  ./public/monitor_check.php
-2e767c4ebaa6bed1149a482cca184b98428d63cb475169ee3923eaa7980510ee  ./public/monitor_delete.php
-814d67c063f80f4c98a19572b48dd0521465dd77ccae5e1b5f03c859a27c7e2f  ./public/monitor_edit.php
-dfe3221ab8acc9d170254e966c33dba4633d17a88850804fbfa5185fa48f62d5  ./public/monitor_view.php
-1c9f321c6e860d49309683e253dbdf2d2b1b9099a8083d38e87c7faa64a5f90c  ./public/register.php
-640313d0a505def2aebe548000be2c71c01576be0efb4590bedef359c9549573  ./public/rss.php
-488557b26a86f5b1f8f2275a55a0785904851a602320a41d980ad553a5498567  ./public/settings.php
-46070bd17c15bee8a012b1553c75fe8daac4667c76dcd77b6a9a1f026230746e  ./scripts/worker.php
-ab2856f49d677ba7ceef867cde767637a222f99562ca4ba4491fb615125f4e86  ./sql/migrations/v0.2.1_to_v0.3.sql
-1b9f7b774851865c9d55ab0276b5af747979248e97b173dbdc76097d9815479c  ./sql/migrations/v0.3.1_to_v0.4.sql
-27e1a529a6e8a234962d94d01e9309cf337193ef22d433fe9a6a84710b790ac4  ./sql/migrations/v0.3_to_v0.3.1.sql
-a33274bc05956f8c1e7cd188f6d338c7edab59095e24d397f3f8f96e79182f3d  ./sql/migrations/v0.5.5_to_v0.5.6.sql
-7bc78afc36e27b71ed1573e4ed73d2e64104a34953b1f19b49c637ef8462fb1d  ./sql/migrations/v0.5.6_to_v0.5.7.sql
-b4da8f03b5c0fe6b61442afc35d7c3448c29184a2516be45718cea102a91f5c5  ./sql/schema.sql
+./CODE_OF_CONDUCT.md
+./CONTRIBUTING.md
+./LICENSE.md
+./README.md
+./SECURITY.md
+./app/api/Router.php
+./app/auth.php
+./app/bootstrap.php
+./app/config.php
+./app/csrf.php
+./app/db.php
+./app/logger.php
+./app/services/Audit.php
+./app/services/CertFetcher.php
+./app/services/Emailer.php
+./app/services/MonitorService.php
+./app/services/Notifier.php
+./app/services/RateLimiter.php
+./app/services/SmtpClient.php
+./app/services/SsrfPolicy.php
+./app/services/Worker.php
+./app/ui.php
+./docs/api.md
+./docs/architecture.md
+./docs/deploy.md
+./docs/file_registry.md
+./docs/ops_runbook.md
+./docs/release_notes_v0.4.x.md
+./docs/release_notes_v0.5.x.md
+./docs/ui_map.md
+./public/admin/api_keys.php
+./public/admin/audit.php
+./public/admin/email.php
+./public/admin/job_cancel.php
+./public/admin/monitors.php
+./public/admin/outbox.php
+./public/admin/outbox_run.php
+./public/admin/system.php
+./public/admin/user_edit.php
+./public/admin/users.php
+./public/api/v1/index.php
+./public/check_now.php
+./public/check_now_all.php
+./public/dashboard.php
+./public/events.php
+./public/history.php
+./public/index.php
+./public/login.php
+./public/logout.php
+./public/monitor_add.php
+./public/monitor_check.php
+./public/monitor_delete.php
+./public/monitor_edit.php
+./public/monitor_view.php
+./public/register.php
+./public/rss.php
+./public/settings.php
+./scripts/worker.php
+./sql/migrations/v0.2.1_to_v0.3.sql
+./sql/migrations/v0.3.1_to_v0.4.sql
+./sql/migrations/v0.3_to_v0.3.1.sql
+./sql/migrations/v0.5.5_to_v0.5.6.sql
+./sql/migrations/v0.5.6_to_v0.5.7.sql
+./sql/schema.sql
 ```

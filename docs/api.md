@@ -1,4 +1,4 @@
-# API (v0.5.9)
+# API (v0.6)
 
 Authentication:
 - Preferred: create an API key in the admin UI (Admin → API Keys) and use `Authorization: Bearer <token>`.

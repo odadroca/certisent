@@ -27,10 +27,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $res = Emailer::sendText($to, '[Certinel] Test email', "This is a test email sent by Certinel v".app_version()." at ".db_now_utc()." UTC\n");
         if (($res['ok'] ?? false) === true) {
             flash_set('success', 'Test email sent to '.$to.'.');
-            Audit::log($user, 'email.test_sent', 'system', null, ['to'=>$to,'transport'=>$transport]);
+            Audit::log((int)$user['id'], 'email.test_sent', 'system', null, ['to'=>$to,'transport'=>$transport]);
         } else {
             flash_set('error', 'Email send failed: '.(string)($res['error'] ?? 'unknown_error'));
-            Audit::log($user, 'email.test_failed', 'system', null, ['to'=>$to,'transport'=>$transport,'error'=>$res['error'] ?? null]);
+            Audit::log((int)$user['id'], 'email.test_failed', 'system', null, ['to'=>$to,'transport'=>$transport,'error'=>$res['error'] ?? null]);
         }
     }
     header('Location: '.url_for('admin/email.php'));

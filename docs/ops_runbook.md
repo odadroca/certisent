@@ -1,4 +1,4 @@
-# Ops runbook (v0.5.9)
+# Ops runbook (v0.6)
 
 This is a pragmatic troubleshooting checklist for operators running Certinel on shared hosting or a VPS.
 
@@ -111,7 +111,7 @@ Fix:
 Failure modes:
 - Trusting arbitrary proxy headers without CIDR gating enables spoofing.
 
-## Logout behavior (v0.5.9)
+## Logout behavior (v0.6)
 
 - `GET /logout.php` shows a confirmation page.
 - Actual logout is `POST /logout.php` with CSRF token.

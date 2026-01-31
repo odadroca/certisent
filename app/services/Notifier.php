@@ -66,16 +66,16 @@ final class Notifier {
      */
     public static function processOutbox(int $limit = 100): array {
         $now = db_now_utc();
-        $st = db()->prepare("SELECT o.*, u.email, u.notify_channels_json
+        $limit = max(1, min(1000, $limit));
+        $sql = "SELECT o.*, u.email, u.notify_channels_json
                              FROM notification_outbox o
                              JOIN users u ON u.id=o.user_id
                              WHERE o.status='pending'
                                AND (o.next_retry_at IS NULL OR o.next_retry_at <= :now)
                              ORDER BY o.created_at ASC
-                             LIMIT :lim");
-        $st->bindValue(':now', $now);
-        $st->bindValue(':lim', $limit, PDO::PARAM_INT);
-        $st->execute();
+                             LIMIT {$limit}";
+        $st = db()->prepare($sql);
+        $st->execute([':now' => $now]);
         $rows = $st->fetchAll();
 
         $processed = 0; $sent = 0; $failed = 0;

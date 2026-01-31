@@ -1,4 +1,4 @@
-# Deployment and upgrades (v0.5.9)
+# Deployment and upgrades (v0.6)
 
 This document covers (a) fresh installs, (b) common hosting gotchas, and (c) upgrade paths including when SQL migrations are required.
 

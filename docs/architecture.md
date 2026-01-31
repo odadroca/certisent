@@ -1,4 +1,4 @@
-# Architecture (v0.5.9)
+# Architecture (v0.6)
 
 ## Components
 

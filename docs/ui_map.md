@@ -1,4 +1,4 @@
-# Certinel v0.5.9 UI map
+# Certinel v0.6 UI map
 
 All routes are relative to the `/public/` folder.
 

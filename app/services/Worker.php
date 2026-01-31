@@ -148,11 +148,12 @@ final class Worker {
         $lastId = $job['last_monitor_id'] !== null ? (int)$job['last_monitor_id'] : 0;
         $processed = (int)$job['total_processed'];
 
-        $sel = db()->prepare("SELECT id FROM monitors WHERE enabled=1 AND id > :last ORDER BY id ASC LIMIT :lim");
+        $maxChecks = max(1, min(10000, $maxChecks));
+        $sql = "SELECT id FROM monitors WHERE enabled=1 AND id > :last ORDER BY id ASC LIMIT {$maxChecks}";
+        $sel = db()->prepare($sql);
         $sel->bindValue(':last', $lastId, PDO::PARAM_INT);
-        $sel->bindValue(':lim', $maxChecks, PDO::PARAM_INT);
         $sel->execute();
-        $rows = $sel->fetchAll();
+$rows = $sel->fetchAll();
 
         $checked = 0; $errors=0; $changed=0; $renewed=0; $warned=0;
         // Cancellation responsiveness: check job status between monitor checks.

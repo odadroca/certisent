@@ -1,6 +1,6 @@
 <p align="center"><img src="https://i.postimg.cc/qMpPkTVz/certinel-neg.png" alt="Certinel" width="200" height="200"></p>
 
-# Certinel — TLS/SSL Certificate Monitoring (Beta) · v0.5.9
+# Certinel — TLS/SSL Certificate Monitoring (Beta) - v0.6
 
 Certinel is a lightweight TLS/SSL certificate monitoring service that **live-fetches** the certificate presented by an endpoint (SNI-capable), stores immutable snapshots, detects changes (renewals/rotations), and notifies before outages happen.
 
@@ -44,7 +44,7 @@ Docs: `docs/deploy.md`, `docs/ops_runbook.md`.
 ## Security baseline (documented behaviors)
 - Password hashing (`password_hash` / `password_verify`)
 - CSRF tokens on mutating forms
-- Logout (v0.5.9): UI uses POST+CSRF; direct GET requests show a confirmation page.
+- Logout (v0.6): UI uses POST+CSRF; direct GET requests show a confirmation page.
 - Prepared statements (PDO)
 - Role checks on every action
 - Session hardening (`SameSite`, `HttpOnly`, `Secure` when HTTPS; proxy-aware options in v0.5.5)
@@ -59,6 +59,7 @@ Security reporting: see `SECURITY.md`.
 - `docs/api.md` — API endpoints/scopes
 - `docs/ui_map.md` — UI routes by role
 - `docs/release_notes_v0.5.x.md` — v0.5 hardening changes
+- `docs/release_notes_v0.6.x.md` — v0.6 delivery reliability fixes
 
 ## Contributing
 - Fork the Repository
