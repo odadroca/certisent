@@ -98,7 +98,7 @@ try {
     $rateLimitRecentBlocks = [];
 }
 
-render_header('Admin · System', $user);
+render_header(t('admin.system.page_title'), $user);
 
 $schemaVersion = Worker::getSystemState('schema_version') ?? '';
 $appVersion = app_version();
@@ -113,29 +113,29 @@ $schemaOk = ($schemaVersion === '' || $schemaVersion === $appVersion);
     <div class="text-sm text-gray-400">Operator diagnostics (UTC)</div>
   </div>
   <div class="text-sm">
-    <a class="text-green-400 hover:underline" href="monitors.php">Monitors</a>
+    <a class="text-green-400 hover:underline" href="monitors.php"><?php echo h(t('admin.system.link_monitors')); ?></a>
     <span class="text-gray-600 mx-2">·</span>
-    <a class="text-green-400 hover:underline" href="outbox.php">Outbox</a>
+    <a class="text-green-400 hover:underline" href="outbox.php"><?php echo h(t('admin.system.link_outbox')); ?></a>
     <span class="text-gray-600 mx-2">·</span>
-    <a class="text-green-400 hover:underline" href="email.php">Email</a>
+    <a class="text-green-400 hover:underline" href="email.php"><?php echo h(t('admin.system.link_email')); ?></a>
     <span class="text-gray-600 mx-2">·</span>
-    <a class="text-green-400 hover:underline" href="api_keys.php">API Keys</a>
+    <a class="text-green-400 hover:underline" href="api_keys.php"><?php echo h(t('admin.system.link_api_keys')); ?></a>
     <span class="text-gray-600 mx-2">·</span>
-    <a class="text-green-400 hover:underline" href="users.php">Users</a>
+    <a class="text-green-400 hover:underline" href="users.php"><?php echo h(t('admin.system.link_users')); ?></a>
     <span class="text-gray-600 mx-2">·</span>
-    <a class="text-green-400 hover:underline" href="audit.php">Audit</a>
+    <a class="text-green-400 hover:underline" href="audit.php"><?php echo h(t('admin.system.link_audit')); ?></a>
   </div>
 </div>
 
 <div class="grid md:grid-cols-2 gap-4">
   <div class="bg-white text-black rounded-2xl p-6 shadow">
-    <h2 class="font-semibold mb-3">Worker heartbeat</h2>
+    <h2 class="font-semibold mb-3"><?php echo h(t('admin.system.h1_worker_heartbeat')); ?></h2>
 
     <?php if (!$lastCron): ?>
-      <div class="text-sm text-gray-700">No heartbeat recorded yet.</div>
+      <div class="text-sm text-gray-700"><?php echo h(t('admin.system.msg_no_heartbeat')); ?></div>
     <?php else: ?>
       <div class="text-sm text-gray-700 space-y-2">
-        <div><span class="text-gray-500">Last run:</span> <span class="font-mono text-xs"><?php echo h($lastCron); ?> UTC</span></div>
+        <div><span class="text-gray-500"><?php echo h(t('admin.system.label_last_run')); ?>:</span> <span class="font-mono text-xs"><?php echo h($lastCron); ?> UTC</span></div>
         <div><span class="text-gray-500">Last ok flag:</span> <?php echo h((string)($lastCronOk ?? '')); ?></div>
         <div>
           <span class="text-gray-500">Age:</span>
@@ -165,7 +165,7 @@ $schemaOk = ($schemaVersion === '' || $schemaVersion === $appVersion);
 </div>
 
   <div class="bg-white text-black rounded-2xl p-6 shadow">
-    <h2 class="font-semibold mb-3">Registration</h2>
+    <h2 class="font-semibold mb-3"><?php echo h(t('admin.system.h1_registration')); ?></h2>
     <div class="text-sm text-gray-700 space-y-2">
       <div><span class="text-gray-500">REGISTRATION_MODE:</span> <span class="font-mono text-xs"><?php echo h($registrationMode); ?></span></div>
       <div><span class="text-gray-500">DB override disabled:</span> <?php echo $registrationsDisabled ? '<span class="font-semibold text-red-700">yes</span>' : '<span class="font-semibold text-green-700">no</span>'; ?></div>
@@ -179,14 +179,14 @@ $schemaOk = ($schemaVersion === '' || $schemaVersion === $appVersion);
           <?php echo csrf_field(); ?>
           <input type="hidden" name="action" value="registration_toggle" />
           <input type="hidden" name="desired" value="enable" />
-          <button class="bg-green-700 text-white px-3 py-2 rounded" type="submit">Enable registrations</button>
+          <button class="bg-green-700 text-white px-3 py-2 rounded" type="submit"><?php echo h(t('admin.system.btn_enable_registrations')); ?></button>
         </form>
       <?php else: ?>
         <form method="post" class="inline" onsubmit="return confirm('Disable new registrations? Existing users can still sign in.');">
           <?php echo csrf_field(); ?>
           <input type="hidden" name="action" value="registration_toggle" />
           <input type="hidden" name="desired" value="disable" />
-          <button class="bg-black text-white px-3 py-2 rounded" type="submit">Disable registrations</button>
+          <button class="bg-black text-white px-3 py-2 rounded" type="submit"><?php echo h(t('admin.system.btn_disable_registrations')); ?></button>
         </form>
       <?php endif; ?>
     </div>
@@ -199,7 +199,7 @@ $schemaOk = ($schemaVersion === '' || $schemaVersion === $appVersion);
 </div>
 
   <div class="bg-white text-black rounded-2xl p-6 shadow">
-    <h2 class="font-semibold mb-3">Last worker run</h2>
+    <h2 class="font-semibold mb-3"><?php echo h(t('admin.system.h1_last_worker_run')); ?></h2>
     <?php if (!$lastRun): ?>
       <div class="text-sm text-gray-700">No worker_run event recorded yet.</div>
     <?php else: ?>
@@ -217,36 +217,36 @@ $schemaOk = ($schemaVersion === '' || $schemaVersion === $appVersion);
   </div>
 
   <div class="bg-white text-black rounded-2xl p-6 shadow">
-    <h2 class="font-semibold mb-3">Events (last 24h)</h2>
+    <h2 class="font-semibold mb-3"><?php echo h(t('admin.system.h1_events_last_24h')); ?></h2>
     <div class="text-sm text-gray-700 space-y-2">
       <div><span class="text-gray-500">Critical:</span> <?php echo (int)$counts['critical']; ?></div>
       <div><span class="text-gray-500">Warn:</span> <?php echo (int)$counts['warn']; ?></div>
       <div><span class="text-gray-500">Info:</span> <?php echo (int)$counts['info']; ?></div>
     </div>
     <div class="mt-4 text-sm">
-      <a class="text-green-700 hover:underline" href="<?php echo h(url_for('history.php?severity=critical')); ?>">View critical events</a>
+      <a class="text-green-700 hover:underline" href="<?php echo h(url_for('history.php?severity=critical')); ?>"><?php echo h(t('admin.system.link_view_critical_events')); ?></a>
     </div>
   </div>
 
   <div class="bg-white text-black rounded-2xl p-6 shadow">
-    <h2 class="font-semibold mb-3">Outbox</h2>
+    <h2 class="font-semibold mb-3"><?php echo h(t('admin.system.h1_outbox')); ?></h2>
     <div class="text-sm text-gray-700 space-y-2">
       <div><span class="text-gray-500">Pending:</span> <?php echo (int)$outboxCounts['pending']; ?></div>
       <div><span class="text-gray-500">Failed:</span> <?php echo (int)$outboxCounts['failed']; ?></div>
       <div><span class="text-gray-500">Sent:</span> <?php echo (int)$outboxCounts['sent']; ?></div>
     </div>
     <div class="mt-4 text-sm">
-      <a class="text-green-700 hover:underline" href="outbox.php">View outbox</a>
+      <a class="text-green-700 hover:underline" href="outbox.php"><?php echo h(t('admin.system.link_view_outbox')); ?></a>
       <form method="post" action="outbox_run.php" class="mt-3">
         <?php echo csrf_field(); ?>
-        <button class="bg-green-700 text-white px-3 py-2 rounded" type="submit">Run outbox now</button>
+        <button class="bg-green-700 text-white px-3 py-2 rounded" type="submit"><?php echo h(t('admin.system.btn_run_outbox_now')); ?></button>
       </form>
     </div>
   </div>
 
   <?php if ($rateLimitSummary !== null): ?>
   <div class="bg-white text-black rounded-2xl p-6 shadow">
-    <h2 class="font-semibold mb-3">Rate limiting</h2>
+    <h2 class="font-semibold mb-3"><?php echo h(t('admin.system.h1_rate_limiting')); ?></h2>
     <div class="text-sm text-gray-700 space-y-2">
       <div><span class="text-gray-500">Login blocks:</span> <?php echo (int)$rateLimitSummary['login_ip']['blocks']; ?><?php echo $rateLimitSummary['login_ip']['last_block_at'] ? ' <span class="text-gray-500">(last:</span> <span class="font-mono text-xs">' . h((string)$rateLimitSummary['login_ip']['last_block_at']) . ' UTC</span><span class="text-gray-500">)</span>' : ''; ?></div>
       <div><span class="text-gray-500">API blocks (IP):</span> <?php echo (int)$rateLimitSummary['api_ip']['blocks']; ?><?php echo $rateLimitSummary['api_ip']['last_block_at'] ? ' <span class="text-gray-500">(last:</span> <span class="font-mono text-xs">' . h((string)$rateLimitSummary['api_ip']['last_block_at']) . ' UTC</span><span class="text-gray-500">)</span>' : ''; ?></div>
@@ -260,10 +260,10 @@ $schemaOk = ($schemaVersion === '' || $schemaVersion === $appVersion);
           <table class="min-w-full text-xs">
             <thead>
               <tr class="text-left border-b">
-                <th class="py-2 pr-3">Key</th>
-                <th class="py-2 pr-3">Blocks</th>
-                <th class="py-2 pr-3">Last block</th>
-                <th class="py-2 pr-3">Blocked until</th>
+                <th class="py-2 pr-3"><?php echo h(t('admin.system.th_key')); ?></th>
+                <th class="py-2 pr-3"><?php echo h(t('admin.system.th_blocks')); ?></th>
+                <th class="py-2 pr-3"><?php echo h(t('admin.system.th_last_block')); ?></th>
+                <th class="py-2 pr-3"><?php echo h(t('admin.system.th_blocked_until')); ?></th>
               </tr>
             </thead>
             <tbody>
@@ -289,20 +289,20 @@ $schemaOk = ($schemaVersion === '' || $schemaVersion === $appVersion);
 </div>
 
 <div class="mt-6 bg-white text-black rounded-2xl p-6 shadow overflow-x-auto">
-  <h2 class="font-semibold mb-3">Worker jobs (25)</h2>
+  <h2 class="font-semibold mb-3"><?php echo h(t('admin.system.h1_worker_jobs')); ?></h2>
   <?php if (empty($jobs)): ?>
     <div class="text-sm text-gray-700">No jobs recorded.</div>
   <?php else: ?>
     <table class="min-w-full text-sm">
       <thead>
         <tr class="text-left border-b">
-          <th class="py-2 pr-3">ID</th>
-          <th class="py-2 pr-3">Type</th>
-          <th class="py-2 pr-3">Status</th>
-          <th class="py-2 pr-3">Processed</th>
-          <th class="py-2 pr-3">Requested by</th>
-          <th class="py-2 pr-3">Created</th>
-          <th class="py-2 pr-3">Updated</th>
+          <th class="py-2 pr-3"><?php echo h(t('admin.system.th_id')); ?></th>
+          <th class="py-2 pr-3"><?php echo h(t('admin.system.th_type')); ?></th>
+          <th class="py-2 pr-3"><?php echo h(t('admin.system.th_status')); ?></th>
+          <th class="py-2 pr-3"><?php echo h(t('admin.system.th_processed')); ?></th>
+          <th class="py-2 pr-3"><?php echo h(t('admin.system.th_requested_by')); ?></th>
+          <th class="py-2 pr-3"><?php echo h(t('admin.system.th_created')); ?></th>
+          <th class="py-2 pr-3"><?php echo h(t('admin.system.th_updated')); ?></th>
           <th class="py-2 pr-3"></th>
         </tr>
       </thead>
@@ -321,7 +321,7 @@ $schemaOk = ($schemaVersion === '' || $schemaVersion === $appVersion);
                 <form method="post" action="job_cancel.php" class="inline">
                   <?php echo csrf_field(); ?>
                   <input type="hidden" name="job_id" value="<?php echo (int)$j['id']; ?>">
-                  <button class="text-red-700 hover:underline" type="submit">Cancel</button>
+                  <button class="text-red-700 hover:underline" type="submit"><?php echo h(t('common.cancel')); ?></button>
                 </form>
               <?php endif; ?>
             </td>
@@ -333,18 +333,18 @@ $schemaOk = ($schemaVersion === '' || $schemaVersion === $appVersion);
 </div>
 
 <div class="mt-6 bg-white text-black rounded-2xl p-6 shadow overflow-x-auto">
-  <h2 class="font-semibold mb-3">System events (50)</h2>
+  <h2 class="font-semibold mb-3"><?php echo h(t('admin.system.h1_system_events')); ?></h2>
   <?php if (!$sysEvents): ?>
     <div class="text-sm text-gray-700">No system events recorded.</div>
   <?php else: ?>
     <table class="min-w-full text-sm">
       <thead>
         <tr class="text-left border-b">
-          <th class="py-2 pr-3">Time (UTC)</th>
-          <th class="py-2 pr-3">Severity</th>
-          <th class="py-2 pr-3">Type</th>
-          <th class="py-2 pr-3">Message</th>
-          <th class="py-2 pr-3">Meta</th>
+          <th class="py-2 pr-3"><?php echo h(t('admin.system.th_time_utc')); ?></th>
+          <th class="py-2 pr-3"><?php echo h(t('admin.system.th_severity')); ?></th>
+          <th class="py-2 pr-3"><?php echo h(t('admin.system.th_type')); ?></th>
+          <th class="py-2 pr-3"><?php echo h(t('admin.system.th_message')); ?></th>
+          <th class="py-2 pr-3"><?php echo h(t('admin.system.th_meta')); ?></th>
         </tr>
       </thead>
       <tbody>

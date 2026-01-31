@@ -48,31 +48,31 @@ $st = db()->prepare($sql);
 $st->execute($params);
 $rows = $st->fetchAll();
 
-render_header('Admin · Monitors', $user);
+render_header(t('admin.monitors.page_title'), $user);
 ?>
 
 <div class="flex items-start justify-between mb-4">
   <div>
-    <div class="text-lg font-semibold">Monitors</div>
-    <div class="text-sm text-gray-400">Inventory (latest snapshot per monitor). Max 500 rows.</div>
+    <div class="text-lg font-semibold"><?php echo h(t('admin.monitors.h1')); ?></div>
+    <div class="text-sm text-gray-400"><?php echo h(t('admin.monitors.help_inventory')); ?></div>
   </div>
   <div class="text-sm">
-    <a class="text-green-400 hover:underline" href="users.php">Users</a>
+    <a class="text-green-400 hover:underline" href="users.php"><?php echo h(t('admin.monitors.link_users')); ?></a>
     <span class="text-gray-600 mx-2">·</span>
-    <a class="text-green-400 hover:underline" href="audit.php">Audit</a>
+    <a class="text-green-400 hover:underline" href="audit.php"><?php echo h(t('admin.monitors.link_audit')); ?></a>
   </div>
 </div>
 
 <div class="bg-white text-black rounded-2xl p-4 shadow mb-4">
   <form method="get" class="flex flex-wrap gap-3 items-end">
     <div>
-      <label class="block text-xs text-gray-600">Status filter</label>
+      <label class="block text-xs text-gray-600"><?php echo h(t('admin.monitors.label_status_filter')); ?></label>
       <select name="status" class="border rounded px-2 py-1">
-        <option value="" <?php echo $statusFilter===''?'selected':''; ?>>All</option>
-        <option value="ok" <?php echo $statusFilter==='ok'?'selected':''; ?>>ok</option>
-        <option value="warn" <?php echo $statusFilter==='warn'?'selected':''; ?>>warn</option>
-        <option value="critical" <?php echo $statusFilter==='critical'?'selected':''; ?>>critical</option>
-        <option value="unknown" <?php echo $statusFilter==='unknown'?'selected':''; ?>>unknown</option>
+        <option value="" <?php echo $statusFilter===''?'selected':''; ?><?php echo h(t('admin.monitors.opt_all')); ?></option>
+        <option value="ok" <?php echo $statusFilter==='ok'?'selected':''; ?><?php echo h(t('admin.monitors.opt_ok')); ?></option>
+        <option value="warn" <?php echo $statusFilter==='warn'?'selected':''; ?><?php echo h(t('admin.monitors.opt_warn')); ?></option>
+        <option value="critical" <?php echo $statusFilter==='critical'?'selected':''; ?><?php echo h(t('admin.monitors.opt_critical')); ?></option>
+        <option value="unknown" <?php echo $statusFilter==='unknown'?'selected':''; ?><?php echo h(t('admin.monitors.opt_unknown')); ?></option>
       </select>
     </div>
     <button class="bg-green-700 text-white px-3 py-2 rounded">Apply</button>
@@ -83,16 +83,16 @@ render_header('Admin · Monitors', $user);
   <table class="min-w-full text-sm">
     <thead>
       <tr class="text-left border-b">
-        <th class="py-2 pr-3">ID</th>
-        <th class="py-2 pr-3">Owner</th>
-        <th class="py-2 pr-3">URL</th>
-        <th class="py-2 pr-3">Enabled</th>
-        <th class="py-2 pr-3">Freq (min)</th>
-        <th class="py-2 pr-3">Warn (days)</th>
-        <th class="py-2 pr-3">Status</th>
-        <th class="py-2 pr-3">Valid to</th>
-        <th class="py-2 pr-3">Days</th>
-        <th class="py-2 pr-3">Actions</th>
+        <th class="py-2 pr-3"><?php echo h(t('admin.monitors.th_id')); ?></th>
+        <th class="py-2 pr-3"><?php echo h(t('admin.monitors.th_owner')); ?></th>
+        <th class="py-2 pr-3"><?php echo h(t('admin.monitors.th_url')); ?></th>
+        <th class="py-2 pr-3"><?php echo h(t('admin.monitors.th_enabled')); ?></th>
+        <th class="py-2 pr-3"><?php echo h(t('admin.monitors.th_freq_min')); ?></th>
+        <th class="py-2 pr-3"><?php echo h(t('admin.monitors.th_warn_days')); ?></th>
+        <th class="py-2 pr-3"><?php echo h(t('admin.monitors.th_status')); ?></th>
+        <th class="py-2 pr-3"><?php echo h(t('admin.monitors.th_valid_to')); ?></th>
+        <th class="py-2 pr-3"><?php echo h(t('admin.monitors.th_days')); ?></th>
+        <th class="py-2 pr-3"><?php echo h(t('admin.monitors.th_actions')); ?></th>
       </tr>
     </thead>
     <tbody>
@@ -109,9 +109,9 @@ render_header('Admin · Monitors', $user);
           <td class="py-2 pr-3 font-mono text-xs"><?php echo h((string)($r['valid_to'] ?? '')); ?></td>
           <td class="py-2 pr-3"><?php echo h((string)($r['days_remaining'] ?? '')); ?></td>
           <td class="py-2 pr-3 whitespace-nowrap">
-            <a class="text-green-700 hover:underline" href="../monitor_view.php?id=<?php echo (int)$r['id']; ?>">View</a>
+            <a class="text-green-700 hover:underline" href="../monitor_view.php?id=<?php echo (int)$r['id']; ?>"><?php echo h(t('common.view')); ?></a>
             <span class="text-gray-400 mx-2">·</span>
-            <a class="text-green-700 hover:underline" href="../monitor_edit.php?id=<?php echo (int)$r['id']; ?>">Edit</a>
+            <a class="text-green-700 hover:underline" href="../monitor_edit.php?id=<?php echo (int)$r['id']; ?>"><?php echo h(t('common.edit')); ?></a>
           </td>
         </tr>
       <?php endforeach; ?>

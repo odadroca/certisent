@@ -35,12 +35,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $hasOwnerCols = db_has_column('api_keys', 'owner_user_id') && db_has_column('api_keys', 'key_type');
 
         if (($keyType === 'user' || cfg('API_KEYS_REQUIRE_OWNER','false') === 'true') && $ownerUserId <= 0) {
-            flash_set('error', 'Owner user is required for user-scoped API keys.');
+            flash_set('error', 'Owner user is required for <?php echo h(t('admin.api_keys.opt_user_scoped')); ?> API keys.');
             header('Location: api_keys.php');
             exit;
         }
         if (($keyType === 'user') && !$hasOwnerCols) {
-            flash_set('error', 'DB schema missing api_keys owner columns. Apply v0.5.6 migration first.');
+            flash_set_key('error', 'admin.api_keys.err_schema_missing');
             header('Location: api_keys.php');
             exit;
         }
@@ -82,7 +82,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Store token for one-time display after redirect (do NOT store in DB).
         $_SESSION['created_token_once'] = $token;
         Audit::log((int)$user['id'], 'api_key.create', 'api_key', (int)db()->lastInsertId(), ['name'=>$name,'scopes'=>$scopes]);
-        flash_set('success', 'API key created. Copy the token now; it will not be shown again.');
+        flash_set_key('success', 'admin.api_keys.ok_created');
     }
 
     if ($action === 'revoke') {
@@ -90,7 +90,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($id > 0) {
             db()->prepare('UPDATE api_keys SET is_active=0, updated_at=:u WHERE id=:id')->execute([':u'=>db_now_utc(), ':id'=>$id]);
             Audit::log((int)$user['id'], 'api_key.revoke', 'api_key', $id, []);
-            flash_set('success', 'API key revoked.');
+            flash_set_key('success', 'admin.api_keys.ok_revoked');
         }
     }
 
@@ -111,7 +111,7 @@ if ($hasOwnerCols) {
     $keys = db()->query('SELECT id,name,scopes_json,is_active,created_at,last_used_at FROM api_keys ORDER BY id DESC')->fetchAll();
 }
 
-render_header('Admin · API Keys', $user);
+render_header(t('admin.api_keys.page_title'), $user);
 ?>
 
 <div class="flex items-start justify-between mb-4">
@@ -143,24 +143,24 @@ if ($createdToken !== null) {
     <input type="hidden" name="action" value="create" />
 
     <div>
-      <label class="block text-sm text-gray-700">Name</label>
+      <label class="block text-sm text-gray-700"><?php echo h(t('admin.api_keys.label_name')); ?></label>
       <input name="name" class="w-full border rounded px-3 py-2" placeholder="worker" />
     </div>
 
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div>
-        <label class="block text-sm text-gray-700">Key type</label>
+        <label class="block text-sm text-gray-700"><?php echo h(t('admin.api_keys.label_key_type')); ?></label>
         <select name="key_type" class="w-full border rounded px-3 py-2">
-          <option value="system">system (legacy)</option>
-          <option value="user">user-scoped</option>
+          <option value="system"><?php echo h(t('admin.api_keys.opt_system_legacy')); ?></option>
+          <option value="user"><?php echo h(t('admin.api_keys.opt_user_scoped')); ?></option>
         </select>
         <div class="text-xs text-gray-500 mt-1">
-          User-scoped keys enforce monitor ownership on <code>/api/v1/check</code> when using <code>monitor_id</code>.
+          <?php echo h(t('admin.api_keys.help_user_scoped')); ?> <code>/api/v1/check</code> when using <code>monitor_id</code>.
         </div>
       </div>
       <div>
-        <label class="block text-sm text-gray-700">Owner user</label>
+        <label class="block text-sm text-gray-700"><?php echo h(t('admin.api_keys.label_owner_user')); ?></label>
         <select name="owner_user_id" class="w-full border rounded px-3 py-2">
           <option value="0">(none)</option>
           <?php foreach (db()->query('SELECT id,email,role FROM users ORDER BY email ASC')->fetchAll() as $uu): ?>
@@ -187,17 +187,17 @@ if ($createdToken !== null) {
 </div>
 
 <div class="bg-white text-black rounded-2xl p-6 shadow overflow-x-auto">
-  <h2 class="font-semibold mb-3">Existing keys</h2>
+  <h2 class="font-semibold mb-3"><?php echo h(t('admin.api_keys.h2_existing')); ?></h2>
   <table class="min-w-full text-sm">
     <thead>
       <tr class="text-left border-b">
         <th class="py-2 pr-3">ID</th>
-        <th class="py-2 pr-3">Name</th>
+        <th class="py-2 pr-3"><?php echo h(t('admin.api_keys.th_name')); ?></th>
         <?php if ($hasOwnerCols): ?>
-          <th class="py-2 pr-3">Type</th>
-          <th class="py-2 pr-3">Owner</th>
+          <th class="py-2 pr-3"><?php echo h(t('admin.api_keys.th_type')); ?></th>
+          <th class="py-2 pr-3"><?php echo h(t('admin.api_keys.th_owner')); ?></th>
         <?php endif; ?>
-        <th class="py-2 pr-3">Scopes</th>
+        <th class="py-2 pr-3"><?php echo h(t('admin.api_keys.th_scopes')); ?></th>
         <th class="py-2 pr-3">Active</th>
         <th class="py-2 pr-3">Created (UTC)</th>
         <th class="py-2 pr-3">Last used (UTC)</th>
@@ -220,7 +220,7 @@ if ($createdToken !== null) {
                 <?php echo csrf_field(); ?>
                 <input type="hidden" name="action" value="revoke" />
                 <input type="hidden" name="id" value="<?php echo (int)$k['id']; ?>" />
-                <button class="text-red-700 hover:underline">Revoke</button>
+                <button class="text-red-700 hover:underline"><?php echo h(t('admin.api_keys.btn_revoke')); ?></button>
               </form>
             <?php else: ?>
               <span class="text-gray-500">—</span>

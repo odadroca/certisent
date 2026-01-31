@@ -32,30 +32,30 @@ foreach ($st2->fetchAll() as $r) {
     if (isset($counts[$k])) $counts[$k] = (int)$r['c'];
 }
 
-render_header('Admin · Outbox', $user);
+render_header(t('admin.outbox.page_title'), $user);
 ?>
 
 <div class="flex items-start justify-between mb-4">
   <div>
-    <div class="text-lg font-semibold">Notification outbox</div>
-    <div class="text-sm text-gray-400">Reliable delivery queue (last 300 rows). Counts: pending=<?php echo (int)$counts['pending']; ?>, sent=<?php echo (int)$counts['sent']; ?>, failed=<?php echo (int)$counts['failed']; ?>.</div>
+    <div class="text-lg font-semibold"><?php echo h(t('admin.outbox.h1')); ?></div>
+    <div class="text-sm text-gray-400"><?php echo h(t('admin.outbox.help_prefix')); ?> pending=<?php echo (int)$counts['pending']; ?>, sent=<?php echo (int)$counts['sent']; ?>, failed=<?php echo (int)$counts['failed']; ?>.</div>
   </div>
   <div class="text-sm">
-    <a class="text-green-400 hover:underline" href="system.php">System</a>
+    <a class="text-green-400 hover:underline" href="system.php"><?php echo h(t('admin.outbox.link_system')); ?></a>
     <span class="text-gray-600 mx-2">·</span>
-    <a class="text-green-400 hover:underline" href="api_keys.php">API Keys</a>
+    <a class="text-green-400 hover:underline" href="api_keys.php"><?php echo h(t('admin.outbox.link_api_keys')); ?></a>
   </div>
 </div>
 
 <div class="bg-white text-black rounded-2xl p-4 shadow mb-4">
   <form method="get" class="flex flex-wrap gap-3 items-end">
     <div>
-      <label class="block text-xs text-gray-600">Status</label>
+      <label class="block text-xs text-gray-600"><?php echo h(t('admin.outbox.label_status')); ?></label>
       <select name="status" class="border rounded px-2 py-1">
-        <option value="" <?php echo $status===''?'selected':''; ?>>All</option>
-        <option value="pending" <?php echo $status==='pending'?'selected':''; ?>>pending</option>
-        <option value="sent" <?php echo $status==='sent'?'selected':''; ?>>sent</option>
-        <option value="failed" <?php echo $status==='failed'?'selected':''; ?>>failed</option>
+        <option value="" <?php echo $status===''?'selected':''; ?><?php echo h(t('admin.outbox.opt_all')); ?></option>
+        <option value="pending" <?php echo $status==='pending'?'selected':''; ?><?php echo h(t('admin.outbox.opt_pending')); ?></option>
+        <option value="sent" <?php echo $status==='sent'?'selected':''; ?><?php echo h(t('admin.outbox.opt_sent')); ?></option>
+        <option value="failed" <?php echo $status==='failed'?'selected':''; ?><?php echo h(t('admin.outbox.opt_failed')); ?></option>
       </select>
     </div>
     <button class="bg-green-700 text-white px-3 py-2 rounded">Apply</button>
@@ -67,15 +67,15 @@ render_header('Admin · Outbox', $user);
   <table class="min-w-full text-sm">
     <thead>
       <tr class="text-left border-b">
-        <th class="py-2 pr-3">Created</th>
-        <th class="py-2 pr-3">User</th>
-        <th class="py-2 pr-3">Channel</th>
-        <th class="py-2 pr-3">Status</th>
-        <th class="py-2 pr-3">Attempts</th>
-        <th class="py-2 pr-3">Next retry</th>
-        <th class="py-2 pr-3">Event</th>
-        <th class="py-2 pr-3">Target</th>
-        <th class="py-2 pr-3">Last error</th>
+        <th class="py-2 pr-3"><?php echo h(t('admin.outbox.th_created')); ?></th>
+        <th class="py-2 pr-3"><?php echo h(t('admin.outbox.th_user')); ?></th>
+        <th class="py-2 pr-3"><?php echo h(t('admin.outbox.th_channel')); ?></th>
+        <th class="py-2 pr-3"><?php echo h(t('admin.outbox.th_status')); ?></th>
+        <th class="py-2 pr-3"><?php echo h(t('admin.outbox.th_attempts')); ?></th>
+        <th class="py-2 pr-3"><?php echo h(t('admin.outbox.th_next_retry')); ?></th>
+        <th class="py-2 pr-3"><?php echo h(t('admin.outbox.th_event')); ?></th>
+        <th class="py-2 pr-3"><?php echo h(t('admin.outbox.th_target')); ?></th>
+        <th class="py-2 pr-3"><?php echo h(t('admin.outbox.th_last_error')); ?></th>
       </tr>
     </thead>
     <tbody>

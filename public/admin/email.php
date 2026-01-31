@@ -22,14 +22,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $to = trim((string)($_POST['to'] ?? ''));
     if ($to === '') $to = $adminEmail;
     if ($to === '') {
-        flash_set('error', 'No recipient email (set ADMIN_EMAIL or provide a recipient).');
+        flash_set_key('error', 'admin.email.err.no_recipient');
     } else {
         $res = Emailer::sendText($to, '[Certinel] Test email', "This is a test email sent by Certinel v".app_version()." at ".db_now_utc()." UTC\n");
         if (($res['ok'] ?? false) === true) {
-            flash_set('success', 'Test email sent to '.$to.'.');
+            flash_set_key('success', 'admin.email.ok.sent', ['to' => $to]);
             Audit::log((int)$user['id'], 'email.test_sent', 'system', null, ['to'=>$to,'transport'=>$transport]);
         } else {
-            flash_set('error', 'Email send failed: '.(string)($res['error'] ?? 'unknown_error'));
+            flash_set_key('error', 'admin.email.err.send_failed', ['error' => (string)($res['error'] ?? 'unknown_error')]);
             Audit::log((int)$user['id'], 'email.test_failed', 'system', null, ['to'=>$to,'transport'=>$transport,'error'=>$res['error'] ?? null]);
         }
     }
@@ -37,7 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit;
 }
 
-render_header('Admin · Email', $user);
+render_header(t('admin.email.page_title'), $user);
 ?>
 
 <div class="flex items-start justify-between mb-4">
@@ -67,7 +67,7 @@ render_header('Admin · Email', $user);
   </div>
 
   <div class="bg-white text-black rounded-2xl p-6 shadow">
-    <h2 class="font-semibold mb-3">SMTP / API details</h2>
+    <h2 class="font-semibold mb-3"><?php echo h(t('admin.email.h2_smtp_api_details')); ?></h2>
     <?php if (strtolower($transport) === 'smtp'): ?>
       <div class="text-sm text-gray-700 space-y-2">
         <div><span class="text-gray-500">SMTP_HOST:</span> <span class="font-mono text-xs"><?php echo h($smtpHost); ?></span></div>
@@ -87,14 +87,14 @@ render_header('Admin · Email', $user);
 </div>
 
 <div class="mt-6 bg-white text-black rounded-2xl p-6 shadow">
-  <h2 class="font-semibold mb-3">Send test email</h2>
+  <h2 class="font-semibold mb-3"><?php echo h(t('admin.email.h2_send_test_email')); ?></h2>
   <form method="post" class="space-y-3">
     <?php echo csrf_field(); ?>
     <div>
-      <label class="block text-sm text-gray-700 mb-1">Recipient (optional; defaults to ADMIN_EMAIL)</label>
-      <input name="to" class="w-full border rounded px-3 py-2" placeholder="name@example.com" />
+      <label class="block text-sm text-gray-700 mb-1"><?php echo h(t('admin.email.label_recipient_optional')); ?></label>
+      <input name="to" class="w-full border rounded px-3 py-2" placeholder="<?php echo h(t('admin.email.placeholder_recipient')); ?>" />
     </div>
-    <button class="bg-green-700 text-white px-4 py-2 rounded" type="submit">Send test</button>
+    <button class="bg-green-700 text-white px-4 py-2 rounded" type="submit"><?php echo h(t('admin.email.btn_send_test')); ?></button>
   </form>
 </div>
 

@@ -7,27 +7,27 @@ $admin = require_role('admin');
 
 $rows = db()->query("SELECT * FROM audit_log ORDER BY created_at DESC LIMIT 200")->fetchAll();
 
-render_header('Admin · Audit log', $admin);
+render_header(t('admin.audit.page_title'), $admin);
 ?>
 <div class="bg-white text-black rounded-2xl p-6 shadow">
   <div class="flex items-start justify-between mb-4">
     <div>
-      <h1 class="text-xl font-semibold">Audit log</h1>
-      <div class="text-xs text-gray-600">Last 200 actions.</div>
+      <h1 class="text-xl font-semibold"><?php echo h(t('admin.audit.h1')); ?></h1>
+      <div class="text-xs text-gray-600"><?php echo h(t('admin.audit.help')); ?></div>
     </div>
-    <a class="text-green-700 hover:underline" href="users.php">Back</a>
+    <a class="text-green-700 hover:underline" href="users.php"><?php echo h(t('common.back')); ?></a>
   </div>
 
   <div class="overflow-x-auto">
     <table class="min-w-full text-sm">
       <thead>
         <tr class="text-left border-b">
-          <th class="py-2 pr-3">Time (UTC)</th>
-          <th class="py-2 pr-3">Actor</th>
-          <th class="py-2 pr-3">Action</th>
-          <th class="py-2 pr-3">Entity</th>
-          <th class="py-2 pr-3">IP</th>
-          <th class="py-2 pr-3">Meta</th>
+          <th class="py-2 pr-3"><?php echo h(t('admin.audit.th_time_utc')); ?></th>
+          <th class="py-2 pr-3"><?php echo h(t('admin.audit.th_actor')); ?></th>
+          <th class="py-2 pr-3"><?php echo h(t('admin.audit.th_action')); ?></th>
+          <th class="py-2 pr-3"><?php echo h(t('admin.audit.th_entity')); ?></th>
+          <th class="py-2 pr-3"><?php echo h(t('admin.audit.th_ip')); ?></th>
+          <th class="py-2 pr-3"><?php echo h(t('admin.audit.th_meta')); ?></th>
         </tr>
       </thead>
       <tbody>

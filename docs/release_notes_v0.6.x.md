@@ -68,3 +68,8 @@ This document tracks patch releases in the v0.6 series.
   - Run outbox now (`/public/admin/outbox_run.php`) could fail due to missing UI helpers.
 - Outbox and worker batching compatibility:
   - Avoided PDO driver incompatibilities around parameterized `LIMIT`, restoring reliable outbox processing in some environments.
+
+
+## v0.6.5
+- Localization: admin UI pages (`public/admin/*.php`) now use translation keys via `t()`, with EN/PT catalogs expanded.
+- No behavioral changes; default remains English.
