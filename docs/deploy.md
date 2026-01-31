@@ -78,6 +78,13 @@ If you are upgrading from <= v0.5.6 and your database predates v0.5.7, run:
 
 This creates the `rate_limits` table (idempotent via `CREATE TABLE IF NOT EXISTS`).
 
+### 0.6 → 0.6.1+
+
+If you are upgrading from v0.6 and want the per-user UI language preference, run once:
+- `sql/migrations/v0.6_to_v0.6.1.sql`
+
+This adds `users.locale` (default: `en`).
+
 ## Verifying an upgrade
 
 - Visit **Admin → System** to confirm the worker heartbeat and that the DB is reachable.

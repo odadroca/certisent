@@ -5,7 +5,9 @@ require_once __DIR__ . '/../app/ui.php';
 
 $user = require_login();
 
-$st = db()->prepare('SELECT id,email,role,notify_channels_json,rss_token FROM users WHERE id=:id');
+$hasLocale = db_has_column('users', 'locale');
+$select = 'SELECT id,email,role,notify_channels_json,rss_token' . ($hasLocale ? ',locale' : '') . ' FROM users WHERE id=:id';
+$st = db()->prepare($select);
 $st->execute([':id'=>(int)$user['id']]);
 $u = $st->fetch();
 if (!$u) { http_response_code(404); echo 'Not found.'; exit; }
@@ -15,6 +17,9 @@ if (!is_array($channels)) $channels = [];
 $emailEnabled = (bool)($channels['email'] ?? true);
 $slackWebhook = (string)($channels['slack_webhook'] ?? '');
 $teamsWebhook = (string)($channels['teams_webhook'] ?? '');
+
+$locale = $hasLocale ? (string)($u['locale'] ?? 'en') : 'en';
+$locale = function_exists('normalize_locale') ? normalize_locale($locale) : 'en';
 
 $oldSlackWebhook = $slackWebhook;
 $oldTeamsWebhook = $teamsWebhook;
@@ -37,6 +42,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $emailEnabled = isset($_POST['email_enabled']);
     $slackWebhook = trim((string)($_POST['slack_webhook'] ?? ''));
     $teamsWebhook = trim((string)($_POST['teams_webhook'] ?? ''));
+    $postedLocale = trim((string)($_POST['locale'] ?? $locale));
+    $postedLocale = function_exists('normalize_locale') ? normalize_locale($postedLocale) : 'en';
 
     // Basic validation: allow empty or plausible URL.
     foreach (['Slack'=>$slackWebhook, 'Teams'=>$teamsWebhook] as $name=>$val) {
@@ -47,6 +54,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if ($err === '') {
+        if ($hasLocale) {
+            $stL = db()->prepare('UPDATE users SET locale=:l WHERE id=:id');
+            $stL->execute([':l'=>$postedLocale, ':id'=>(int)$user['id']]);
+            $_SESSION['locale'] = $postedLocale;
+        }
+
         $new = [
             'email' => $emailEnabled,
             'slack_webhook' => ($slackWebhook === '' ? null : $slackWebhook),
@@ -128,6 +141,17 @@ render_header('Settings', $user);
   <form method="post" class="space-y-4">
     <?php echo csrf_field(); ?>
     <input type="hidden" name="action" value="save" />
+
+	    <div class="border rounded-xl p-4">
+	      <div class="font-semibold mb-2">Language</div>
+	      <select name="locale" class="border rounded px-3 py-2 text-sm" <?php echo $hasLocale ? '' : 'disabled'; ?>>
+	        <option value="en" <?php echo ($locale === 'en') ? 'selected' : ''; ?>>English</option>
+	        <option value="pt" <?php echo ($locale === 'pt') ? 'selected' : ''; ?>>Português</option>
+	      </select>
+	      <?php if (!$hasLocale): ?>
+	        <div class="text-xs text-gray-600 mt-1">DB migration required (adds users.locale).</div>
+	      <?php endif; ?>
+	    </div>
 
     <div class="border rounded-xl p-4">
       <div class="font-semibold mb-2">Email</div>

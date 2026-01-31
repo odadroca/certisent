@@ -6,6 +6,8 @@ CREATE TABLE IF NOT EXISTS users (
   email VARCHAR(255) NOT NULL UNIQUE,
   password_hash VARCHAR(255) NOT NULL,
   role ENUM('admin','viewer','auditor') NOT NULL DEFAULT 'viewer',
+  -- v0.6.1: UI locale preference (default English). Existing installs may add via migration.
+  locale VARCHAR(16) NOT NULL DEFAULT 'en',
   created_at DATETIME NOT NULL,
   last_login_at DATETIME NULL,
   notify_channels_json JSON NULL,

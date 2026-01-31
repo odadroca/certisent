@@ -46,7 +46,8 @@ function url_for(string $path): string {
 
 function render_header(string $title, ?array $user = null): void {
     $appName = 'Certinel';
-    echo '<!doctype html><html lang="en"><head><meta charset="utf-8">';
+    $lang = function_exists('current_locale') ? current_locale() : 'en';
+    echo '<!doctype html><html lang="'.h($lang).'"><head><meta charset="utf-8">';
     echo '<meta name="viewport" content="width=device-width, initial-scale=1">';
     echo '<title>'.h($title).' · '.$appName.'</title>';
     echo '<script src="https://cdn.tailwindcss.com"></script>';

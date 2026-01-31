@@ -1,10 +1,11 @@
-# File registry (v0.6)
+# File registry (v0.6.1)
 
 This file lists repository files for change auditing.
 
-Generated: 2026-01-31 16:18:36 UTC
+Generated: 2026-01-31 18:11:59 UTC
 
 ```
+./.env.example
 ./CODE_OF_CONDUCT.md
 ./CONTRIBUTING.md
 ./LICENSE.md
@@ -16,7 +17,11 @@ Generated: 2026-01-31 16:18:36 UTC
 ./app/config.php
 ./app/csrf.php
 ./app/db.php
+./app/i18n.php
+./app/locales/en.php
+./app/locales/pt.php
 ./app/logger.php
+./app/logs/.htaccess
 ./app/services/Audit.php
 ./app/services/CertFetcher.php
 ./app/services/Emailer.php
@@ -34,7 +39,9 @@ Generated: 2026-01-31 16:18:36 UTC
 ./docs/ops_runbook.md
 ./docs/release_notes_v0.4.x.md
 ./docs/release_notes_v0.5.x.md
+./docs/release_notes_v0.6.x.md
 ./docs/ui_map.md
+./public/.htaccess
 ./public/admin/api_keys.php
 ./public/admin/audit.php
 ./public/admin/email.php
@@ -68,5 +75,6 @@ Generated: 2026-01-31 16:18:36 UTC
 ./sql/migrations/v0.3_to_v0.3.1.sql
 ./sql/migrations/v0.5.5_to_v0.5.6.sql
 ./sql/migrations/v0.5.6_to_v0.5.7.sql
+./sql/migrations/v0.6_to_v0.6.1.sql
 ./sql/schema.sql
 ```
