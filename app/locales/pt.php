@@ -310,4 +310,6 @@ return [
     'admin.user_edit.label_role' => "Função",
     'admin.user_edit.label_notify_channels_json' => "JSON de canais de notificação",
     'admin.user_edit.help_roles' => "auditor = só leitura. viewer = gere os próprios monitores. admin = gere tudo.",
+    'admin.outbox.btn_run_outbox_now' => "Executar outbox agora",
+    'admin.outbox.confirm_run' => "Executar outbox agora?",
 ];

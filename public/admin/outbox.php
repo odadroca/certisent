@@ -44,6 +44,10 @@ render_header(t('admin.outbox.page_title'), $user);
     <a class="text-green-400 hover:underline" href="system.php"><?php echo h(t('admin.outbox.link_system')); ?></a>
     <span class="text-gray-600 mx-2">·</span>
     <a class="text-green-400 hover:underline" href="api_keys.php"><?php echo h(t('admin.outbox.link_api_keys')); ?></a>
+    <form method="post" action="outbox_run.php" class="inline-block ml-3" onsubmit="return confirm('<?php echo h(t('admin.outbox.confirm_run')); ?>');">
+      <?php echo csrf_field(); ?>
+      <button class="bg-green-700 text-white px-3 py-1 rounded" type="submit"><?php echo h(t('admin.outbox.btn_run_outbox_now')); ?></button>
+    </form>
   </div>
 </div>
 
@@ -52,10 +56,10 @@ render_header(t('admin.outbox.page_title'), $user);
     <div>
       <label class="block text-xs text-gray-600"><?php echo h(t('admin.outbox.label_status')); ?></label>
       <select name="status" class="border rounded px-2 py-1">
-        <option value="" <?php echo $status===''?'selected':''; ?><?php echo h(t('admin.outbox.opt_all')); ?></option>
-        <option value="pending" <?php echo $status==='pending'?'selected':''; ?><?php echo h(t('admin.outbox.opt_pending')); ?></option>
-        <option value="sent" <?php echo $status==='sent'?'selected':''; ?><?php echo h(t('admin.outbox.opt_sent')); ?></option>
-        <option value="failed" <?php echo $status==='failed'?'selected':''; ?><?php echo h(t('admin.outbox.opt_failed')); ?></option>
+        <option value="" <?php echo $status===''?'selected':''; ?>><?php echo h(t('admin.outbox.opt_all')); ?></option>
+        <option value="pending" <?php echo $status==='pending'?'selected':''; ?>><?php echo h(t('admin.outbox.opt_pending')); ?></option>
+        <option value="sent" <?php echo $status==='sent'?'selected':''; ?>><?php echo h(t('admin.outbox.opt_sent')); ?></option>
+        <option value="failed" <?php echo $status==='failed'?'selected':''; ?>><?php echo h(t('admin.outbox.opt_failed')); ?></option>
       </select>
     </div>
     <button class="bg-green-700 text-white px-3 py-2 rounded">Apply</button>

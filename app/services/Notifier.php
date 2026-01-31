@@ -302,7 +302,7 @@ private static function tr(string $key, array $params, string $locale, string $f
     $lines[] = "";
     $lines[] = (string)($event['message'] ?? '');
 
-    $meta = format_event_meta($event['meta_json'] ?? null);
+    $meta = self::formatEventMeta($event['meta_json'] ?? null);
     if ($meta !== '') {
         $lines[] = "";
         $lines[] = self::tr('notify.email.line.meta', [
@@ -317,9 +317,71 @@ private static function tr(string $key, array $params, string $locale, string $f
 }
 
 
-    private static function renderWebhookText(array $event, ?array $monitor, string $locale = 'en'): string {
+    
+    /** @return array<string,mixed> */
+    private static function metaArray(?string $metaJson): array {
+        if (!$metaJson) return [];
+        $arr = json_decode($metaJson, true);
+        return is_array($arr) ? $arr : [];
+    }
+
+    /**
+     * Human-readable meta summary for notifications.
+     *
+     * Note: Mirrors the UI helper but is defined here to avoid a hard dependency on app/ui.php
+     * (workers/API do not load UI helpers).
+     */
+    private static function formatEventMeta(?string $metaJson): string {
+        $m = self::metaArray($metaJson);
+        if (!$m) return '';
+
+        $parts = [];
+
+        // Worker run summary
+        $hasRun = isset($m['checked']) || isset($m['errors']) || isset($m['changed']) || isset($m['renewed']) || isset($m['warned']);
+        if ($hasRun) {
+            $parts[] = 'checked=' . (int)($m['checked'] ?? 0);
+            $parts[] = 'errors=' . (int)($m['errors'] ?? 0);
+            $parts[] = 'changed=' . (int)($m['changed'] ?? 0);
+            $parts[] = 'renewed=' . (int)($m['renewed'] ?? 0);
+            $parts[] = 'warned=' . (int)($m['warned'] ?? 0);
+            if (isset($m['duration_ms'])) $parts[] = 'ms=' . (int)$m['duration_ms'];
+        }
+
+        // Change/renew confirmation
+        if (isset($m['confirm_result'])) $parts[] = 'confirm=' . (string)$m['confirm_result'];
+        if (isset($m['confirm_samples'])) $parts[] = 'samples=' . (int)$m['confirm_samples'];
+
+        if (isset($m['observed_fingerprints']) && is_array($m['observed_fingerprints'])) {
+            $fps = array_values(array_unique(array_map('strval', $m['observed_fingerprints'])));
+            $parts[] = 'observed_fp=' . count($fps);
+            $fps = array_slice($fps, 0, 3);
+            $short = array_map(function($x){ return substr($x, 0, 12) . '…'; }, $fps);
+            $parts[] = 'observed=' . implode(',', $short);
+        }
+
+        // Renewal timing
+        if (isset($m['early_renewal_days'])) $parts[] = 'early_renewal_days=' . (int)$m['early_renewal_days'];
+        if (isset($m['prev_valid_to'])) $parts[] = 'prev_valid_to=' . (string)$m['prev_valid_to'];
+        if (isset($m['new_valid_to'])) $parts[] = 'new_valid_to=' . (string)$m['new_valid_to'];
+
+        // Error (short)
+        if (isset($m['error'])) $parts[] = 'error=' . (string)$m['error'];
+
+        // Fingerprints are long; show only a prefix.
+        if (isset($m['prev_fingerprint'])) $parts[] = 'prev_fp=' . substr((string)$m['prev_fingerprint'], 0, 12) . '…';
+        if (isset($m['new_fingerprint'])) $parts[] = 'new_fp=' . substr((string)$m['new_fingerprint'], 0, 12) . '…';
+
+        if (!$parts) {
+            $j = json_encode($m, JSON_UNESCAPED_SLASHES);
+            return $j ? $j : '';
+        }
+        return implode(' | ', $parts);
+    }
+
+private static function renderWebhookText(array $event, ?array $monitor, string $locale = 'en'): string {
     $target = $monitor ? (string)($monitor['url'] ?? '') : 'system';
-    $meta = format_event_meta($event['meta_json'] ?? null);
+    $meta = self::formatEventMeta($event['meta_json'] ?? null);
     $metaPart = $meta ? " | {$meta}" : '';
 
     return self::tr('notify.webhook.text', [

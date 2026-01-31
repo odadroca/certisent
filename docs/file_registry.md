@@ -1,8 +1,8 @@
-# File registry (v0.6.5)
+# File registry (v0.6.6)
 
 This file lists repository files for change auditing.
 
-Generated: 2026-01-31 20:36:03 UTC
+Generated: 2026-01-31 20:58:44 UTC
 
 ```
 ./.env.example
@@ -11,6 +11,8 @@ Generated: 2026-01-31 20:36:03 UTC
 ./LICENSE.md
 ./README.md
 ./SECURITY.md
+./app/
+./app/api/
 ./app/api/Router.php
 ./app/auth.php
 ./app/bootstrap.php
@@ -18,10 +20,13 @@ Generated: 2026-01-31 20:36:03 UTC
 ./app/csrf.php
 ./app/db.php
 ./app/i18n.php
+./app/locales/
 ./app/locales/en.php
 ./app/locales/pt.php
 ./app/logger.php
+./app/logs/
 ./app/logs/.htaccess
+./app/services/
 ./app/services/Audit.php
 ./app/services/CertFetcher.php
 ./app/services/Emailer.php
@@ -32,6 +37,7 @@ Generated: 2026-01-31 20:36:03 UTC
 ./app/services/SsrfPolicy.php
 ./app/services/Worker.php
 ./app/ui.php
+./docs/
 ./docs/api.md
 ./docs/architecture.md
 ./docs/deploy.md
@@ -41,7 +47,9 @@ Generated: 2026-01-31 20:36:03 UTC
 ./docs/release_notes_v0.5.x.md
 ./docs/release_notes_v0.6.x.md
 ./docs/ui_map.md
+./public/
 ./public/.htaccess
+./public/admin/
 ./public/admin/api_keys.php
 ./public/admin/audit.php
 ./public/admin/email.php
@@ -52,6 +60,8 @@ Generated: 2026-01-31 20:36:03 UTC
 ./public/admin/system.php
 ./public/admin/user_edit.php
 ./public/admin/users.php
+./public/api/
+./public/api/v1/
 ./public/api/v1/index.php
 ./public/check_now.php
 ./public/check_now_all.php
@@ -69,7 +79,10 @@ Generated: 2026-01-31 20:36:03 UTC
 ./public/register.php
 ./public/rss.php
 ./public/settings.php
+./scripts/
 ./scripts/worker.php
+./sql/
+./sql/migrations/
 ./sql/migrations/v0.2.1_to_v0.3.sql
 ./sql/migrations/v0.3.1_to_v0.4.sql
 ./sql/migrations/v0.3_to_v0.3.1.sql

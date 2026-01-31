@@ -35,7 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $hasOwnerCols = db_has_column('api_keys', 'owner_user_id') && db_has_column('api_keys', 'key_type');
 
         if (($keyType === 'user' || cfg('API_KEYS_REQUIRE_OWNER','false') === 'true') && $ownerUserId <= 0) {
-            flash_set('error', 'Owner user is required for <?php echo h(t('admin.api_keys.opt_user_scoped')); ?> API keys.');
+            flash_set_key('error', 'admin.api_keys.err_owner_required', ['type' => t('admin.api_keys.opt_user_scoped')]);
             header('Location: api_keys.php');
             exit;
         }
@@ -210,6 +210,10 @@ if ($createdToken !== null) {
         <tr class="border-b align-top">
           <td class="py-2 pr-3 font-mono text-xs"><?php echo (int)$k['id']; ?></td>
           <td class="py-2 pr-3"><?php echo h((string)$k['name']); ?></td>
+          <?php if ($hasOwnerCols): ?>
+            <td class="py-2 pr-3"><?php echo h((string)($k['key_type'] ?? '')); ?></td>
+            <td class="py-2 pr-3"><?php echo h((string)($k['owner_email'] ?? '')); ?></td>
+          <?php endif; ?>
           <td class="py-2 pr-3 font-mono text-xs"><?php echo h(implode(',', array_map('strval',$sc))); ?></td>
           <td class="py-2 pr-3"><?php echo ((int)$k['is_active']===1) ? 'Yes' : 'No'; ?></td>
           <td class="py-2 pr-3 font-mono text-xs"><?php echo h((string)$k['created_at']); ?></td>

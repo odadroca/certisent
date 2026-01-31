@@ -2,6 +2,17 @@
 
 This document tracks patch releases in the v0.6 series.
 
+## v0.6.6 (2026-01-31)
+
+### Fixed
+- Admin: fixed HTTP 500 on `public/admin/api_keys.php` (syntax error in owner-required flash message).
+- Admin: restored “Run outbox now” action in the Outbox UI (`public/admin/outbox.php`) and kept `public/admin/outbox_run.php` as the handler.
+- Notifications: fixed email/webhook sending failure caused by `Call to undefined function format_event_meta()` by internalizing meta formatting in `app/services/Notifier.php` (workers don’t load UI helpers).
+
+### Upgrade notes
+- No schema changes in v0.6.6.
+- Default remains English; localization remains opt-in per user (`users.locale`).
+
 ## v0.6.4 (2026-01-31)
 
 ### Added / Changed
