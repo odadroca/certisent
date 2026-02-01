@@ -1,6 +1,6 @@
 <p align="center"><img src="https://i.postimg.cc/qMpPkTVz/certinel-neg.png" alt="Certinel" width="200" height="200"></p>
 
-# Certinel — TLS/SSL Certificate Monitoring (Beta) - v0.6.7
+# Certinel — TLS/SSL Certificate Monitoring (Beta) - v0.7.1
 
 Certinel is a lightweight TLS/SSL certificate monitoring service that **live-fetches** the certificate presented by an endpoint (SNI-capable), stores immutable snapshots, detects changes (renewals/rotations), and notifies before outages happen.
 
@@ -41,18 +41,6 @@ Docs: `docs/deploy.md`, `docs/ops_runbook.md`.
 - **Heartbeat**: Admin → System shows last worker run time (UTC).
 - **Upgrade approach**: replace code, keep `.env` + DB; run SQL migrations only when required (see `docs/deploy.md`).
 
-## Localization (v0.6.5)
-- Per-user UI language preference is stored in `users.locale` (default: `en`).
-- Configure via **Settings → Language**.
-- v0.6.5 localizes the core monitoring UI (dashboard, monitor CRUD, events/history pages).
-- Upgrade note: existing deployments must apply `sql/migrations/v0.6_to_v0.6.1.sql` to add the column.
-
-
-## Notification redundancy (v0.6.7)
-- Per-user setting **Settings → Email → Send each notification this many times (1–5)**.
-- Stored in `users.notify_repeat_count` (default: 1).
-- Upgrade note: apply `sql/migrations/v0.6.6_to_v0.6.7.sql` to add the column.
-
 ## Security baseline (documented behaviors)
 - Password hashing (`password_hash` / `password_verify`)
 - CSRF tokens on mutating forms
@@ -72,6 +60,12 @@ Security reporting: see `SECURITY.md`.
 - `docs/ui_map.md` — UI routes by role
 - `docs/release_notes_v0.5.x.md` — v0.5 hardening changes
 - `docs/release_notes_v0.6.x.md` — v0.6+ patch notes
+- `docs/localization.md` — localization (i18n) guide
+- `docs/release_notes_v0.7.x.md` — v0.7 release notes
+
+### Localization formatting
+- `I18N_FORMAT_DATES` (default `false`): enable locale-aware UI formatting for dates/numbers (requires PHP intl).
+
 
 ## Contributing
 - Fork the Repository

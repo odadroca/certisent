@@ -6,7 +6,7 @@ declare(strict_types=1);
  * v0.3.1: searches multiple candidate locations to reduce accidental misplacement outages.
  */
 
-function app_version(): string { return '0.6.7'; }
+function app_version(): string { return '0.7.1'; }
 
 /**
  * Database schema version.
@@ -113,7 +113,9 @@ function cfg(string $key, $default = null) {
             'DB_PASS' => (string)env('DB_PASS', ''),
             'MAIL_FROM' => (string)env('MAIL_FROM', 'no-reply@example.com'),
             'MAIL_FROM_NAME' => (string)env('MAIL_FROM_NAME', 'Certinel'),
-            'MAIL_TRANSPORT' => (string)env('MAIL_TRANSPORT', 'mail'),
+                        // v0.7 i18n formatting (opt-in, default off).
+            'I18N_FORMAT_DATES' => (string)env('I18N_FORMAT_DATES', 'false'),
+'MAIL_TRANSPORT' => (string)env('MAIL_TRANSPORT', 'mail'),
             'SMTP_HOST' => (string)env('SMTP_HOST', ''),
             'SMTP_PORT' => (int)env('SMTP_PORT', '587'),
             'SMTP_USER' => (string)env('SMTP_USER', ''),

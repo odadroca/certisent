@@ -113,3 +113,9 @@ HTTP API relay (`MAIL_TRANSPORT=api`):
 - `MAIL_API_TOKEN` (optional)
 
 Use **Admin → Email** to send a test email.
+
+
+## Localization
+
+Optional env var:
+- `I18N_FORMAT_DATES` (default `false`): enable locale-aware UI formatting for dates/numbers (requires PHP intl).

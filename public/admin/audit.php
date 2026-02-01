@@ -33,7 +33,7 @@ render_header(t('admin.audit.page_title'), $admin);
       <tbody>
         <?php foreach ($rows as $r): ?>
           <tr class="border-b align-top">
-            <td class="py-2 pr-3 font-mono text-xs"><?php echo h($r['created_at']); ?></td>
+            <td class="py-2 pr-3 font-mono text-xs"><?php echo h(ui_dt($r['created_at'])); ?></td>
             <td class="py-2 pr-3"><?php echo h((string)$r['actor_user_id']); ?></td>
             <td class="py-2 pr-3 font-mono text-xs"><?php echo h($r['action']); ?></td>
             <td class="py-2 pr-3"><?php echo h($r['entity_type']); ?>#<?php echo h((string)$r['entity_id']); ?></td>

@@ -7,6 +7,20 @@ function h(string $s): string { return htmlspecialchars($s, ENT_QUOTES, 'UTF-8')
  * Flash messages stored in session.
  * Types: info|success|warn|error
  */
+/**
+ * Locale-aware UI helpers (opt-in via I18N_FORMAT_DATES).
+ * These return raw strings; callers should still escape with h().
+ */
+function ui_dt(?string $dbDatetime): string {
+    if (function_exists('fmt_datetime_ui')) return fmt_datetime_ui($dbDatetime);
+    return (string)($dbDatetime ?? '');
+}
+
+function ui_num($n): string {
+    if (function_exists('fmt_number_ui')) return fmt_number_ui($n);
+    return (string)($n ?? '');
+}
+
 function flash_set(string $type, string $message): void {
     if (!isset($_SESSION['flash']) || !is_array($_SESSION['flash'])) {
         $_SESSION['flash'] = [];

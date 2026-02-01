@@ -67,8 +67,8 @@ $lastCron = Worker::getSystemState('last_cron_run_at');
           <td class="py-2 pr-3"><?php echo badge_status($displayStatus); ?></td>
           <td class="py-2 pr-3 font-mono"><?php echo h($m['url']); ?></td>
           <td class="py-2 pr-3"><?php echo h((string)($m['last_issuer_cn'] ?? '—')); ?></td>
-          <td class="py-2 pr-3"><?php echo h((string)($m['last_valid_to'] ?? '—')); ?><?php echo $m['last_valid_to'] ? ' UTC' : ''; ?></td>
-          <td class="py-2 pr-3"><?php echo h((string)($m['last_days_remaining'] ?? '—')); ?></td>
+          <td class="py-2 pr-3"><?php echo h(ui_dt($m['last_valid_to'] ?? null) ?: '—'); ?><?php echo $m['last_valid_to'] ? ' UTC' : ''; ?></td>
+          <td class="py-2 pr-3"><?php echo h(ui_num($m['last_days_remaining'] ?? '—')); ?></td>
           <td class="py-2 pr-3"><?php echo h((string)($m['last_checked_at'] ?? '—')); ?><?php echo $m['last_checked_at'] ? ' UTC' : ''; ?></td>
           <td class="py-2 pr-3"><?php echo h((string)($m['next_due_at'] ?? '—')); ?><?php echo $m['next_due_at'] ? ' UTC' : ''; ?></td>
           <td class="py-2 pr-3">
@@ -97,12 +97,12 @@ $lastCron = Worker::getSystemState('last_cron_run_at');
 
         <div class="mt-4 space-y-2">
           <div class="text-xs text-gray-600 flex justify-between">
-            <span><?php echo t('dashboard.valid_from'); ?>: <?php echo h((string)($m['last_valid_from'] ?? '—')); ?><?php echo $m['last_valid_from'] ? ' UTC' : ''; ?></span>
-            <span><?php echo t('dashboard.valid_to'); ?>: <?php echo h((string)($m['last_valid_to'] ?? '—')); ?><?php echo $m['last_valid_to'] ? ' UTC' : ''; ?></span>
+            <span><?php echo t('dashboard.valid_from'); ?>: <?php echo h(ui_dt($m['last_valid_from'] ?? null) ?: '—'); ?><?php echo $m['last_valid_from'] ? ' UTC' : ''; ?></span>
+            <span><?php echo t('dashboard.valid_to'); ?>: <?php echo h(ui_dt($m['last_valid_to'] ?? null) ?: '—'); ?><?php echo $m['last_valid_to'] ? ' UTC' : ''; ?></span>
           </div>
           <?php echo progress_bar($m['last_days_remaining'] !== null ? (int)$m['last_days_remaining'] : null, $m['last_valid_from'] ?? null, $m['last_valid_to'] ?? null); ?>
           <div class="text-xs text-gray-700 flex justify-between">
-            <span><?php echo t('dashboard.days_left'); ?>: <span class="font-semibold"><?php echo h((string)($m['last_days_remaining'] ?? '—')); ?></span></span>
+            <span><?php echo t('dashboard.days_left'); ?>: <span class="font-semibold"><?php echo h(ui_num($m['last_days_remaining'] ?? '—')); ?></span></span>
             <span><?php echo t('dashboard.warn_threshold'); ?>: <?php echo (int)$m['notify_days_before_expiry']; ?> <?php echo t('common.days'); ?></span>
           </div>
           <div class="text-xs text-gray-600 flex justify-between">

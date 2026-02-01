@@ -98,3 +98,72 @@ function t(string $key, array $params = [], ?string $locale = null): string {
     }
     return $s;
 }
+
+/**
+ * Parse common truthy strings.
+ */
+function i18n_truthy($v): bool {
+    if (is_bool($v)) return $v;
+    $s = strtolower(trim((string)$v));
+    return in_array($s, ['1','true','yes','on','y'], true);
+}
+
+/**
+ * Whether locale-aware formatting is enabled (opt-in).
+ * Default: off (preserves current outputs).
+ */
+function i18n_format_enabled(): bool {
+    if (!function_exists('cfg')) return false;
+    return i18n_truthy(cfg('I18N_FORMAT_DATES', 'false'));
+}
+
+/**
+ * Format a UTC datetime string (DB format) for UI.
+ *
+ * When formatting is disabled, returns the input unchanged.
+ * When enabled, uses ext/intl if available; otherwise returns the input unchanged.
+ */
+function fmt_datetime_ui(?string $dbDatetime, ?string $locale = null): string {
+    $s = (string)($dbDatetime ?? '');
+    if ($s === '') return '';
+    if (!i18n_format_enabled()) return $s;
+
+    if (!class_exists('IntlDateFormatter')) return $s;
+    try {
+        $dt = new DateTimeImmutable($s, new DateTimeZone('UTC'));
+        $loc = normalize_locale($locale ?? current_locale());
+        $fmt = new IntlDateFormatter($loc, IntlDateFormatter::MEDIUM, IntlDateFormatter::SHORT, 'UTC');
+        $out = $fmt->format($dt);
+        return is_string($out) && $out !== '' ? $out : $s;
+    } catch (Throwable $e) {
+        return $s;
+    }
+}
+
+/**
+ * Format a number for UI.
+ *
+ * When formatting is disabled, returns the number as-is (string-cast).
+ * When enabled, uses ext/intl NumberFormatter if available; otherwise returns the input.
+ */
+function fmt_number_ui($n, ?string $locale = null): string {
+    if ($n === null) return '';
+    if (is_string($n) && !is_numeric($n)) return (string)$n;
+
+    $s = (string)$n;
+    if (!i18n_format_enabled()) return $s;
+
+    if (!class_exists('NumberFormatter')) return $s;
+    try {
+        $loc = normalize_locale($locale ?? current_locale());
+        $nf = new NumberFormatter($loc, NumberFormatter::DECIMAL);
+        // Preserve integer-like outputs.
+        if (is_int($n) || (is_string($n) && ctype_digit($n))) {
+            $nf->setAttribute(NumberFormatter::FRACTION_DIGITS, 0);
+        }
+        $out = $nf->format($n);
+        return is_string($out) && $out !== '' ? $out : $s;
+    } catch (Throwable $e) {
+        return $s;
+    }
+}

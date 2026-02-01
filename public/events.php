@@ -53,7 +53,7 @@ render_header(t('page.events.title'), $user);
       <tbody>
         <?php foreach ($events as $e): ?>
           <tr class="border-b align-top">
-            <td class="py-2 pr-3 font-mono text-xs"><?php echo h($e['created_at']); ?></td>
+            <td class="py-2 pr-3 font-mono text-xs"><?php echo h(ui_dt($e['created_at'])); ?></td>
             <td class="py-2 pr-3"><?php echo h($e['severity']); ?></td>
             <td class="py-2 pr-3 font-mono text-xs"><?php echo h($e['type']); ?></td>
             <td class="py-2 pr-3"><?php echo h($e['message']); ?></td>

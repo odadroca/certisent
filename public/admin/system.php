@@ -135,7 +135,7 @@ $schemaOk = ($schemaVersion === '' || $schemaVersion === $appVersion);
       <div class="text-sm text-gray-700"><?php echo h(t('admin.system.msg_no_heartbeat')); ?></div>
     <?php else: ?>
       <div class="text-sm text-gray-700 space-y-2">
-        <div><span class="text-gray-500"><?php echo h(t('admin.system.label_last_run')); ?>:</span> <span class="font-mono text-xs"><?php echo h($lastCron); ?> UTC</span></div>
+        <div><span class="text-gray-500"><?php echo h(t('admin.system.label_last_run')); ?>:</span> <span class="font-mono text-xs"><?php echo h(ui_dt($lastCron)); ?> UTC</span></div>
         <div><span class="text-gray-500">Last ok flag:</span> <?php echo h((string)($lastCronOk ?? '')); ?></div>
         <div>
           <span class="text-gray-500">Age:</span>

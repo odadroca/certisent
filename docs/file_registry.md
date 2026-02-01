@@ -1,10 +1,11 @@
-# File registry (v0.6.7)
+# File registry (v0.7.1)
 
 This file lists repository files for change auditing.
 
-Generated: 2026-01-31 21:36:04 UTC
+Generated: 2026-01-31 22:30:04 UTC
 
 ```
+./
 ./.env.example
 ./CODE_OF_CONDUCT.md
 ./CONTRIBUTING.md
@@ -42,10 +43,12 @@ Generated: 2026-01-31 21:36:04 UTC
 ./docs/architecture.md
 ./docs/deploy.md
 ./docs/file_registry.md
+./docs/localization.md
 ./docs/ops_runbook.md
 ./docs/release_notes_v0.4.x.md
 ./docs/release_notes_v0.5.x.md
 ./docs/release_notes_v0.6.x.md
+./docs/release_notes_v0.7.x.md
 ./docs/ui_map.md
 ./public/
 ./public/.htaccess
@@ -91,4 +94,6 @@ Generated: 2026-01-31 21:36:04 UTC
 ./sql/migrations/v0.6.6_to_v0.6.7.sql
 ./sql/migrations/v0.6_to_v0.6.1.sql
 ./sql/schema.sql
+./tools/
+./tools/i18n_audit.php
 ```

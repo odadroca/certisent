@@ -37,6 +37,18 @@ function login_user(array $userRow): void {
         'email' => $userRow['email'],
         'role' => $userRow['role'],
     ];
+
+    // Locale persistence:
+    // Users can choose a locale in settings, stored in users.locale.
+    // A logged-out visitor typically caches 'en' into $_SESSION['locale'] (via current_locale())
+    // on the login/register pages. Without resetting it here, that cached value overrides
+    // the user's saved preference after login.
+    if (isset($userRow['locale']) && function_exists('normalize_locale')) {
+        $_SESSION['locale'] = normalize_locale((string)$userRow['locale']);
+    } else {
+        // Clear any cached guest locale so current_locale() can resolve again.
+        unset($_SESSION['locale']);
+    }
 }
 
 function logout_user(): void {
