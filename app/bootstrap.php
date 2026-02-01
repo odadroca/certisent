@@ -228,6 +228,7 @@ require_once __DIR__ . '/services/Audit.php';
 require_once __DIR__ . '/services/RateLimiter.php';
 require_once __DIR__ . '/services/SsrfPolicy.php';
 require_once __DIR__ . '/services/CertFetcher.php';
+require_once __DIR__ . '/services/TlsValidator.php';
 require_once __DIR__ . '/services/SmtpClient.php';
 require_once __DIR__ . '/services/Emailer.php';
 require_once __DIR__ . '/services/Notifier.php';

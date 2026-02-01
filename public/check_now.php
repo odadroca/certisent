@@ -23,6 +23,12 @@ try {
         $vf = (int)($parsed['validFrom_time_t'] ?? 0);
         $vt = (int)($parsed['validTo_time_t'] ?? 0);
         $days = (int)floor(($vt - time()) / 86400);
+
+        // v0.7.2: hostname validation ("wrong.host" style) for immediate user feedback.
+        $hv = null;
+        if (is_array($parsed) && !empty($p['host'])) {
+            $hv = TlsValidator::validateHostname((string)$p['host'], $parsed);
+        }
         $res = [
             'url'=>$p['url'],
             'host'=>$p['host'],
@@ -33,6 +39,7 @@ try {
             'valid_from'=> $vf ? gmdate('Y-m-d H:i:s', $vf) : null,
             'valid_to'=> $vt ? gmdate('Y-m-d H:i:s', $vt) : null,
             'days_remaining'=>$days,
+            'hostname_validation'=>$hv,
         ];
     }
 } catch (Throwable $e) {
@@ -49,6 +56,19 @@ render_header('Quick check', current_user());
       Error: <?php echo h($err); ?>
     </div>
   <?php elseif ($res): ?>
+    <?php $hv = $res['hostname_validation'] ?? null; ?>
+    <?php if (is_array($hv) && (($hv['ok'] ?? true) === false) && (($hv['error'] ?? '') === 'hostname_mismatch')): ?>
+      <div class="p-3 rounded bg-yellow-100 text-yellow-900 text-sm mb-4 border border-yellow-200">
+        <div class="font-semibold mb-1">Warning: hostname mismatch</div>
+        <div>The certificate presented by this endpoint does <span class="font-semibold">not</span> match the requested host <span class="font-mono"><?php echo h((string)$res['host']); ?></span>.</div>
+        <?php if (!empty($hv['candidates']) && is_array($hv['candidates'])): ?>
+          <?php $c = array_slice(array_values(array_map('strval', $hv['candidates'])), 0, 8); ?>
+          <?php if (count($c) > 0): ?>
+            <div class="mt-1 text-xs">Names on cert: <span class="font-mono break-all"><?php echo h(implode(', ', $c)); ?></span></div>
+          <?php endif; ?>
+        <?php endif; ?>
+      </div>
+    <?php endif; ?>
     <div class="grid md:grid-cols-2 gap-4 text-sm">
       <div><span class="text-gray-600">URL</span><div class="font-mono"><?php echo h($res['url']); ?></div></div>
       <div><span class="text-gray-600">Fingerprint (SHA-256)</span><div class="font-mono break-all"><?php echo h($res['fingerprint']); ?></div></div>

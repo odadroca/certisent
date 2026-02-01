@@ -1,4 +1,4 @@
-# Deployment and upgrades (v0.6)
+# Deployment and upgrades (v0.7.2)
 
 This document covers (a) fresh installs, (b) common hosting gotchas, and (c) upgrade paths including when SQL migrations are required.
 
@@ -85,6 +85,11 @@ If you are upgrading from v0.6 and want the per-user UI language preference, run
 - `sql/migrations/v0.6.6_to_v0.6.7.sql`
 
 This adds `users.locale` (default: `en`).
+
+### 0.7.1 → 0.7.2+
+
+If you are upgrading from v0.7.1 to v0.7.2 and want the opt-in hostname validation data model, run:
+- `sql/migrations/v0.7.1_to_v0.7.2.sql`
 
 ## Verifying an upgrade
 

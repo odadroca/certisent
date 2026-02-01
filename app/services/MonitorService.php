@@ -121,7 +121,7 @@ final class MonitorService {
     }
 
     public static function getMonitorById(int $monitorId): ?array {
-        $st = db()->prepare("SELECT m.*, s.notify_days_before_expiry, s.check_frequency_minutes, s.notify_on_change, s.notify_on_renewal
+        $st = db()->prepare("SELECT m.*, s.notify_days_before_expiry, s.check_frequency_minutes, s.notify_on_change, s.notify_on_renewal, s.tls_validation_mode
                              FROM monitors m JOIN monitor_settings s ON s.monitor_id=m.id WHERE m.id=:id");
         $st->execute([':id'=>$monitorId]);
         $r = $st->fetch();

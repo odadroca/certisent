@@ -1,6 +1,6 @@
 <p align="center"><img src="https://i.postimg.cc/qMpPkTVz/certinel-neg.png" alt="Certinel" width="200" height="200"></p>
 
-# Certinel — TLS/SSL Certificate Monitoring (Beta) - v0.7.1
+# Certinel — TLS/SSL Certificate Monitoring (Beta) - v.0.7.2
 
 Certinel is a lightweight TLS/SSL certificate monitoring service that **live-fetches** the certificate presented by an endpoint (SNI-capable), stores immutable snapshots, detects changes (renewals/rotations), and notifies before outages happen.
 
@@ -40,6 +40,20 @@ Docs: `docs/deploy.md`, `docs/ops_runbook.md`.
 - **Outbox**: notification deliveries are queued and retried (Admin → Outbox).
 - **Heartbeat**: Admin → System shows last worker run time (UTC).
 - **Upgrade approach**: replace code, keep `.env` + DB; run SQL migrations only when required (see `docs/deploy.md`).
+
+## TLS validation mode (hostname identity) (v.0.7.2)
+
+Certinel **does not verify TLS** by default (`verify_peer=false`) because it is designed to observe *what the endpoint actually serves*.
+
+v0.7.2 introduces an **opt-in** per-monitor `tls_validation_mode` data model for hostname identity checks:
+- `off` (default): legacy behavior; no hostname validation stored.
+- `observe`: compute and persist `monitors.hostname_ok` / `monitors.hostname_error` (does not change alerting behavior in v0.7.2).
+- `enforce`: reserved for a future release; treated like `observe` in v0.7.2.
+
+Quick Check shows an immediate warning if a hostname mismatch is detected.
+
+Enable for a monitor (SQL):
+- set `monitor_settings.tls_validation_mode='observe'` (or `enforce`) for the target `monitor_id`.
 
 ## Security baseline (documented behaviors)
 - Password hashing (`password_hash` / `password_verify`)

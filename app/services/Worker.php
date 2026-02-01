@@ -349,6 +349,12 @@ $rows = $sel->fetchAll();
         $subject = null;
         $serial = null;
         $daysRemaining = null;
+        // v0.7.2: optional TLS identity validation (hostname mismatch)
+        $tlsMode = strtolower(trim((string)($m['tls_validation_mode'] ?? 'off')));
+        if (!in_array($tlsMode, ['off','observe','enforce'], true)) $tlsMode = 'off';
+        $hostnameOk = null;
+        $hostnameErr = null;
+        $hostnameShouldUpdate = 0;
 
         if (!$fetch['ok']) {
             $status = 'critical';
@@ -374,6 +380,28 @@ $rows = $sel->fetchAll();
 
                 $daysRemaining = (int)floor(($vt - time()) / 86400);
 
+                // v0.7.2: hostname validation (opt-in per monitor)
+                if ($tlsMode !== 'off') {
+                    $hv = TlsValidator::validateHostname((string)$m['host'], $parsed);
+                    $hostnameShouldUpdate = 1;
+                    $hostnameOk = $hv['ok'] ? 1 : 0;
+                    if (!$hv['ok']) {
+                        $hostnameErr = (string)($hv['error'] ?? 'hostname_mismatch');
+                        $cands = $hv['candidates'] ?? [];
+                        if (is_array($cands) && count($cands) > 0) {
+                            $list = implode(', ', array_slice(array_values(array_map('strval', $cands)), 0, 6));
+                            if ($list !== '') {
+                                $hostnameErr .= ' (candidates: ' . $list . ')';
+                            }
+                        }
+                        if (strlen($hostnameErr) > 255) {
+                            $hostnameErr = substr($hostnameErr, 0, 252) . '...';
+                        }
+                    } else {
+                        $hostnameErr = null;
+                    }
+                }
+
                 $notifyDays = (int)$m['notify_days_before_expiry'];
                 if ($daysRemaining <= 0) {
                     $status = 'critical';
@@ -382,6 +410,7 @@ $rows = $sel->fetchAll();
                 } else {
                     $status = 'ok';
                 }
+
             }
         }
 
@@ -409,7 +438,10 @@ $rows = $sel->fetchAll();
 
         // Update monitor denormalized fields for fast UI queries
         $up = db()->prepare('UPDATE monitors SET last_checked_at=:c, last_status=:st, last_fingerprint_sha256=:fp, last_issuer_cn=:issuer,
-                             last_valid_from=:vf, last_valid_to=:vt, last_days_remaining=:days, last_error=:err, updated_at=:u WHERE id=:id');
+                             last_valid_from=:vf, last_valid_to=:vt, last_days_remaining=:days, last_error=:err,
+                             hostname_ok = CASE WHEN :hupd=1 THEN :hok ELSE hostname_ok END,
+                             hostname_error = CASE WHEN :hupd=1 THEN :herr ELSE hostname_error END,
+                             updated_at=:u WHERE id=:id');
         $up->execute([
             ':c'=>$now,
             ':st'=>$status,
@@ -419,6 +451,9 @@ $rows = $sel->fetchAll();
             ':vt'=>$validTo,
             ':days'=>$daysRemaining,
             ':err'=>$err,
+            ':hupd'=>$hostnameShouldUpdate,
+            ':hok'=>$hostnameOk,
+            ':herr'=>$hostnameErr,
             ':u'=>$now,
             ':id'=>$monitorId,
         ]);

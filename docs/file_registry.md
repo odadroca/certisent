@@ -1,8 +1,8 @@
-# File registry (v0.7.1)
+# File registry (v0.7.2)
 
 This file lists repository files for change auditing.
 
-Generated: 2026-01-31 22:30:04 UTC
+Generated: 2026-01-31 23:57:06 UTC
 
 ```
 ./
@@ -36,6 +36,7 @@ Generated: 2026-01-31 22:30:04 UTC
 ./app/services/RateLimiter.php
 ./app/services/SmtpClient.php
 ./app/services/SsrfPolicy.php
+./app/services/TlsValidator.php
 ./app/services/Worker.php
 ./app/ui.php
 ./docs/
@@ -93,6 +94,7 @@ Generated: 2026-01-31 22:30:04 UTC
 ./sql/migrations/v0.5.6_to_v0.5.7.sql
 ./sql/migrations/v0.6.6_to_v0.6.7.sql
 ./sql/migrations/v0.6_to_v0.6.1.sql
+./sql/migrations/v0.7.1_to_v0.7.2.sql
 ./sql/schema.sql
 ./tools/
 ./tools/i18n_audit.php

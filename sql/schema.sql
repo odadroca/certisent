@@ -36,6 +36,9 @@ CREATE TABLE IF NOT EXISTS monitors (
   last_valid_to DATETIME NULL,
   last_days_remaining INT NULL,
   last_error VARCHAR(255) NULL,
+  -- v0.7.2: optional TLS identity validation (hostname mismatch). Default behavior unchanged unless enabled per monitor.
+  hostname_ok TINYINT(1) NULL,
+  hostname_error VARCHAR(255) NULL,
   CONSTRAINT fk_monitors_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -49,6 +52,8 @@ CREATE TABLE IF NOT EXISTS monitor_settings (
   check_frequency_minutes INT NOT NULL DEFAULT 60,
   notify_on_change TINYINT(1) NOT NULL DEFAULT 1,
   notify_on_renewal TINYINT(1) NOT NULL DEFAULT 1,
+  -- v0.7.2: opt-in TLS validation mode (default off; preserve legacy behavior)
+  tls_validation_mode ENUM('off','observe','enforce') NOT NULL DEFAULT 'off',
   CONSTRAINT fk_settings_monitor FOREIGN KEY (monitor_id) REFERENCES monitors(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 

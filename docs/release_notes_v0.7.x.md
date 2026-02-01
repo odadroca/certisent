@@ -1,5 +1,17 @@
 # Release notes (v0.7.x)
 
+## v0.7.2
+
+### Added (default-preserving)
+- Opt-in per-monitor TLS hostname validation mode: `monitor_settings.tls_validation_mode` (`off|observe|enforce`, default `off`).
+- Hostname validation results persisted to `monitors.hostname_ok` / `monitors.hostname_error` when mode is not `off`.
+
+### DB migration
+- New columns require running: `sql/migrations/v0.7.1_to_v0.7.2.sql`.
+
+### UI
+- Quick Check now shows an immediate prominent warning when a hostname mismatch is detected ("wrong.host" style), while still displaying parsed certificate details.
+
 ## v0.7.1
 
 ### Fixed
