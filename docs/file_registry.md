@@ -1,19 +1,19 @@
-# File registry (v0.7.5)
+# File registry (v0.7.6)
 
 This file lists repository files for change auditing.
 
-Generated: 2026-02-01 01:33:13 UTC
+Generated: 2026-02-01 01:55:40 UTC
 
 ```
-./
+.
 ./.env.example
 ./CODE_OF_CONDUCT.md
 ./CONTRIBUTING.md
 ./LICENSE.md
 ./README.md
 ./SECURITY.md
-./app/
-./app/api/
+./app
+./app/api
 ./app/api/Router.php
 ./app/auth.php
 ./app/bootstrap.php
@@ -21,13 +21,13 @@ Generated: 2026-02-01 01:33:13 UTC
 ./app/csrf.php
 ./app/db.php
 ./app/i18n.php
-./app/locales/
+./app/locales
 ./app/locales/en.php
 ./app/locales/pt.php
 ./app/logger.php
-./app/logs/
+./app/logs
 ./app/logs/.htaccess
-./app/services/
+./app/services
 ./app/services/Audit.php
 ./app/services/CertFetcher.php
 ./app/services/Emailer.php
@@ -39,7 +39,7 @@ Generated: 2026-02-01 01:33:13 UTC
 ./app/services/TlsValidator.php
 ./app/services/Worker.php
 ./app/ui.php
-./docs/
+./docs
 ./docs/api.md
 ./docs/architecture.md
 ./docs/deploy.md
@@ -51,9 +51,9 @@ Generated: 2026-02-01 01:33:13 UTC
 ./docs/release_notes_v0.6.x.md
 ./docs/release_notes_v0.7.x.md
 ./docs/ui_map.md
-./public/
+./public
 ./public/.htaccess
-./public/admin/
+./public/admin
 ./public/admin/api_keys.php
 ./public/admin/audit.php
 ./public/admin/email.php
@@ -64,8 +64,8 @@ Generated: 2026-02-01 01:33:13 UTC
 ./public/admin/system.php
 ./public/admin/user_edit.php
 ./public/admin/users.php
-./public/api/
-./public/api/v1/
+./public/api
+./public/api/v1
 ./public/api/v1/index.php
 ./public/check_now.php
 ./public/check_now_all.php
@@ -83,10 +83,10 @@ Generated: 2026-02-01 01:33:13 UTC
 ./public/register.php
 ./public/rss.php
 ./public/settings.php
-./scripts/
+./scripts
 ./scripts/worker.php
-./sql/
-./sql/migrations/
+./sql
+./sql/migrations
 ./sql/migrations/v0.2.1_to_v0.3.sql
 ./sql/migrations/v0.3.1_to_v0.4.sql
 ./sql/migrations/v0.3_to_v0.3.1.sql
@@ -96,7 +96,8 @@ Generated: 2026-02-01 01:33:13 UTC
 ./sql/migrations/v0.6_to_v0.6.1.sql
 ./sql/migrations/v0.7.1_to_v0.7.2.sql
 ./sql/migrations/v0.7.2_to_v0.7.3.sql
+./sql/migrations/v0.7.5_to_v0.7.6.sql
 ./sql/schema.sql
-./tools/
+./tools
 ./tools/i18n_audit.php
 ```

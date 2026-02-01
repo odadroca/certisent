@@ -29,8 +29,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $tvm = 'off';
     }
 
+    // v0.7.6: Certinel-defined pinning (SPKI sha256) (opt-in).
+    $pm = (string)($_POST['pin_mode'] ?? ($m['pin_mode'] ?? 'off'));
+    if (!in_array($pm, ['off','observe','enforce'], true)) {
+        $pm = 'off';
+    }
+    $ps = (string)($_POST['pin_spki_sha256'] ?? ($m['pin_spki_sha256'] ?? ''));
+
     try {
-        MonitorService::updateMonitor((int)$user['id'], $id, $url, $days, $freq, $enabled, $noc, $nor, $tvm);
+        MonitorService::updateMonitor((int)$user['id'], $id, $url, $days, $freq, $enabled, $noc, $nor, $tvm, $pm, $ps);
         header('Location: dashboard.php');
         exit;
     } catch (Throwable $e) {
@@ -71,6 +78,23 @@ render_header(t('page.monitor_edit.title'), $user);
         <option value="enforce" <?php echo $curTvm==='enforce' ? 'selected' : ''; ?>><?php echo t('monitor_edit.tls_mode.enforce'); ?></option>
       </select>
       <div class="text-xs text-gray-600 mt-1"><?php echo t('monitor_edit.tls_validation_note'); ?></div>
+    </div>
+
+    <div class="mt-1">
+      <label class="text-sm"><?php echo t('monitor_edit.pin_mode'); ?></label>
+      <?php $curPm = (string)($_POST['pin_mode'] ?? ($m['pin_mode'] ?? 'off')); ?>
+      <select name="pin_mode" class="w-full border rounded px-3 py-2">
+        <option value="off" <?php echo $curPm==='off' ? 'selected' : ''; ?>><?php echo t('monitor_edit.pin_mode.off'); ?></option>
+        <option value="observe" <?php echo $curPm==='observe' ? 'selected' : ''; ?>><?php echo t('monitor_edit.pin_mode.observe'); ?></option>
+        <option value="enforce" <?php echo $curPm==='enforce' ? 'selected' : ''; ?>><?php echo t('monitor_edit.pin_mode.enforce'); ?></option>
+      </select>
+      <div class="text-xs text-gray-600 mt-1"><?php echo t('monitor_edit.pin_note'); ?></div>
+    </div>
+
+    <div>
+      <label class="text-sm"><?php echo t('monitor_edit.pin_value'); ?></label>
+      <input name="pin_spki_sha256" class="w-full border rounded px-3 py-2 font-mono text-xs" placeholder="sha256/&lt;base64&gt;" value="<?php echo h((string)($_POST['pin_spki_sha256'] ?? ($m['pin_spki_sha256'] ?? ''))); ?>" />
+      <div class="text-xs text-gray-600 mt-1"><?php echo t('monitor_edit.pin_value_note'); ?></div>
     </div>
     <div class="flex items-center gap-2">
       <input type="checkbox" name="enabled" <?php echo ((int)($m['enabled'])===1 ? 'checked' : ''); ?> />

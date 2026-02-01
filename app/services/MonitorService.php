@@ -54,7 +54,9 @@ final class MonitorService {
         int $enabled,
         ?int $notifyOnChange = null,
         ?int $notifyOnRenewal = null,
-        ?string $tlsValidationMode = null
+        ?string $tlsValidationMode = null,
+        ?string $pinMode = null,
+        ?string $pinSpkiSha256 = null
     ): void {
         $parsed = self::parseUrl($url);
         $now = db_now_utc();
@@ -87,6 +89,39 @@ final class MonitorService {
             $fields .= ', tls_validation_mode=:tvm';
             $params[':tvm'] = $tlsValidationMode;
         }
+
+        // v0.7.6: Certinel-defined pinning (SPKI sha256) (opt-in).
+        if ($pinMode !== null) {
+            $allowed = ['off','observe','enforce'];
+            if (!in_array($pinMode, $allowed, true)) {
+                $pinMode = 'off';
+            }
+            $fields .= ', pin_mode=:pm';
+            $params[':pm'] = $pinMode;
+        }
+        if ($pinSpkiSha256 !== null) {
+            $v = trim((string)$pinSpkiSha256);
+            if (class_exists('TlsValidator') && method_exists('TlsValidator', 'normalizeSpkiPin')) {
+                $v = (string)TlsValidator::normalizeSpkiPin($v);
+            }
+            if ($v === '') {
+                $fields .= ', pin_spki_sha256=NULL';
+            } else {
+                // Validate format: base64 sha256 of SPKI (32 bytes => 44 chars base64 with padding).
+                $ok = false;
+                if (class_exists('TlsValidator') && method_exists('TlsValidator', 'isValidSpkiPin')) {
+                    $ok = (bool)TlsValidator::isValidSpkiPin($v);
+                } else {
+                    $raw = base64_decode($v, true);
+                    $ok = is_string($raw) && strlen($raw) === 32;
+                }
+                if (!$ok) {
+                    throw new RuntimeException('Invalid SPKI pin value (expected base64 sha256 of SPKI).');
+                }
+                $fields .= ', pin_spki_sha256=:ps';
+                $params[':ps'] = $v;
+            }
+        }
         $st2 = db()->prepare('UPDATE monitor_settings SET '.$fields.' WHERE monitor_id=:id');
         $st2->execute($params);
 
@@ -94,6 +129,8 @@ final class MonitorService {
         if ($notifyOnChange !== null) $meta['notify_on_change'] = $notifyOnChange ? 1 : 0;
         if ($notifyOnRenewal !== null) $meta['notify_on_renewal'] = $notifyOnRenewal ? 1 : 0;
         if ($tlsValidationMode !== null) $meta['tls_validation_mode'] = $tlsValidationMode;
+        if ($pinMode !== null) $meta['pin_mode'] = $pinMode;
+        if ($pinSpkiSha256 !== null) $meta['pin_spki_sha256'] = $pinSpkiSha256;
         Audit::log($actorUserId, 'monitor.update', 'monitor', $monitorId, $meta);
     }
 
@@ -131,7 +168,8 @@ final class MonitorService {
     }
 
     public static function getMonitorById(int $monitorId): ?array {
-        $st = db()->prepare("SELECT m.*, s.notify_days_before_expiry, s.check_frequency_minutes, s.notify_on_change, s.notify_on_renewal, s.tls_validation_mode
+        $st = db()->prepare("SELECT m.*, s.notify_days_before_expiry, s.check_frequency_minutes, s.notify_on_change, s.notify_on_renewal, s.tls_validation_mode,
+                                    s.pin_mode, s.pin_spki_sha256
                              FROM monitors m JOIN monitor_settings s ON s.monitor_id=m.id WHERE m.id=:id");
         $st->execute([':id'=>$monitorId]);
         $r = $st->fetch();

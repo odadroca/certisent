@@ -96,6 +96,11 @@ If you are upgrading from v0.7.1 to v0.7.2 and want the opt-in hostname validati
 If you are upgrading from v0.7.2 to v0.7.3 and want the opt-in trust validation data model, run:
 - `sql/migrations/v0.7.2_to_v0.7.3.sql`
 
+### 0.7.5 → 0.7.6+
+
+If you are upgrading from v0.7.5 to v0.7.6 and want Certinel-defined pinning settings, run:
+- `sql/migrations/v0.7.5_to_v0.7.6.sql`
+
 ## Verifying an upgrade
 
 - Visit **Admin → System** to confirm the worker heartbeat and that the DB is reachable.

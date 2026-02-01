@@ -104,6 +104,27 @@ render_header(t('page.monitor_view.title'), $user);
             <?php endif; ?>
           <?php endif; ?>
         </div>
+
+        <?php
+          $pinMode = (string)($m['pin_mode'] ?? 'off');
+          $pinModeKey = 'tls.mode.' . ($pinMode ?: 'off');
+          $pinVal = (string)($m['pin_spki_sha256'] ?? '');
+        ?>
+        <div>
+          <span class="text-gray-500"><?php echo t('tls.label.pinning'); ?>:</span>
+          <?php if ($pinMode === 'off'): ?>
+            <?php echo t('tls.value.off'); ?>
+          <?php else: ?>
+            <?php echo t($pinModeKey); ?>
+            <?php if ($pinVal !== ''): ?>
+              <div class="text-xs text-gray-600 mt-1">
+                <?php echo t('tls.label.pin_value'); ?>: <span class="font-mono break-all"><?php echo h('sha256/'.$pinVal); ?></span>
+              </div>
+            <?php else: ?>
+              <span class="text-xs text-gray-600">(<?php echo t('tls.value.not_configured'); ?>)</span>
+            <?php endif; ?>
+          <?php endif; ?>
+        </div>
       </div>
     </div>
 

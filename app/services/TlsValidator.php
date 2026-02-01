@@ -13,6 +13,80 @@ declare(strict_types=1);
 final class TlsValidator {
 
     /**
+     * Compute SPKI (SubjectPublicKeyInfo) sha256 for the leaf certificate.
+     *
+     * Returned value is base64(SHA-256(SPKI DER)). This is a Certinel-defined pin format.
+     *
+     * @return array{ok:bool,sha256_base64:?string,sha256_hex:?string,error:?string}
+     */
+    public static function computeSpkiSha256(string $certPem): array {
+        $certPem = trim($certPem);
+        if ($certPem === '') {
+            return ['ok'=>false,'sha256_base64'=>null,'sha256_hex'=>null,'error'=>'empty_pem'];
+        }
+
+        $pub = @openssl_pkey_get_public($certPem);
+        if ($pub === false) {
+            return ['ok'=>false,'sha256_base64'=>null,'sha256_hex'=>null,'error'=>'openssl_pkey_get_public_failed'];
+        }
+
+        $det = openssl_pkey_get_details($pub);
+        if (!is_array($det) || empty($det['key']) || !is_string($det['key'])) {
+            return ['ok'=>false,'sha256_base64'=>null,'sha256_hex'=>null,'error'=>'openssl_pkey_details_failed'];
+        }
+        $pubPem = (string)$det['key'];
+        $b64 = preg_replace('/-----BEGIN PUBLIC KEY-----|-----END PUBLIC KEY-----|\s+/', '', $pubPem);
+        $b64 = is_string($b64) ? trim($b64) : '';
+        if ($b64 === '') {
+            return ['ok'=>false,'sha256_base64'=>null,'sha256_hex'=>null,'error'=>'spki_extract_failed'];
+        }
+        $der = base64_decode($b64, true);
+        if (!is_string($der) || $der === '') {
+            return ['ok'=>false,'sha256_base64'=>null,'sha256_hex'=>null,'error'=>'spki_base64_decode_failed'];
+        }
+
+        $bin = hash('sha256', $der, true);
+        if (!is_string($bin) || strlen($bin) !== 32) {
+            return ['ok'=>false,'sha256_base64'=>null,'sha256_hex'=>null,'error'=>'sha256_failed'];
+        }
+        return [
+            'ok'=>true,
+            'sha256_base64'=>base64_encode($bin),
+            'sha256_hex'=>hash('sha256', $der),
+            'error'=>null,
+        ];
+    }
+
+    /**
+     * Normalize a pin value (accepts optional 'sha256/' prefix).
+     */
+    public static function normalizeSpkiPin(string $pin): string {
+        $p = trim($pin);
+        if ($p === '') return '';
+        $p = preg_replace('/\s+/', '', $p) ?? $p;
+        if (stripos($p, 'sha256/') === 0) {
+            $p = substr($p, 7);
+        }
+        if (stripos($p, 'sha256:') === 0) {
+            $p = substr($p, 7);
+        }
+        return trim($p);
+    }
+
+    /**
+     * Validate a normalized SPKI pin value (base64 sha256 digest).
+     */
+    public static function isValidSpkiPin(string $pin): bool {
+        $p = self::normalizeSpkiPin($pin);
+        if ($p === '') return false;
+        if (!preg_match('/^[A-Za-z0-9+\/]+=*$/', $p)) return false;
+        // SHA-256 digest is 32 bytes; base64 is typically 44 chars with '=' padding.
+        if (strlen($p) < 43 || strlen($p) > 64) return false;
+        $raw = base64_decode($p, true);
+        return is_string($raw) && strlen($raw) === 32;
+    }
+
+    /**
      * Validate that $host is covered by the certificate identity (SAN DNS/IP, CN fallback).
      *
      * @param string $host requested host (SNI/URL host)

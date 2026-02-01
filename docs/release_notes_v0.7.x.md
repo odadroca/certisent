@@ -1,5 +1,15 @@
 # Release notes (v0.7.x)
 
+## v0.7.6
+
+### Added (default-preserving)
+- Certinel-defined certificate/public-key pinning (not HPKP preload): per-monitor `monitor_settings.pin_mode` (`off|observe|enforce`, default `off`) plus `monitor_settings.pin_spki_sha256` (base64 sha256 of SPKI).
+- Quick Check displays `SPKI sha256 (pin)` (copy/paste value).
+- Worker: when pinning is enabled and a pin is set, emits event `tls_pin_mismatch` on mismatch (severity: `warn` in `observe`, `critical` in `enforce`).
+
+### DB migration
+- New columns require running: `sql/migrations/v0.7.5_to_v0.7.6.sql`.
+
 ## v0.7.5
 
 ### Added (default-preserving)

@@ -35,11 +35,18 @@ try {
         if (!empty($p['host'])) {
             $tv = TlsValidator::validateTrust((string)$p['host'], (int)$p['port']);
         }
+
+        // v0.7.6: SPKI sha256 (Certinel-defined pinning material).
+        $spki = null;
+        if (!empty($f['pem']) && is_string($f['pem'])) {
+            $spki = TlsValidator::computeSpkiSha256((string)$f['pem']);
+        }
         $res = [
             'url'=>$p['url'],
             'host'=>$p['host'],
             'port'=>$p['port'],
             'fingerprint'=>$f['fingerprint_sha256'] ?? '',
+            'spki_sha256_base64'=> (is_array($spki) && ($spki['ok'] ?? false) ? (string)($spki['sha256_base64'] ?? '') : ''),
             'issuer'=>$parsed['issuer']['CN'] ?? ($parsed['issuer']['O'] ?? ''),
             'subject'=>$parsed['subject']['CN'] ?? ($parsed['subject']['O'] ?? ''),
             'valid_from'=> $vf ? gmdate('Y-m-d H:i:s', $vf) : null,
@@ -105,6 +112,7 @@ render_header('Quick check', current_user());
     <div class="grid md:grid-cols-2 gap-4 text-sm">
       <div><span class="text-gray-600">URL</span><div class="font-mono"><?php echo h($res['url']); ?></div></div>
       <div><span class="text-gray-600">Fingerprint (SHA-256)</span><div class="font-mono break-all"><?php echo h($res['fingerprint']); ?></div></div>
+      <div><span class="text-gray-600">SPKI sha256 (pin)</span><div class="font-mono break-all"><?php echo h($res['spki_sha256_base64'] ? ('sha256/'.$res['spki_sha256_base64']) : ''); ?></div></div>
       <div><span class="text-gray-600">Issuer</span><div><?php echo h((string)$res['issuer']); ?></div></div>
       <div><span class="text-gray-600">Subject</span><div><?php echo h((string)$res['subject']); ?></div></div>
       <div><span class="text-gray-600">Valid from</span><div><?php echo h((string)$res['valid_from']); ?> UTC</div></div>

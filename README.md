@@ -1,6 +1,6 @@
 <p align="center"><img src="https://i.postimg.cc/qMpPkTVz/certinel-neg.png" alt="Certinel" width="200" height="200"></p>
 
-# Certinel — TLS/SSL Certificate Monitoring (Beta) - v.0.7.5
+# Certinel — TLS/SSL Certificate Monitoring (Beta) - v0.7.6
 
 Certinel is a lightweight TLS/SSL certificate monitoring service that **live-fetches** the certificate presented by an endpoint (SNI-capable), stores immutable snapshots, detects changes (renewals/rotations), and notifies before outages happen.
 
@@ -41,7 +41,7 @@ Docs: `docs/deploy.md`, `docs/ops_runbook.md`.
 - **Heartbeat**: Admin → System shows last worker run time (UTC).
 - **Upgrade approach**: replace code, keep `.env` + DB; run SQL migrations only when required (see `docs/deploy.md`).
 
-## TLS validation mode (hostname + trust) (v.0.7.5)
+## TLS validation mode (hostname + trust) (v0.7.6)
 
 Certinel **does not verify TLS** by default (`verify_peer=false`) because it is designed to observe *what the endpoint actually serves*.
 
@@ -54,7 +54,7 @@ Trust validation uses a *separate* probe that validates the certificate chain us
 Mode values:
 - `off` (default): legacy behavior; hostname/trust validation not computed or persisted.
 - `observe`: compute and persist hostname + trust validation fields (does not change expiry/change alerting behavior).
-- `enforce`: reserved for a future release; treated like `observe` in v0.7.5.
+- `enforce`: currently behaves like `observe` (compute + persist + notify). Enforcement is reserved for future behavior changes.
 
 Trust categories:
 - `tls_self_signed` — self-signed certificate.
@@ -71,7 +71,7 @@ When `tls_validation_mode` is `observe` or `enforce`, the worker also emits new 
 Event dedupe: these TLS invalid-state events are created only when the classification changes or when the certificate fingerprint changes.
 
 
-UI (v.0.7.5):
+UI (v0.7.6):
 - Monitor → Edit → **TLS validation mode** (`off|observe|enforce`).
 - Dashboard and Monitor view show the last-known hostname/trust validation summary (separate from expiry/change status).
 
@@ -86,6 +86,30 @@ Optional configuration (env):
 - `TLS_TRUST_CONNECT_TIMEOUT_SECS` (default `4`) — connect timeout for trust probe.
 - `TLS_TRUST_TIMEOUT_SECS` (default `6`) — total timeout for trust probe.
 - `TLS_CA_BUNDLE` (default empty) — optional CA bundle path override when the system CA bundle is not available.
+
+## Certificate/public-key pinning (SPKI sha256) (v0.7.6)
+
+Certinel supports **Certinel-defined pinning** (not HPKP preload).
+
+- Pin material: **SPKI sha256** of the *leaf certificate public key* (`base64(SHA-256(SPKI DER))`).
+- Purpose: detect unexpected key changes (interception, misconfiguration, unplanned rotation).
+
+Per-monitor settings (stored in `monitor_settings`):
+- `pin_mode`: `off|observe|enforce` (default `off`).
+- `pin_spki_sha256`: base64 sha256 of SPKI (no prefix) — UI accepts `sha256/<base64>` too.
+
+Behavior:
+- Quick Check displays the current `SPKI sha256 (pin)` so you can copy/paste it.
+- When `pin_mode` is `observe|enforce` and a pin is set, the worker emits `tls_pin_mismatch` if the observed SPKI sha256 differs.
+  - Severity: `warn` in `observe`, `critical` in `enforce`.
+- Pinning does **not** change fetch behavior (`verify_peer=false`) and does not affect existing expiry/change/renewal logic unless enabled.
+
+Safe usage:
+- Keep `off` unless you explicitly want to be alerted on key mismatches.
+- Planned rotations require updating the pin value.
+
+Enable for a monitor (SQL alternative):
+- set `monitor_settings.pin_mode='observe'` (or `enforce`) and set `monitor_settings.pin_spki_sha256` to the base64 pin value.
 
 ## Security baseline (documented behaviors)
 - Password hashing (`password_hash` / `password_verify`)

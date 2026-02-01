@@ -566,13 +566,14 @@ $rows = $sel->fetchAll();
             $out['warned'] = 1;
         }
 
+        // For dedupe logic: fingerprint changed since previous snapshot?
+        $fpChanged = ($prev && $finger && !empty($prev['fingerprint_sha256']) && $prev['fingerprint_sha256'] !== $finger);
+
 
         // v0.7.4: TLS invalid state events (opt-in).
         // Emit only when tls_validation_mode is observe/enforce, and dedupe to avoid repeated event spam:
         // - Create an event when the invalid classification changes OR the certificate fingerprint changes.
         if ($tlsMode !== 'off') {
-            $fpChanged = ($prev && $finger && !empty($prev['fingerprint_sha256']) && $prev['fingerprint_sha256'] !== $finger);
-
             // Hostname mismatch ("wrong.host" style)
             $nowWrongHost = ($hostnameShouldUpdate === 1 && $hostnameOk === 0);
             $prevWrongHost = ((int)($m['hostname_ok'] ?? 1) === 0);
@@ -611,7 +612,50 @@ $rows = $sel->fetchAll();
             }
         }
 
+        // v0.7.6: Certinel-defined pinning (SPKI sha256) (opt-in).
+        // Pinning is independent from tls_validation_mode.
+        $pinMode = strtolower(trim((string)($m['pin_mode'] ?? 'off')));
+        if (!in_array($pinMode, ['off','observe','enforce'], true)) $pinMode = 'off';
+        $pinVal = TlsValidator::normalizeSpkiPin((string)($m['pin_spki_sha256'] ?? ''));
+        if ($pinMode !== 'off' && $pinVal !== '' && TlsValidator::isValidSpkiPin($pinVal) && is_string($pem) && $pem !== '') {
+            $spki = TlsValidator::computeSpkiSha256($pem);
+            if (($spki['ok'] ?? false) === true) {
+                $obs = (string)($spki['sha256_base64'] ?? '');
+                if ($obs !== '' && !hash_equals($pinVal, $obs)) {
+                    $sev = ($pinMode === 'enforce') ? 'critical' : 'warn';
+                    if (self::shouldEmitPinMismatchEvent($monitorId, (string)($finger ?? ''), $pinVal, $obs, (bool)$fpChanged)) {
+                        self::createEvent($monitorId, 'tls_pin_mismatch', $sev, 'TLS pin mismatch (SPKI sha256 does not match configured pin).', [
+                            'host' => (string)$m['host'],
+                            'port' => (int)$m['port'],
+                            'fingerprint' => (string)($finger ?? ''),
+                            'pin_mode' => $pinMode,
+                            'pin_spki_sha256' => $pinVal,
+                            'observed_spki_sha256' => $obs,
+                        ]);
+                    }
+                }
+            }
+        }
+
         return $out;
+    }
+
+    private static function shouldEmitPinMismatchEvent(int $monitorId, string $fingerprint, string $pin, string $observed, bool $fpChanged): bool {
+        if ($fpChanged) return true;
+
+        $st = db()->prepare("SELECT meta_json FROM events WHERE monitor_id=:mid AND type='tls_pin_mismatch' ORDER BY created_at DESC LIMIT 1");
+        $st->execute([':mid' => $monitorId]);
+        $r = $st->fetch();
+        if (!$r) return true;
+
+        $meta = json_decode((string)($r['meta_json'] ?? ''), true);
+        if (!is_array($meta)) return true;
+
+        return !(
+            (string)($meta['fingerprint'] ?? '') === $fingerprint &&
+            (string)($meta['pin_spki_sha256'] ?? '') === $pin &&
+            (string)($meta['observed_spki_sha256'] ?? '') === $observed
+        );
     }
 
     /**
