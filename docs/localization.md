@@ -1,6 +1,6 @@
 # Localization (i18n)
 
-Certinel supports basic UI localization via a minimal translation catalog and a per-user locale preference.
+Certisent supports basic UI localization via a minimal translation catalog and a per-user locale preference.
 
 ## Concepts
 
@@ -15,7 +15,7 @@ Certinel supports basic UI localization via a minimal translation catalog and a 
 2. `users.locale` (when logged in and the column exists)
 3. Default: `en`
 
-Note: on login, Certinel resets the cached session locale to the user's saved `users.locale` so a previously cached guest locale does not override the preference.
+Note: on login, Certisent resets the cached session locale to the user's saved `users.locale` so a previously cached guest locale does not override the preference.
 
 ## Adding a new locale
 

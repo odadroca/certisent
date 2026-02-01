@@ -155,8 +155,8 @@ final class Notifier {
                         $payload = [
                             '@type' => 'MessageCard',
                             '@context' => 'http://schema.org/extensions',
-                            'summary' => self::tr('notify.teams.summary', [], $loc, 'Certinel alert'),
-                            'title' => self::tr('notify.teams.title', ['type' => (string)($event['type'] ?? 'event')], $loc, 'Certinel: '.(string)($event['type'] ?? 'event')),
+                            'summary' => self::tr('notify.teams.summary', [], $loc, 'Certisent alert'),
+                            'title' => self::tr('notify.teams.title', ['type' => (string)($event['type'] ?? 'event')], $loc, 'Certisent: '.(string)($event['type'] ?? 'event')),
                             'text' => self::renderWebhookText($event, $monitor, $loc),
                         ];
                         [$ok, $err] = self::sendWebhook($url, $payload);
@@ -265,7 +265,7 @@ private static function tr(string $key, array $params, string $locale, string $f
             'severity' => (string)($event['severity'] ?? 'info'),
             'type' => (string)($event['type'] ?? 'event'),
             'host' => $host,
-        ], $locale, "[Certinel] ".(string)($event['severity'] ?? 'info')." ".(string)($event['type'] ?? 'event')." — {$host}");
+        ], $locale, "[Certisent] ".(string)($event['severity'] ?? 'info')." ".(string)($event['type'] ?? 'event')." — {$host}");
     }
 
     /**
@@ -345,7 +345,7 @@ private static function tr(string $key, array $params, string $locale, string $f
     }
 
     $lines[] = "";
-    $lines[] = self::tr('notify.email.signature', [], $locale, 'Certinel');
+    $lines[] = self::tr('notify.email.signature', [], $locale, 'Certisent');
 
     return implode("\n", $lines);
 }

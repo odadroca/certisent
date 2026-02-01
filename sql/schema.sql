@@ -1,4 +1,4 @@
--- Certinel schema (MySQL 8+ recommended)
+-- Certisent schema (MySQL 8+ recommended)
 -- All timestamps stored as UTC strings (DATETIME).
 
 CREATE TABLE IF NOT EXISTS users (
@@ -58,7 +58,7 @@ CREATE TABLE IF NOT EXISTS monitor_settings (
   notify_on_renewal TINYINT(1) NOT NULL DEFAULT 1,
   -- v0.7.2: opt-in TLS validation mode (default off; preserve legacy behavior)
   tls_validation_mode ENUM('off','observe','enforce') NOT NULL DEFAULT 'off',
-  -- v0.7.6: Certinel-defined certificate/public-key pinning settings (default off).
+  -- v0.7.6: Certisent-defined certificate/public-key pinning settings (default off).
   -- pin_spki_sha256 stores base64(SHA-256(SPKI DER)) for the endpoint's leaf public key.
   pin_mode ENUM('off','observe','enforce') NOT NULL DEFAULT 'off',
   pin_spki_sha256 VARCHAR(64) NULL,

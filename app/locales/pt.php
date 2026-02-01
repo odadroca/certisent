@@ -29,7 +29,7 @@ return [
     'auth.err.invalid_credentials' => 'Credenciais inválidas.',
     'auth.err.account_locked' => 'Conta bloqueada. Tente novamente mais tarde.',
     'landing.hero' => 'Detete mudanças silenciosas de certificados TLS antes de quebrarem integrações.',
-    'landing.lead' => 'O Certinel regista o certificado que um endpoint apresenta agora, deteta renovações/substituições antes do fim da validade e alerta.',
+    'landing.lead' => 'O Certisent regista o certificado que um endpoint apresenta agora, deteta renovações/substituições antes do fim da validade e alerta.',
     'landing.quick_check' => 'Verificação rápida',
     'landing.url_placeholder' => 'https://api.exemplo.com',
     'btn.check_now' => 'Verificar agora',
@@ -134,7 +134,7 @@ return [
     'monitor_edit.tls_mode.enforce' => 'forçar (registar + notificar)',
     'monitor_edit.tls_validation_note' => 'Mantenha desligado em ambientes internos/autossinados. Use observar/forçar para registar e alertar sobre identidade/confiança TLS inválida.',
 
-    // v0.7.6: Pinning definido pelo Certinel
+    // v0.7.6: Pinning definido pelo Certisent
     'monitor_edit.pin_mode' => 'Modo de pinning',
     'monitor_edit.pin_mode.off' => 'desligado',
     'monitor_edit.pin_mode.observe' => 'observar',
@@ -183,15 +183,15 @@ return [
     'history.scope_global' => ' (global)',
     'history.scope_yours' => ' (os seus monitores)',
     'history.type_placeholder' => 'expiry_warning',
-    'notify.email.subject' => '[Certinel] {severity} {type} — {host}',
+    'notify.email.subject' => '[Certisent] {severity} {type} — {host}',
     'notify.email.line.event' => 'Evento: {type} ({severity})',
     'notify.email.line.time' => 'Hora: {time} UTC',
     'notify.email.line.target' => 'Alvo: {target}',
     'notify.email.line.meta' => 'Meta: {meta}',
-    'notify.email.signature' => 'Certinel',
+    'notify.email.signature' => 'Certisent',
     'notify.webhook.text' => '{severity} {type} — {target} — {message} (UTC {time}){meta_part}',
-    'notify.teams.summary' => 'Alerta Certinel',
-    'notify.teams.title' => 'Certinel: {type}',
+    'notify.teams.summary' => 'Alerta Certisent',
+    'notify.teams.title' => 'Certisent: {type}',
 
     'errors.method_not_allowed' => "Método não permitido.",
     'errors.not_found' => "Não encontrado.",

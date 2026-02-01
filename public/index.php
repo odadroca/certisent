@@ -11,7 +11,7 @@ render_header($title, $user);
 <div class="bg-white text-black rounded-2xl p-6 shadow">
   <h1 class="text-xl font-semibold mb-2"><?php echo h(function_exists('t') ? t('landing.hero') : 'Detect silent TLS certificate changes before they break integrations.'); ?></h1>
   <p class="text-sm text-gray-700 mb-4">
-    <?php echo h(function_exists('t') ? t('landing.lead') : 'Certinel records the certificate an endpoint serves right now, detects renewals/replacements before expiry, and alerts.'); ?>
+    <?php echo h(function_exists('t') ? t('landing.lead') : 'Certisent records the certificate an endpoint serves right now, detects renewals/replacements before expiry, and alerts.'); ?>
   </p>
 
   <div class="grid md:grid-cols-2 gap-6">

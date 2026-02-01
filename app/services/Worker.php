@@ -612,7 +612,7 @@ $rows = $sel->fetchAll();
             }
         }
 
-        // v0.7.6: Certinel-defined pinning (SPKI sha256) (opt-in).
+        // v0.7.6: Certisent-defined pinning (SPKI sha256) (opt-in).
         // Pinning is independent from tls_validation_mode.
         $pinMode = strtolower(trim((string)($m['pin_mode'] ?? 'off')));
         if (!in_array($pinMode, ['off','observe','enforce'], true)) $pinMode = 'off';
@@ -752,7 +752,7 @@ $rows = $sel->fetchAll();
         $admin = cfg('ADMIN_EMAIL', '');
         if ($admin) {
             // best-effort email; no user_id context
-            @mail($admin, "[Certinel] critical cron_failed", $msg, "From: ".cfg('MAIL_FROM_NAME','Certinel')." <".cfg('MAIL_FROM','no-reply@example.com').">");
+            @mail($admin, "[Certisent] critical cron_failed", $msg, "From: ".cfg('MAIL_FROM_NAME','Certisent')." <".cfg('MAIL_FROM','no-reply@example.com').">");
         }
     }
 }

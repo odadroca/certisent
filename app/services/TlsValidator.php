@@ -15,7 +15,7 @@ final class TlsValidator {
     /**
      * Compute SPKI (SubjectPublicKeyInfo) sha256 for the leaf certificate.
      *
-     * Returned value is base64(SHA-256(SPKI DER)). This is a Certinel-defined pin format.
+     * Returned value is base64(SHA-256(SPKI DER)). This is a Certisent-defined pin format.
      *
      * @return array{ok:bool,sha256_base64:?string,sha256_hex:?string,error:?string}
      */

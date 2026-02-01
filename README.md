@@ -1,4 +1,4 @@
-<p align="center"><img src="https://i.postimg.cc/qMpPkTVz/certinel-neg.png" alt="Certisent" width="200" height="200"></p>
+<p align="center"><img src="https://i.postimg.cc/qMpPkTVz/certisent-neg.png" alt="Certisent" width="200" height="200"></p>
 
 # Certisent — TLS/SSL Certificate Sentinel (Beta) - v0.7.6
 

@@ -1,4 +1,4 @@
--- Certinel migration: v0.6.6 -> v0.6.7
+-- Certisent migration: v0.6.6 -> v0.6.7
 -- Adds per-user notification repeat count (default 1).
 
 ALTER TABLE users

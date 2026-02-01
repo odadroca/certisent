@@ -24,7 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($to === '') {
         flash_set_key('error', 'admin.email.err.no_recipient');
     } else {
-        $res = Emailer::sendText($to, '[Certinel] Test email', "This is a test email sent by Certinel v".app_version()." at ".db_now_utc()." UTC\n");
+        $res = Emailer::sendText($to, '[Certisent] Test email', "This is a test email sent by Certisent v".app_version()." at ".db_now_utc()." UTC\n");
         if (($res['ok'] ?? false) === true) {
             flash_set_key('success', 'admin.email.ok.sent', ['to' => $to]);
             Audit::log((int)$user['id'], 'email.test_sent', 'system', null, ['to'=>$to,'transport'=>$transport]);

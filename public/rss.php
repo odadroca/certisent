@@ -52,7 +52,7 @@ if ($includeSystem) {
 header('Content-Type: application/rss+xml; charset=utf-8');
 
 $appUrl = app_base_url();
-$feedTitle = "Certinel events for " . $u['email'];
+$feedTitle = "Certisent events for " . $u['email'];
 $feedLink = $appUrl ?: '';
 $feedDesc = "Certificate monitoring events (UTC).";
 

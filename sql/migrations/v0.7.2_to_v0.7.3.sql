@@ -1,4 +1,4 @@
--- Certinel migration: v0.7.2 -> v0.7.3
+-- Certisent migration: v0.7.2 -> v0.7.3
 -- Adds opt-in TLS trust validation fields (chain trust using system CA bundle).
 -- Persisted only when monitor_settings.tls_validation_mode != 'off'.
 --

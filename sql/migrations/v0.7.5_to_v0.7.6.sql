@@ -1,6 +1,6 @@
--- Certinel migration: v0.7.5 -> v0.7.6
+-- Certisent migration: v0.7.5 -> v0.7.6
 -- Adds per-monitor certificate/public-key pinning settings.
--- Pinning is Certinel-defined (not HPKP preload).
+-- Pinning is Certisent-defined (not HPKP preload).
 --
 -- New fields:
 --  - monitor_settings.pin_mode: off|observe|enforce (default off)

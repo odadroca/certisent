@@ -90,7 +90,7 @@ final class MonitorService {
             $params[':tvm'] = $tlsValidationMode;
         }
 
-        // v0.7.6: Certinel-defined pinning (SPKI sha256) (opt-in).
+        // v0.7.6: Certisent-defined pinning (SPKI sha256) (opt-in).
         if ($pinMode !== null) {
             $allowed = ['off','observe','enforce'];
             if (!in_array($pinMode, $allowed, true)) {

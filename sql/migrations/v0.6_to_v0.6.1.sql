@@ -1,4 +1,4 @@
--- Certinel migration: v0.6 -> v0.6.1
+-- Certisent migration: v0.6 -> v0.6.1
 -- Adds per-user UI locale preference.
 
 ALTER TABLE users

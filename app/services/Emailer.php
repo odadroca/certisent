@@ -20,7 +20,7 @@ final class Emailer {
     /** @return array{ok:bool,error:?string} */
     private static function sendMailFunction(string $to, string $subject, string $textBody): array {
         $from = cfg('MAIL_FROM', 'no-reply@example.com');
-        $fromName = cfg('MAIL_FROM_NAME', 'Certinel');
+        $fromName = cfg('MAIL_FROM_NAME', 'Certisent');
         $headers = [];
         $headers[] = "From: {$fromName} <{$from}>";
         $headers[] = "MIME-Version: 1.0";
@@ -43,7 +43,7 @@ final class Emailer {
         }
 
         $from = (string)cfg('MAIL_FROM', 'no-reply@example.com');
-        $fromName = (string)cfg('MAIL_FROM_NAME', 'Certinel');
+        $fromName = (string)cfg('MAIL_FROM_NAME', 'Certisent');
 
         try {
             $c = new SmtpClient($host, $port, $enc, $timeout);

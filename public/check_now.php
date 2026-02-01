@@ -36,7 +36,7 @@ try {
             $tv = TlsValidator::validateTrust((string)$p['host'], (int)$p['port']);
         }
 
-        // v0.7.6: SPKI sha256 (Certinel-defined pinning material).
+        // v0.7.6: SPKI sha256 (Certisent-defined pinning material).
         $spki = null;
         if (!empty($f['pem']) && is_string($f['pem'])) {
             $spki = TlsValidator::computeSpkiSha256((string)$f['pem']);

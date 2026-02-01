@@ -112,7 +112,7 @@ function cfg(string $key, $default = null) {
             'DB_USER' => (string)env('DB_USER', ''),
             'DB_PASS' => (string)env('DB_PASS', ''),
             'MAIL_FROM' => (string)env('MAIL_FROM', 'no-reply@example.com'),
-            'MAIL_FROM_NAME' => (string)env('MAIL_FROM_NAME', 'Certinel'),
+            'MAIL_FROM_NAME' => (string)env('MAIL_FROM_NAME', 'Certisent'),
                         // v0.7 i18n formatting (opt-in, default off).
             'I18N_FORMAT_DATES' => (string)env('I18N_FORMAT_DATES', 'false'),
 'MAIL_TRANSPORT' => (string)env('MAIL_TRANSPORT', 'mail'),

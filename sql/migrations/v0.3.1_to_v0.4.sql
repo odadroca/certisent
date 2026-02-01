@@ -1,4 +1,4 @@
--- Certinel migration: v0.3.1 -> v0.4
+-- Certisent migration: v0.3.1 -> v0.4
 -- Adds async worker_jobs table and bumps schema_version.
 
 CREATE TABLE IF NOT EXISTS worker_jobs (

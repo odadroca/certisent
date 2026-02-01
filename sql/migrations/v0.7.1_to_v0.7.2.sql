@@ -1,4 +1,4 @@
--- Certinel migration: v0.7.1 -> v0.7.2
+-- Certisent migration: v0.7.1 -> v0.7.2
 -- Adds opt-in TLS identity validation fields:
 --  - per-monitor mode: monitor_settings.tls_validation_mode (default: off)
 --  - last-known hostname validation result: monitors.hostname_ok / monitors.hostname_error

@@ -29,7 +29,7 @@ return [
     'auth.err.invalid_credentials' => 'Invalid credentials.',
     'auth.err.account_locked' => 'Account locked. Try again later.',
     'landing.hero' => 'Detect silent TLS certificate changes before they break integrations.',
-    'landing.lead' => 'Certinel records the certificate an endpoint serves right now, detects renewals/replacements before expiry, and alerts.',
+    'landing.lead' => 'Certisent records the certificate an endpoint serves right now, detects renewals/replacements before expiry, and alerts.',
     'landing.quick_check' => 'Quick check',
     'landing.url_placeholder' => 'https://api.example.com',
     'btn.check_now' => 'Check now',
@@ -134,7 +134,7 @@ return [
     'monitor_edit.tls_mode.enforce' => 'enforce (record + notify)',
     'monitor_edit.tls_validation_note' => 'Keep off for internal/self-signed environments. Use observe/enforce to record and alert on invalid TLS identity/trust.',
 
-    // v0.7.6: Certinel-defined pinning
+    // v0.7.6: Certisent-defined pinning
     'monitor_edit.pin_mode' => 'Pinning mode',
     'monitor_edit.pin_mode.off' => 'off',
     'monitor_edit.pin_mode.observe' => 'observe',
@@ -183,15 +183,15 @@ return [
     'history.scope_global' => ' (global)',
     'history.scope_yours' => ' (your monitors)',
     'history.type_placeholder' => 'expiry_warning',
-    'notify.email.subject' => '[Certinel] {severity} {type} — {host}',
+    'notify.email.subject' => '[Certisent] {severity} {type} — {host}',
     'notify.email.line.event' => 'Event: {type} ({severity})',
     'notify.email.line.time' => 'Time: {time} UTC',
     'notify.email.line.target' => 'Target: {target}',
     'notify.email.line.meta' => 'Meta: {meta}',
-    'notify.email.signature' => 'Certinel',
+    'notify.email.signature' => 'Certisent',
     'notify.webhook.text' => '{severity} {type} — {target} — {message} (UTC {time}){meta_part}',
-    'notify.teams.summary' => 'Certinel alert',
-    'notify.teams.title' => 'Certinel: {type}',
+    'notify.teams.summary' => 'Certisent alert',
+    'notify.teams.title' => 'Certisent: {type}',
 
     'errors.method_not_allowed' => "Method not allowed.",
     'errors.not_found' => "Not found.",

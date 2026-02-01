@@ -29,7 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $tvm = 'off';
     }
 
-    // v0.7.6: Certinel-defined pinning (SPKI sha256) (opt-in).
+    // v0.7.6: Certisent-defined pinning (SPKI sha256) (opt-in).
     $pm = (string)($_POST['pin_mode'] ?? ($m['pin_mode'] ?? 'off'));
     if (!in_array($pm, ['off','observe','enforce'], true)) {
         $pm = 'off';

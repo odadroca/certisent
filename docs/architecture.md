@@ -41,7 +41,7 @@
 
 ## Trust boundaries and policy controls
 
-Certinel *actively connects to remote endpoints*, which is an SSRF-shaped surface.
+Certisent *actively connects to remote endpoints*, which is an SSRF-shaped surface.
 
 Controls are configured via `.env`:
 - **Target SSRF policy** (`SSRF_MODE`):
