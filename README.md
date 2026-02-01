@@ -1,6 +1,6 @@
 <p align="center"><img src="https://i.postimg.cc/qMpPkTVz/certinel-neg.png" alt="Certinel" width="200" height="200"></p>
 
-# Certinel — TLS/SSL Certificate Monitoring (Beta) - v0.7.3
+# Certinel — TLS/SSL Certificate Monitoring (Beta) - v.0.7.4
 
 Certinel is a lightweight TLS/SSL certificate monitoring service that **live-fetches** the certificate presented by an endpoint (SNI-capable), stores immutable snapshots, detects changes (renewals/rotations), and notifies before outages happen.
 
@@ -41,11 +41,11 @@ Docs: `docs/deploy.md`, `docs/ops_runbook.md`.
 - **Heartbeat**: Admin → System shows last worker run time (UTC).
 - **Upgrade approach**: replace code, keep `.env` + DB; run SQL migrations only when required (see `docs/deploy.md`).
 
-## TLS validation mode (hostname + trust) (v0.7.3)
+## TLS validation mode (hostname + trust) (v.0.7.4)
 
 Certinel **does not verify TLS** by default (`verify_peer=false`) because it is designed to observe *what the endpoint actually serves*.
 
-v0.7.2 introduced an **opt-in** per-monitor `tls_validation_mode` data model. In v0.7.3 it can persist:
+v0.7.2 introduced an **opt-in** per-monitor `tls_validation_mode` data model. In v0.7.3+ it can persist:
 - **Hostname identity** ("wrong.host" style): `monitors.hostname_ok` / `monitors.hostname_error`.
 - **Trust (chain validation)**: `monitors.trust_ok` / `monitors.trust_category` / `monitors.trust_error`.
 
@@ -54,7 +54,7 @@ Trust validation uses a *separate* probe that validates the certificate chain us
 Mode values:
 - `off` (default): legacy behavior; hostname/trust validation not computed or persisted.
 - `observe`: compute and persist hostname + trust validation fields (does not change expiry/change alerting behavior).
-- `enforce`: reserved for a future release; treated like `observe` in v0.7.3.
+- `enforce`: reserved for a future release; treated like `observe` in v0.7.4.
 
 Trust categories:
 - `tls_self_signed` — self-signed certificate.
@@ -62,6 +62,14 @@ Trust categories:
 - `tls_untrusted_unknown` — trust validation failed but could not be classified.
 
 Quick Check shows immediate warnings for hostname mismatch and trust validation failures.
+
+When `tls_validation_mode` is `observe` or `enforce`, the worker also emits new event types (notification categories) when invalid states are detected:
+- `tls_wrong_host` — hostname mismatch (certificate names do not match the requested host).
+- `tls_self_signed` — self-signed certificate (not trusted by the system CA bundle).
+- `tls_untrusted_root` — chain cannot be validated to a trusted root (system CA bundle).
+
+Event dedupe: these TLS invalid-state events are created only when the classification changes or when the certificate fingerprint changes.
+
 
 Enable for a monitor (SQL):
 - set `monitor_settings.tls_validation_mode='observe'` (or `enforce`) for the target `monitor_id`.

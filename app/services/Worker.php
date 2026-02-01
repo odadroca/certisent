@@ -566,6 +566,51 @@ $rows = $sel->fetchAll();
             $out['warned'] = 1;
         }
 
+
+        // v0.7.4: TLS invalid state events (opt-in).
+        // Emit only when tls_validation_mode is observe/enforce, and dedupe to avoid repeated event spam:
+        // - Create an event when the invalid classification changes OR the certificate fingerprint changes.
+        if ($tlsMode !== 'off') {
+            $fpChanged = ($prev && $finger && !empty($prev['fingerprint_sha256']) && $prev['fingerprint_sha256'] !== $finger);
+
+            // Hostname mismatch ("wrong.host" style)
+            $nowWrongHost = ($hostnameShouldUpdate === 1 && $hostnameOk === 0);
+            $prevWrongHost = ((int)($m['hostname_ok'] ?? 1) === 0);
+            if ($nowWrongHost && ((!$prevWrongHost) || $fpChanged)) {
+                self::createEvent($monitorId, 'tls_wrong_host', 'warn', 'TLS hostname mismatch (certificate does not match host).', [
+                    'host' => (string)$m['host'],
+                    'port' => (int)$m['port'],
+                    'fingerprint' => (string)($finger ?? ''),
+                    'hostname_error' => (string)($hostnameErr ?? ''),
+                ]);
+            }
+
+            // Trust failures (chain validation) — only emit named categories requested in v0.7.4.
+            $nowTrustCat = null;
+            if ($trustShouldUpdate === 1 && $trustOk === 0) {
+                $nowTrustCat = (string)($trustCategory ?? 'tls_untrusted_unknown');
+            }
+            $prevTrustCat = (string)($m['trust_category'] ?? '');
+
+            if ($nowTrustCat === 'tls_self_signed' && (($prevTrustCat !== 'tls_self_signed') || $fpChanged)) {
+                self::createEvent($monitorId, 'tls_self_signed', 'warn', 'TLS trust failure: self-signed certificate.', [
+                    'host' => (string)$m['host'],
+                    'port' => (int)$m['port'],
+                    'fingerprint' => (string)($finger ?? ''),
+                    'trust_category' => $nowTrustCat,
+                    'trust_error' => (string)($trustErr ?? ''),
+                ]);
+            } elseif ($nowTrustCat === 'tls_untrusted_root' && (($prevTrustCat !== 'tls_untrusted_root') || $fpChanged)) {
+                self::createEvent($monitorId, 'tls_untrusted_root', 'warn', 'TLS trust failure: untrusted certificate chain.', [
+                    'host' => (string)$m['host'],
+                    'port' => (int)$m['port'],
+                    'fingerprint' => (string)($finger ?? ''),
+                    'trust_category' => $nowTrustCat,
+                    'trust_error' => (string)($trustErr ?? ''),
+                ]);
+            }
+        }
+
         return $out;
     }
 

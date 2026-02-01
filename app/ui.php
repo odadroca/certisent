@@ -72,7 +72,7 @@ function render_header(string $title, ?array $user = null): void {
     echo '<div class="flex items-center justify-between">';
     echo '<div class="text-2xl font-semibold">';
     echo '<a href="'.h(url_for('index.php')).'" class="hover:opacity-90">';
-    echo '<span class="accent">Certinel</span> <span class="text-gray-300 text-base">certificate sentinel</span>';
+    echo '<img src="/assets/certinel-neg.png" border="0" width="10%" style="display: inline-block;">&nbsp;&nbsp;<span class="accent">Certinel</span>&nbsp;&nbsp;<span class="text-gray-300 text-base">certificate sentinel</span>';
     echo '</a>';
     echo '</div>';
 

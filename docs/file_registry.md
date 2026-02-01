@@ -1,8 +1,8 @@
-# File registry (v0.7.3)
+# File registry (v0.7.4)
 
 This file lists repository files for change auditing.
 
-Generated: 2026-02-01 00:23:53 UTC
+Generated: 2026-02-01 00:42:39 UTC
 
 ```
 ./

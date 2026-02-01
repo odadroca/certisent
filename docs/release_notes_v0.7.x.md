@@ -1,5 +1,17 @@
 # Release notes (v0.7.x)
 
+## v0.7.4
+
+### Added (default-preserving)
+- When `monitor_settings.tls_validation_mode` is `observe|enforce`, the worker now emits new event types (notification categories) for invalid TLS states:
+  - `tls_wrong_host`
+  - `tls_self_signed`
+  - `tls_untrusted_root`
+- Event dedupe: these TLS invalid-state events are created only when the classification changes or the certificate fingerprint changes (avoids repeated event spam).
+
+### DB migration
+- None.
+
 ## v0.7.3
 
 ### Added (default-preserving)
