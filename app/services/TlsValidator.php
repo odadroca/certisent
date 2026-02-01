@@ -55,6 +55,193 @@ final class TlsValidator {
     }
 
     /**
+     * Validate certificate chain trust using the system CA bundle.
+     *
+     * This is intentionally separate from CertFetcher (which keeps verify_peer=false to observe served certs).
+     * The probe validates the chain only (no hostname verification here; hostname identity is checked separately).
+     *
+     * @return array{ok:bool,category:?string,error:?string,type:string,method:string,detail:array<string,mixed>}
+     *   - ok: true when chain trust is valid
+     *   - category: tls_self_signed | tls_untrusted_root | tls_untrusted_unknown (only when type=untrusted)
+     *   - type: ok | untrusted | probe_error
+     */
+    public static function validateTrust(string $host, int $port): array {
+        $host = trim($host);
+        if ($host === '') {
+            return ['ok'=>false,'category'=>'tls_untrusted_unknown','error'=>'empty_host','type'=>'probe_error','method'=>'none','detail'=>[]];
+        }
+        if ($port <= 0 || $port > 65535) $port = 443;
+
+        if (function_exists('curl_init')) {
+            return self::trustViaCurl($host, $port);
+        }
+        return self::trustViaStream($host, $port);
+    }
+
+    private static function trustViaCurl(string $host, int $port): array {
+        $url = 'https://' . $host . ($port !== 443 ? (':' . $port) : '') . '/';
+
+        $connectTimeout = (int)cfg('TLS_TRUST_CONNECT_TIMEOUT_SECS', 4);
+        $timeout = (int)cfg('TLS_TRUST_TIMEOUT_SECS', 6);
+        if ($connectTimeout < 1) $connectTimeout = 1;
+        if ($timeout < $connectTimeout) $timeout = $connectTimeout;
+
+        $ca = trim((string)cfg('TLS_CA_BUNDLE', ''));
+
+        $ch = curl_init();
+        if ($ch === false) {
+            return ['ok'=>false,'category'=>'tls_untrusted_unknown','error'=>'curl_init_failed','type'=>'probe_error','method'=>'curl','detail'=>[]];
+        }
+
+        curl_setopt_array($ch, [
+            CURLOPT_URL => $url,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_HEADER => false,
+            CURLOPT_NOBODY => true,
+            CURLOPT_FOLLOWLOCATION => false,
+            CURLOPT_CONNECTTIMEOUT => $connectTimeout,
+            CURLOPT_TIMEOUT => $timeout,
+
+            // Trust validation (chain trust); no hostname verification here.
+            CURLOPT_SSL_VERIFYPEER => true,
+            CURLOPT_SSL_VERIFYHOST => 0,
+
+            CURLOPT_USERAGENT => 'certinel-trust-probe/0.7.3',
+        ]);
+
+        if ($ca !== '') {
+            curl_setopt($ch, CURLOPT_CAINFO, $ca);
+        }
+
+        $ok = curl_exec($ch);
+        $errno = curl_errno($ch);
+        $err = $errno !== 0 ? (string)curl_error($ch) : null;
+        $httpInfo = defined('CURLINFO_RESPONSE_CODE') ? CURLINFO_RESPONSE_CODE : CURLINFO_HTTP_CODE;
+        $httpCode = (int)curl_getinfo($ch, $httpInfo);
+
+        $verifyResult = null;
+        if (defined('CURLINFO_SSL_VERIFYRESULT')) {
+            $vr = curl_getinfo($ch, CURLINFO_SSL_VERIFYRESULT);
+            if (is_int($vr)) $verifyResult = $vr;
+        }
+
+        curl_close($ch);
+
+        if ($ok !== false && $errno === 0) {
+            return ['ok'=>true,'category'=>null,'error'=>null,'type'=>'ok','method'=>'curl','detail'=>['http_code'=>$httpCode,'verify_result'=>$verifyResult]];
+        }
+
+        // Heuristic: treat OpenSSL verify errors as trust failures; everything else is a probe error.
+        $isTrustErr = ($errno === 60) || (is_int($verifyResult) && $verifyResult !== 0) || (
+            $err !== null && self::looksLikeTrustError($err)
+        );
+
+        if ($isTrustErr) {
+            $cat = self::classifyTrustError($verifyResult, $err);
+            $msg = self::shortError('curl:' . $errno . ' ' . ($err ?? 'ssl_verify_failed'));
+            return ['ok'=>false,'category'=>$cat,'error'=>$msg,'type'=>'untrusted','method'=>'curl','detail'=>['errno'=>$errno,'http_code'=>$httpCode,'verify_result'=>$verifyResult]];
+        }
+
+        $msg = self::shortError('curl:' . $errno . ' ' . ($err ?? 'probe_failed'));
+        return ['ok'=>false,'category'=>null,'error'=>$msg,'type'=>'probe_error','method'=>'curl','detail'=>['errno'=>$errno,'http_code'=>$httpCode,'verify_result'=>$verifyResult]];
+    }
+
+    private static function trustViaStream(string $host, int $port): array {
+        $connectTimeout = (int)cfg('TLS_TRUST_CONNECT_TIMEOUT_SECS', 4);
+        $timeout = (int)cfg('TLS_TRUST_TIMEOUT_SECS', 6);
+        if ($connectTimeout < 1) $connectTimeout = 1;
+        if ($timeout < $connectTimeout) $timeout = $connectTimeout;
+        $ca = trim((string)cfg('TLS_CA_BUNDLE', ''));
+
+        $ssl = [
+            'verify_peer' => true,
+            'verify_peer_name' => false, // chain trust only; hostname checked separately.
+            'allow_self_signed' => false,
+            'SNI_enabled' => true,
+            'peer_name' => $host,
+            'disable_compression' => true,
+        ];
+        if ($ca !== '') {
+            $ssl['cafile'] = $ca;
+        }
+        $ctx = stream_context_create(['ssl' => $ssl]);
+
+        $errno = 0;
+        $errstr = '';
+        $captured = '';
+        set_error_handler(function(int $severity, string $message) use (&$captured): bool {
+            $captured = $message;
+            return true;
+        });
+        $fp = @stream_socket_client('ssl://' . $host . ':' . $port, $errno, $errstr, $connectTimeout, STREAM_CLIENT_CONNECT, $ctx);
+        restore_error_handler();
+
+        if ($fp === false) {
+            $msg = trim($errstr !== '' ? $errstr : ($captured !== '' ? $captured : 'connect_failed'));
+
+            // Drain a small part of the OpenSSL error stack for diagnostics.
+            $ossl = [];
+            for ($i=0; $i<2; $i++) {
+                $e = openssl_error_string();
+                if ($e === false) break;
+                $ossl[] = $e;
+            }
+            if (!empty($ossl)) {
+                $msg .= ' | openssl: ' . implode('; ', $ossl);
+            }
+
+            $isTrustErr = self::looksLikeTrustError($msg);
+            if ($isTrustErr) {
+                $cat = self::classifyTrustError(null, $msg);
+                return ['ok'=>false,'category'=>$cat,'error'=>self::shortError($msg),'type'=>'untrusted','method'=>'stream','detail'=>['errno'=>$errno]];
+            }
+            return ['ok'=>false,'category'=>null,'error'=>self::shortError($msg),'type'=>'probe_error','method'=>'stream','detail'=>['errno'=>$errno]];
+        }
+
+        // Handshake succeeded with trust enabled.
+        stream_set_timeout($fp, $timeout);
+        fclose($fp);
+        return ['ok'=>true,'category'=>null,'error'=>null,'type'=>'ok','method'=>'stream','detail'=>[]];
+    }
+
+    private static function looksLikeTrustError(string $msg): bool {
+        $m = strtolower($msg);
+        return str_contains($m, 'self signed')
+            || str_contains($m, 'unable to get local issuer')
+            || str_contains($m, 'unable to verify')
+            || str_contains($m, 'certificate')
+            || str_contains($m, 'unknown ca')
+            || str_contains($m, 'certificate chain')
+            || str_contains($m, 'peer certificate');
+    }
+
+    private static function classifyTrustError($verifyResult, ?string $msg): string {
+        if (is_int($verifyResult)) {
+            if ($verifyResult === 18) return 'tls_self_signed';
+            if (in_array($verifyResult, [19, 20, 21, 27], true)) return 'tls_untrusted_root';
+        }
+        $m = strtolower((string)($msg ?? ''));
+        if (str_contains($m, 'self signed certificate') && !str_contains($m, 'in certificate chain')) {
+            return 'tls_self_signed';
+        }
+        if (str_contains($m, 'self signed certificate in certificate chain')
+            || str_contains($m, 'unable to get local issuer')
+            || str_contains($m, 'unable to verify the first certificate')
+            || str_contains($m, 'unknown ca')
+            || str_contains($m, 'certificate chain')) {
+            return 'tls_untrusted_root';
+        }
+        return 'tls_untrusted_unknown';
+    }
+
+    private static function shortError(string $msg): string {
+        $msg = trim(str_replace(["\r", "\n", "\t"], ' ', $msg));
+        $msg = preg_replace('/\s+/', ' ', $msg) ?? $msg;
+        if (strlen($msg) <= 255) return $msg;
+        return substr($msg, 0, 252) . '...';
+    }
+
+    /**
      * @param array<string,mixed> $parsed
      * @return array<int,string> SAN DNS/IP entries, otherwise CN.
      */

@@ -91,6 +91,11 @@ This adds `users.locale` (default: `en`).
 If you are upgrading from v0.7.1 to v0.7.2 and want the opt-in hostname validation data model, run:
 - `sql/migrations/v0.7.1_to_v0.7.2.sql`
 
+### 0.7.2 → 0.7.3+
+
+If you are upgrading from v0.7.2 to v0.7.3 and want the opt-in trust validation data model, run:
+- `sql/migrations/v0.7.2_to_v0.7.3.sql`
+
 ## Verifying an upgrade
 
 - Visit **Admin → System** to confirm the worker heartbeat and that the DB is reachable.

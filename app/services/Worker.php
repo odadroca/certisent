@@ -355,6 +355,11 @@ $rows = $sel->fetchAll();
         $hostnameOk = null;
         $hostnameErr = null;
         $hostnameShouldUpdate = 0;
+        // v0.7.3: optional TLS trust validation (self-signed / untrusted-root)
+        $trustOk = null;
+        $trustCategory = null;
+        $trustErr = null;
+        $trustShouldUpdate = 0;
 
         if (!$fetch['ok']) {
             $status = 'critical';
@@ -402,6 +407,27 @@ $rows = $sel->fetchAll();
                     }
                 }
 
+                // v0.7.3: trust validation (opt-in per monitor). Chain trust only, using system CA bundle.
+                if ($tlsMode !== 'off') {
+                    $tv = TlsValidator::validateTrust((string)$m['host'], (int)$m['port']);
+                    $trustShouldUpdate = 1;
+                    if (($tv['ok'] ?? false) === true) {
+                        $trustOk = 1;
+                        $trustCategory = null;
+                        $trustErr = null;
+                    } else {
+                        $trustOk = 0;
+                        $tType = (string)($tv['type'] ?? 'untrusted');
+                        $trustCategory = $tType === 'untrusted' ? (string)($tv['category'] ?? 'tls_untrusted_unknown') : 'tls_untrusted_unknown';
+                        $tErr = (string)($tv['error'] ?? ($tType === 'probe_error' ? 'probe_error' : 'untrusted'));
+                        if ($tType === 'probe_error' && !str_starts_with($tErr, 'probe_error')) {
+                            $tErr = 'probe_error: ' . $tErr;
+                        }
+                        if (strlen($tErr) > 255) $tErr = substr($tErr, 0, 252) . '...';
+                        $trustErr = $tErr;
+                    }
+                }
+
                 $notifyDays = (int)$m['notify_days_before_expiry'];
                 if ($daysRemaining <= 0) {
                     $status = 'critical';
@@ -441,6 +467,9 @@ $rows = $sel->fetchAll();
                              last_valid_from=:vf, last_valid_to=:vt, last_days_remaining=:days, last_error=:err,
                              hostname_ok = CASE WHEN :hupd=1 THEN :hok ELSE hostname_ok END,
                              hostname_error = CASE WHEN :hupd=1 THEN :herr ELSE hostname_error END,
+                             trust_ok = CASE WHEN :tupd=1 THEN :tok ELSE trust_ok END,
+                             trust_category = CASE WHEN :tupd=1 THEN :tcat ELSE trust_category END,
+                             trust_error = CASE WHEN :tupd=1 THEN :terr ELSE trust_error END,
                              updated_at=:u WHERE id=:id');
         $up->execute([
             ':c'=>$now,
@@ -454,6 +483,10 @@ $rows = $sel->fetchAll();
             ':hupd'=>$hostnameShouldUpdate,
             ':hok'=>$hostnameOk,
             ':herr'=>$hostnameErr,
+            ':tupd'=>$trustShouldUpdate,
+            ':tok'=>$trustOk,
+            ':tcat'=>$trustCategory,
+            ':terr'=>$trustErr,
             ':u'=>$now,
             ':id'=>$monitorId,
         ]);

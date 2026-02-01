@@ -1,5 +1,18 @@
 # Release notes (v0.7.x)
 
+## v0.7.3
+
+### Added (default-preserving)
+- Opt-in TLS trust validation probe (chain trust using the system CA bundle), separate from CertFetcher.
+- Trust validation results persisted to `monitors.trust_ok` / `monitors.trust_category` / `monitors.trust_error` when `monitor_settings.tls_validation_mode` is not `off`.
+- Quick Check now shows an immediate prominent warning when trust validation fails, mapped into:
+  - `tls_self_signed`
+  - `tls_untrusted_root`
+  - `tls_untrusted_unknown`
+
+### DB migration
+- New columns require running: `sql/migrations/v0.7.2_to_v0.7.3.sql`.
+
 ## v0.7.2
 
 ### Added (default-preserving)

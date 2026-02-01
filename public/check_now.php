@@ -29,6 +29,12 @@ try {
         if (is_array($parsed) && !empty($p['host'])) {
             $hv = TlsValidator::validateHostname((string)$p['host'], $parsed);
         }
+        // v0.7.3: trust validation (self-signed / untrusted-root) using system CA bundle.
+        // This is separate from CertFetcher (which keeps verify_peer=false).
+        $tv = null;
+        if (!empty($p['host'])) {
+            $tv = TlsValidator::validateTrust((string)$p['host'], (int)$p['port']);
+        }
         $res = [
             'url'=>$p['url'],
             'host'=>$p['host'],
@@ -40,6 +46,7 @@ try {
             'valid_to'=> $vt ? gmdate('Y-m-d H:i:s', $vt) : null,
             'days_remaining'=>$days,
             'hostname_validation'=>$hv,
+            'trust_validation'=>$tv,
         ];
     }
 } catch (Throwable $e) {
@@ -66,6 +73,32 @@ render_header('Quick check', current_user());
           <?php if (count($c) > 0): ?>
             <div class="mt-1 text-xs">Names on cert: <span class="font-mono break-all"><?php echo h(implode(', ', $c)); ?></span></div>
           <?php endif; ?>
+        <?php endif; ?>
+      </div>
+    <?php endif; ?>
+
+    <?php $tv = $res['trust_validation'] ?? null; ?>
+    <?php if (is_array($tv) && (($tv['ok'] ?? true) === false) && (($tv['type'] ?? '') === 'untrusted')): ?>
+      <?php $cat = (string)($tv['category'] ?? 'tls_untrusted_unknown'); ?>
+      <?php
+        $title = 'Warning: certificate trust failed';
+        $desc = 'The certificate chain presented by this endpoint is not trusted by the system CA bundle.';
+        if ($cat === 'tls_self_signed') {
+          $title = 'Warning: self-signed certificate';
+          $desc = 'The endpoint presents a self-signed certificate (not trusted by the system CA bundle).';
+        } elseif ($cat === 'tls_untrusted_root') {
+          $title = 'Warning: untrusted certificate chain';
+          $desc = 'The presented certificate chain cannot be validated to a trusted root (system CA bundle).';
+        } elseif ($cat === 'tls_untrusted_unknown') {
+          $title = 'Warning: certificate not trusted';
+          $desc = 'TLS trust validation failed, but the specific trust failure could not be classified.';
+        }
+      ?>
+      <div class="p-3 rounded bg-yellow-100 text-yellow-900 text-sm mb-4 border border-yellow-200">
+        <div class="font-semibold mb-1"><?php echo h($title); ?></div>
+        <div><?php echo h($desc); ?></div>
+        <?php if (!empty($tv['error'])): ?>
+          <div class="mt-1 text-xs">Details: <span class="font-mono break-all"><?php echo h((string)$tv['error']); ?></span></div>
         <?php endif; ?>
       </div>
     <?php endif; ?>

@@ -1,8 +1,8 @@
-# File registry (v0.7.2)
+# File registry (v0.7.3)
 
 This file lists repository files for change auditing.
 
-Generated: 2026-01-31 23:57:06 UTC
+Generated: 2026-02-01 00:23:53 UTC
 
 ```
 ./
@@ -95,6 +95,7 @@ Generated: 2026-01-31 23:57:06 UTC
 ./sql/migrations/v0.6.6_to_v0.6.7.sql
 ./sql/migrations/v0.6_to_v0.6.1.sql
 ./sql/migrations/v0.7.1_to_v0.7.2.sql
+./sql/migrations/v0.7.2_to_v0.7.3.sql
 ./sql/schema.sql
 ./tools/
 ./tools/i18n_audit.php

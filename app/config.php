@@ -6,7 +6,7 @@ declare(strict_types=1);
  * v0.3.1: searches multiple candidate locations to reduce accidental misplacement outages.
  */
 
-function app_version(): string { return '0.7.2'; }
+function app_version(): string { return '0.7.3'; }
 
 /**
  * Database schema version.
@@ -134,6 +134,14 @@ function cfg(string $key, $default = null) {
             'TLS_CONNECT_TIMEOUT_SECS' => (int)env('TLS_CONNECT_TIMEOUT_SECS', '7'),
             'TLS_READ_TIMEOUT_SECS' => (int)env('TLS_READ_TIMEOUT_SECS', '7'),
             'TLS_SAMPLES_ON_CHANGE' => (int)env('TLS_SAMPLES_ON_CHANGE', '2'),
+
+            // v0.7.3: TLS trust validation probe (opt-in via monitor_settings.tls_validation_mode).
+            // These timeouts apply only to the *separate* trust probe (CertFetcher remains verify_peer=false).
+            'TLS_TRUST_CONNECT_TIMEOUT_SECS' => (int)env('TLS_TRUST_CONNECT_TIMEOUT_SECS', '4'),
+            'TLS_TRUST_TIMEOUT_SECS' => (int)env('TLS_TRUST_TIMEOUT_SECS', '6'),
+            // Optional override for environments without a working system CA bundle.
+            // When empty, the system/default CA bundle is used.
+            'TLS_CA_BUNDLE' => (string)env('TLS_CA_BUNDLE', ''),
 
             // v0.5 SSRF policy framework (default preserves v0.4.x behavior).
             'SSRF_MODE' => (string)env('SSRF_MODE', 'legacy'),

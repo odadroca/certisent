@@ -39,6 +39,10 @@ CREATE TABLE IF NOT EXISTS monitors (
   -- v0.7.2: optional TLS identity validation (hostname mismatch). Default behavior unchanged unless enabled per monitor.
   hostname_ok TINYINT(1) NULL,
   hostname_error VARCHAR(255) NULL,
+  -- v0.7.3: optional TLS trust validation (chain trust using system CA bundle). Persisted only when enabled per monitor.
+  trust_ok TINYINT(1) NULL,
+  trust_category ENUM('tls_self_signed','tls_untrusted_root','tls_untrusted_unknown') NULL,
+  trust_error VARCHAR(255) NULL,
   CONSTRAINT fk_monitors_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
