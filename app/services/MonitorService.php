@@ -53,7 +53,8 @@ final class MonitorService {
         int $freqMin,
         int $enabled,
         ?int $notifyOnChange = null,
-        ?int $notifyOnRenewal = null
+        ?int $notifyOnRenewal = null,
+        ?string $tlsValidationMode = null
     ): void {
         $parsed = self::parseUrl($url);
         $now = db_now_utc();
@@ -78,12 +79,21 @@ final class MonitorService {
             $fields .= ', notify_on_renewal=:nor';
             $params[':nor'] = $notifyOnRenewal ? 1 : 0;
         }
+        if ($tlsValidationMode !== null) {
+            $allowed = ['off','observe','enforce'];
+            if (!in_array($tlsValidationMode, $allowed, true)) {
+                $tlsValidationMode = 'off';
+            }
+            $fields .= ', tls_validation_mode=:tvm';
+            $params[':tvm'] = $tlsValidationMode;
+        }
         $st2 = db()->prepare('UPDATE monitor_settings SET '.$fields.' WHERE monitor_id=:id');
         $st2->execute($params);
 
         $meta = ['url'=>$parsed['url'], 'enabled'=>$enabled ? 1 : 0, 'notify_days_before_expiry'=>$notifyDays, 'check_frequency_minutes'=>$freqMin];
         if ($notifyOnChange !== null) $meta['notify_on_change'] = $notifyOnChange ? 1 : 0;
         if ($notifyOnRenewal !== null) $meta['notify_on_renewal'] = $notifyOnRenewal ? 1 : 0;
+        if ($tlsValidationMode !== null) $meta['tls_validation_mode'] = $tlsValidationMode;
         Audit::log($actorUserId, 'monitor.update', 'monitor', $monitorId, $meta);
     }
 
@@ -95,7 +105,7 @@ final class MonitorService {
 
     public static function getMonitorsForUser(array $user): array {
         if ($user['role'] === 'admin' || $user['role'] === 'auditor') {
-            $sql = "SELECT m.*, s.notify_days_before_expiry, s.check_frequency_minutes,
+            $sql = "SELECT m.*, s.notify_days_before_expiry, s.check_frequency_minutes, s.tls_validation_mode,
                     m.last_status AS last_status,
                     m.last_days_remaining AS last_days_remaining,
                     m.last_valid_to AS last_valid_to,
@@ -106,7 +116,7 @@ final class MonitorService {
                     ORDER BY m.updated_at DESC";
             return db()->query($sql)->fetchAll();
         }
-        $st = db()->prepare("SELECT m.*, s.notify_days_before_expiry, s.check_frequency_minutes,
+        $st = db()->prepare("SELECT m.*, s.notify_days_before_expiry, s.check_frequency_minutes, s.tls_validation_mode,
                 m.last_status AS last_status,
                 m.last_days_remaining AS last_days_remaining,
                 m.last_valid_to AS last_valid_to,

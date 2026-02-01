@@ -24,9 +24,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $enabled = isset($_POST['enabled']) ? 1 : 0;
     $noc = isset($_POST['notify_on_change']) ? 1 : 0;
     $nor = isset($_POST['notify_on_renewal']) ? 1 : 0;
+    $tvm = (string)($_POST['tls_validation_mode'] ?? ($m['tls_validation_mode'] ?? 'off'));
+    if (!in_array($tvm, ['off','observe','enforce'], true)) {
+        $tvm = 'off';
+    }
 
     try {
-        MonitorService::updateMonitor((int)$user['id'], $id, $url, $days, $freq, $enabled, $noc, $nor);
+        MonitorService::updateMonitor((int)$user['id'], $id, $url, $days, $freq, $enabled, $noc, $nor, $tvm);
         header('Location: dashboard.php');
         exit;
     } catch (Throwable $e) {
@@ -56,6 +60,17 @@ render_header(t('page.monitor_edit.title'), $user);
         <label class="text-sm"><?php echo t('monitor_edit.check_frequency'); ?></label>
         <input type="number" name="freq_min" class="w-full border rounded px-3 py-2" value="<?php echo h((string)($_POST['freq_min'] ?? $m['check_frequency_minutes'])); ?>" />
       </div>
+    </div>
+
+    <div>
+      <label class="text-sm"><?php echo t('monitor_edit.tls_validation_mode'); ?></label>
+      <?php $curTvm = (string)($_POST['tls_validation_mode'] ?? ($m['tls_validation_mode'] ?? 'off')); ?>
+      <select name="tls_validation_mode" class="w-full border rounded px-3 py-2">
+        <option value="off" <?php echo $curTvm==='off' ? 'selected' : ''; ?>><?php echo t('monitor_edit.tls_mode.off'); ?></option>
+        <option value="observe" <?php echo $curTvm==='observe' ? 'selected' : ''; ?>><?php echo t('monitor_edit.tls_mode.observe'); ?></option>
+        <option value="enforce" <?php echo $curTvm==='enforce' ? 'selected' : ''; ?>><?php echo t('monitor_edit.tls_mode.enforce'); ?></option>
+      </select>
+      <div class="text-xs text-gray-600 mt-1"><?php echo t('monitor_edit.tls_validation_note'); ?></div>
     </div>
     <div class="flex items-center gap-2">
       <input type="checkbox" name="enabled" <?php echo ((int)($m['enabled'])===1 ? 'checked' : ''); ?> />

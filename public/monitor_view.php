@@ -52,6 +52,61 @@ render_header(t('page.monitor_view.title'), $user);
       <div><span class="text-gray-500"><?php echo t('monitor_edit.notify_on_renewal'); ?>:</span> <?php echo ((int)$m['notify_on_renewal']===1 ? t('common.yes') : t('common.no')); ?></div>
     </div>
 
+    <div class="mt-4 pt-4 border-t">
+      <h3 class="font-semibold mb-2"><?php echo t('tls.label.validation'); ?></h3>
+      <?php
+        $mode = (string)($m['tls_validation_mode'] ?? 'off');
+        $modeKey = 'tls.mode.' . ($mode ?: 'off');
+        $hostnameOk = $m['hostname_ok'];
+        $trustOk = $m['trust_ok'];
+      ?>
+      <div class="text-sm text-gray-700 space-y-1">
+        <div>
+          <span class="text-gray-500"><?php echo t('tls.label.mode'); ?>:</span>
+          <?php echo t($modeKey); ?>
+        </div>
+        <div>
+          <span class="text-gray-500"><?php echo t('tls.label.hostname'); ?>:</span>
+          <?php if ($mode === 'off'): ?>
+            <?php echo t('tls.value.off'); ?>
+          <?php elseif ($hostnameOk === null): ?>
+            <?php echo t('tls.value.unknown'); ?>
+          <?php elseif ((int)$hostnameOk === 1): ?>
+            <?php echo t('tls.value.ok'); ?>
+          <?php else: ?>
+            <?php echo t('tls.value.mismatch'); ?>
+            <?php if (!empty($m['hostname_error'])): ?>
+              <span class="text-xs text-gray-600">(<?php echo h((string)$m['hostname_error']); ?>)</span>
+            <?php endif; ?>
+          <?php endif; ?>
+        </div>
+        <div>
+          <span class="text-gray-500"><?php echo t('tls.label.trust'); ?>:</span>
+          <?php if ($mode === 'off'): ?>
+            <?php echo t('tls.value.off'); ?>
+          <?php elseif ($trustOk === null): ?>
+            <?php echo t('tls.value.unknown'); ?>
+          <?php elseif ((int)$trustOk === 1): ?>
+            <?php echo t('tls.value.ok'); ?>
+          <?php else: ?>
+            <?php
+              $cat = (string)($m['trust_category'] ?? 'tls_untrusted_unknown');
+              if ($cat === 'tls_self_signed') {
+                  echo t('tls.category.tls_self_signed');
+              } elseif ($cat === 'tls_untrusted_root') {
+                  echo t('tls.category.tls_untrusted_root');
+              } else {
+                  echo t('tls.category.tls_untrusted_unknown');
+              }
+            ?>
+            <?php if (!empty($m['trust_error'])): ?>
+              <span class="text-xs text-gray-600">(<?php echo h((string)$m['trust_error']); ?>)</span>
+            <?php endif; ?>
+          <?php endif; ?>
+        </div>
+      </div>
+    </div>
+
     <?php if (has_role($user,'viewer')): ?>
       <form method="post" action="monitor_check.php" class="mt-4">
         <?php echo csrf_field(); ?>

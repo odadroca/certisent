@@ -1,6 +1,6 @@
 <p align="center"><img src="https://i.postimg.cc/qMpPkTVz/certinel-neg.png" alt="Certinel" width="200" height="200"></p>
 
-# Certinel — TLS/SSL Certificate Monitoring (Beta) - v.0.7.4
+# Certinel — TLS/SSL Certificate Monitoring (Beta) - v.0.7.5
 
 Certinel is a lightweight TLS/SSL certificate monitoring service that **live-fetches** the certificate presented by an endpoint (SNI-capable), stores immutable snapshots, detects changes (renewals/rotations), and notifies before outages happen.
 
@@ -41,7 +41,7 @@ Docs: `docs/deploy.md`, `docs/ops_runbook.md`.
 - **Heartbeat**: Admin → System shows last worker run time (UTC).
 - **Upgrade approach**: replace code, keep `.env` + DB; run SQL migrations only when required (see `docs/deploy.md`).
 
-## TLS validation mode (hostname + trust) (v.0.7.4)
+## TLS validation mode (hostname + trust) (v.0.7.5)
 
 Certinel **does not verify TLS** by default (`verify_peer=false`) because it is designed to observe *what the endpoint actually serves*.
 
@@ -54,7 +54,7 @@ Trust validation uses a *separate* probe that validates the certificate chain us
 Mode values:
 - `off` (default): legacy behavior; hostname/trust validation not computed or persisted.
 - `observe`: compute and persist hostname + trust validation fields (does not change expiry/change alerting behavior).
-- `enforce`: reserved for a future release; treated like `observe` in v0.7.4.
+- `enforce`: reserved for a future release; treated like `observe` in v0.7.5.
 
 Trust categories:
 - `tls_self_signed` — self-signed certificate.
@@ -71,7 +71,15 @@ When `tls_validation_mode` is `observe` or `enforce`, the worker also emits new 
 Event dedupe: these TLS invalid-state events are created only when the classification changes or when the certificate fingerprint changes.
 
 
-Enable for a monitor (SQL):
+UI (v.0.7.5):
+- Monitor → Edit → **TLS validation mode** (`off|observe|enforce`).
+- Dashboard and Monitor view show the last-known hostname/trust validation summary (separate from expiry/change status).
+
+Safe usage for internal/self-signed environments:
+- Keep `off` unless you explicitly want trust/identity warnings.
+- If you enable `observe|enforce` on internal/self-signed services, expect `tls_self_signed` / `tls_untrusted_root` classifications and events.
+
+Enable for a monitor (SQL alternative):
 - set `monitor_settings.tls_validation_mode='observe'` (or `enforce`) for the target `monitor_id`.
 
 Optional configuration (env):

@@ -1,5 +1,14 @@
 # Release notes (v0.7.x)
 
+## v0.7.5
+
+### Added (default-preserving)
+- UI: per-monitor selector for `monitor_settings.tls_validation_mode` (off/observe/enforce) on Monitor → Edit.
+- UI: Dashboard and Monitor view show a last-known TLS validation summary (mode + hostname/trust result), separate from expiry/change status.
+
+### DB migration
+- None.
+
 ## v0.7.4
 
 ### Added (default-preserving)

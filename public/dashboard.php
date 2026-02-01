@@ -10,6 +10,33 @@ $view = (string)($_GET['view'] ?? 'cards');
 $monitors = MonitorService::getMonitorsForUser($user);
 
 render_header(t('page.dashboard.title'), $user);
+
+$tlsSummary = function(array $m): string {
+    $mode = (string)($m['tls_validation_mode'] ?? 'off');
+    if ($mode === 'off') {
+        return t('tls.value.off');
+    }
+    if (array_key_exists('hostname_ok', $m) && $m['hostname_ok'] !== null && (int)$m['hostname_ok'] === 0) {
+        return 'wrong.host';
+    }
+    if (array_key_exists('trust_ok', $m) && $m['trust_ok'] !== null && (int)$m['trust_ok'] === 0) {
+        $cat = (string)($m['trust_category'] ?? 'tls_untrusted_unknown');
+        if ($cat === 'tls_self_signed') {
+            return t('tls.category.tls_self_signed');
+        }
+        if ($cat === 'tls_untrusted_root') {
+            return t('tls.category.tls_untrusted_root');
+        }
+        return t('tls.category.tls_untrusted_unknown');
+    }
+    if (
+        array_key_exists('hostname_ok', $m) && $m['hostname_ok'] !== null && (int)$m['hostname_ok'] === 1 &&
+        array_key_exists('trust_ok', $m) && $m['trust_ok'] !== null && (int)$m['trust_ok'] === 1
+    ) {
+        return t('tls.value.ok');
+    }
+    return t('tls.value.unknown');
+};
 ?>
 <div class="flex items-center justify-between mb-4">
   <div>
@@ -52,6 +79,7 @@ $lastCron = Worker::getSystemState('last_cron_run_at');
         <tr class="text-left border-b">
           <th class="py-2 pr-3"><?php echo t('dashboard.table.status'); ?></th>
           <th class="py-2 pr-3"><?php echo t('dashboard.table.url'); ?></th>
+          <th class="py-2 pr-3"><?php echo t('dashboard.table.tls'); ?></th>
           <th class="py-2 pr-3"><?php echo t('dashboard.table.issuer'); ?></th>
           <th class="py-2 pr-3"><?php echo t('dashboard.table.valid_to'); ?></th>
           <th class="py-2 pr-3"><?php echo t('dashboard.table.days_left'); ?></th>
@@ -66,6 +94,7 @@ $lastCron = Worker::getSystemState('last_cron_run_at');
         <tr class="border-b">
           <td class="py-2 pr-3"><?php echo badge_status($displayStatus); ?></td>
           <td class="py-2 pr-3 font-mono"><?php echo h($m['url']); ?></td>
+          <td class="py-2 pr-3"><?php echo h($tlsSummary($m)); ?></td>
           <td class="py-2 pr-3"><?php echo h((string)($m['last_issuer_cn'] ?? '—')); ?></td>
           <td class="py-2 pr-3"><?php echo h(ui_dt($m['last_valid_to'] ?? null) ?: '—'); ?><?php echo $m['last_valid_to'] ? ' UTC' : ''; ?></td>
           <td class="py-2 pr-3"><?php echo h(ui_num($m['last_days_remaining'] ?? '—')); ?></td>
@@ -91,6 +120,7 @@ $lastCron = Worker::getSystemState('last_cron_run_at');
           <div>
             <div class="font-mono text-sm break-all"><?php echo h($m['url']); ?></div>
             <div class="text-xs text-gray-600 mt-1"><?php echo t('dashboard.issuer'); ?>: <?php echo h((string)($m['last_issuer_cn'] ?? '—')); ?></div>
+            <div class="text-xs text-gray-600"><?php echo t('dashboard.tls'); ?>: <?php echo h($tlsSummary($m)); ?></div>
           </div>
           <div><?php echo badge_status($displayStatus); ?></div>
         </div>
