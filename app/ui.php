@@ -59,7 +59,7 @@ function url_for(string $path): string {
 }
 
 function render_header(string $title, ?array $user = null): void {
-    $appName = 'Certinel';
+    $appName = 'Certisent';
     $lang = function_exists('current_locale') ? current_locale() : 'en';
     echo '<!doctype html><html lang="'.h($lang).'"><head><meta charset="utf-8">';
     echo '<meta name="viewport" content="width=device-width, initial-scale=1">';
@@ -72,7 +72,7 @@ function render_header(string $title, ?array $user = null): void {
     echo '<div class="flex items-center justify-between">';
     echo '<div class="text-2xl font-semibold">';
     echo '<a href="'.h(url_for('index.php')).'" class="hover:opacity-90">';
-    echo '<img src="/assets/certinel-neg.png" border="0" width="10%" style="display: inline-block;">&nbsp;&nbsp;<span class="accent">Certinel</span>&nbsp;&nbsp;<span class="text-gray-300 text-base">certificate sentinel</span>';
+    echo '<img src="/assets/certisent-neg.png" border="0" width="10%" style="display: inline-block;">&nbsp;&nbsp;<span class="accent">Sentryficate</span>&nbsp;&nbsp;<span class="text-gray-300 text-base">certificate sentry</span>';
     echo '</a>';
     echo '</div>';
 
@@ -128,7 +128,7 @@ function render_header(string $title, ?array $user = null): void {
 function render_footer(): void {
     echo '</div>'; // content wrapper
     $v = function_exists('app_version') ? app_version() : 'unknown';
-    echo '<div class="mt-10 text-xs text-gray-500">Certinel v'.h($v).' · UTC timestamps</div>';
+    echo '<div class="mt-10 text-xs text-gray-500">Certisent v'.h($v).' · UTC timestamps</div>';
     echo '</div></body></html>';
 }
 

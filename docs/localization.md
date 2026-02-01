@@ -1,6 +1,6 @@
 # Localization (i18n)
 
-Sentryficate supports basic UI localization via a minimal translation catalog and a per-user locale preference.
+Certinel supports basic UI localization via a minimal translation catalog and a per-user locale preference.
 
 ## Concepts
 
@@ -15,7 +15,7 @@ Sentryficate supports basic UI localization via a minimal translation catalog an
 2. `users.locale` (when logged in and the column exists)
 3. Default: `en`
 
-Note: on login, Sentryficate resets the cached session locale to the user's saved `users.locale` so a previously cached guest locale does not override the preference.
+Note: on login, Certinel resets the cached session locale to the user's saved `users.locale` so a previously cached guest locale does not override the preference.
 
 ## Adding a new locale
 
