@@ -1,6 +1,6 @@
 # Ops runbook (v0.6)
 
-This is a pragmatic troubleshooting checklist for operators running Certinel on shared hosting or a VPS.
+This is a pragmatic troubleshooting checklist for operators running Sentryficate on shared hosting or a VPS.
 
 ## Common failure: configuration missing (500 / config page)
 
@@ -32,7 +32,7 @@ Fix:
 ## Cron and worker heartbeat
 
 Recommended schedule:
-- `php /path/to/certinel/scripts/worker.php --due` every 5–15 minutes.
+- `php /path/to/sentryficate/scripts/worker.php --due` every 5–15 minutes.
 
 If checks show `checked: 0`:
 - monitors may not be due yet (frequency settings)

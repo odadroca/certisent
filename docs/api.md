@@ -40,7 +40,7 @@ Example:
 ```bash
 curl -s \
   -H 'Authorization: Bearer <token>' \
-  https://example.com/certinel/public/api/v1/health
+  https://example.com/sentryficate/public/api/v1/health
 ```
 
 Note: For API keys stored in `api_keys`, the recommended scope is `read_health`. For backward compatibility, `run_worker` also grants access to this endpoint.
@@ -105,5 +105,5 @@ curl -s -X POST \
   -H 'Authorization: Bearer <API_WORKER_KEY>' \
   -H 'Content-Type: application/json' \
   -d '{"mode":"due"}' \
-  https://example.com/certinel/public/api/v1/worker/run
+  https://example.com/sentryficate/public/api/v1/worker/run
 ```

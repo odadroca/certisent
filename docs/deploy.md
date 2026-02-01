@@ -25,7 +25,7 @@ Some Apache configurations do not pass the `Authorization` header through to PHP
 5. Configure your web server to serve the `public/` directory.
 6. Configure cron to run the worker regularly:
 
-   - `php /path/to/certinel/scripts/worker.php --due` every 5–15 minutes
+   - `php /path/to/sentryficate/scripts/worker.php --due` every 5–15 minutes
 
 ## .env search order
 
@@ -98,7 +98,7 @@ If you are upgrading from v0.7.2 to v0.7.3 and want the opt-in trust validation 
 
 ### 0.7.5 → 0.7.6+
 
-If you are upgrading from v0.7.5 to v0.7.6 and want Certinel-defined pinning settings, run:
+If you are upgrading from v0.7.5 to v0.7.6 and want Sentryficate-defined pinning settings, run:
 - `sql/migrations/v0.7.5_to_v0.7.6.sql`
 
 ## Verifying an upgrade

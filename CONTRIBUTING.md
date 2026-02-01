@@ -1,4 +1,4 @@
-# Contributing to Certinel
+# Contributing to Sentryficate
 This project aims to stay lightweight and easy to self-host. Contributions are welcome, but the bar for maintainability is strict.
 
 ## Workflow

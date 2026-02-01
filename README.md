@@ -1,8 +1,8 @@
-<p align="center"><img src="https://i.postimg.cc/qMpPkTVz/certinel-neg.png" alt="Certinel" width="200" height="200"></p>
+<p align="center"><img src="https://i.postimg.cc/qMpPkTVz/certinel-neg.png" alt="Sentryficate" width="200" height="200"></p>
 
-# Certinel — TLS/SSL Certificate Monitoring (Beta) - v0.7.6
+# Sentryficate — TLS/SSL Certificate Monitoring (Beta) - v0.7.6
 
-Certinel is a lightweight TLS/SSL certificate monitoring service that **live-fetches** the certificate presented by an endpoint (SNI-capable), stores immutable snapshots, detects changes (renewals/rotations), and notifies before outages happen.
+Sentryficate is a lightweight TLS/SSL certificate monitoring service that **live-fetches** the certificate presented by an endpoint (SNI-capable), stores immutable snapshots, detects changes (renewals/rotations), and notifies before outages happen.
 
 Design goals: simple hosting (shared hosting or VPS), cron-driven checks, and clear observability of **what the endpoint actually serves**.
 
@@ -10,23 +10,23 @@ Design goals: simple hosting (shared hosting or VPS), cron-driven checks, and cl
 - **Beta (pre-1.0):** expect sharp edges, missing tests, and occasional breaking UI/UX changes between patch releases.
 - Data model is intentionally audit-oriented (snapshots + events + audit log).
 
-## What Certinel does
+## What Sentryficate does
 - Monitors `host:port` endpoints and fetches the leaf certificate over TLS (SNI-capable).
 - Stores **immutable certificate snapshots** and an **events timeline** (expiry warnings, changes, failures).
 - Sends notifications via email/SMTP/API mail relay and optional HTTP hooks.
 - Exposes a small HTTP API for remote worker runs and checks (optional).
 
-## What Certinel is not
+## What Sentryficate is not
 - Not a CA or CT log monitor; it does not detect certificates issued elsewhere unless your endpoint serves them.
 - Not a port scanner; it expects explicit monitors you create.
 
 ## Quick start (shared hosting)
-1. Upload the project so `/public/` is web-accessible (e.g. `public_html/certinel/`).
+1. Upload the project so `/public/` is web-accessible (e.g. `public_html/sentryficate/`).
 2. Copy `.env.example` → `.env`, set at least `APP_SECRET` + DB credentials.
 3. Create the MySQL DB + user, then import `sql/schema.sql`.
 4. Visit `/public/register.php` and create the first user (first registered user becomes **admin**).
 5. Add monitors in the dashboard.
-6. Add cron: `php /path/to/certinel/scripts/worker.php --due` every 5–15 minutes.
+6. Add cron: `php /path/to/sentryficate/scripts/worker.php --due` every 5–15 minutes.
 
 Docs: `docs/deploy.md`, `docs/ops_runbook.md`.
 
@@ -43,7 +43,7 @@ Docs: `docs/deploy.md`, `docs/ops_runbook.md`.
 
 ## TLS validation mode (hostname + trust) (v0.7.6)
 
-Certinel **does not verify TLS** by default (`verify_peer=false`) because it is designed to observe *what the endpoint actually serves*.
+Sentryficate **does not verify TLS** by default (`verify_peer=false`) because it is designed to observe *what the endpoint actually serves*.
 
 v0.7.2 introduced an **opt-in** per-monitor `tls_validation_mode` data model. In v0.7.3+ it can persist:
 - **Hostname identity** ("wrong.host" style): `monitors.hostname_ok` / `monitors.hostname_error`.
@@ -89,7 +89,7 @@ Optional configuration (env):
 
 ## Certificate/public-key pinning (SPKI sha256) (v0.7.6)
 
-Certinel supports **Certinel-defined pinning** (not HPKP preload).
+Sentryficate supports **Sentryficate-defined pinning** (not HPKP preload).
 
 - Pin material: **SPKI sha256** of the *leaf certificate public key* (`base64(SHA-256(SPKI DER))`).
 - Purpose: detect unexpected key changes (interception, misconfiguration, unplanned rotation).
