@@ -24,7 +24,14 @@ try {
     if ($mode === 'all') $res = Worker::runAllChecks($limit);
     else $res = Worker::runDueChecks($limit);
 
-    echo json_encode(['ok'=>true,'mode'=>$mode,'jobs'=>$job,'result'=>$res], JSON_UNESCAPED_SLASHES) . PHP_EOL;
+    // Safeguards: run after checks complete (bounded, non-blocking).
+    $pruned = Worker::pruneSnapshots();
+    $reconciled = Worker::reconcileDenormalized();
+
+    echo json_encode([
+        'ok'=>true,'mode'=>$mode,'jobs'=>$job,'result'=>$res,
+        'safeguards'=>['pruned'=>$pruned,'reconciled'=>$reconciled],
+    ], JSON_UNESCAPED_SLASHES) . PHP_EOL;
 } catch (Throwable $e) {
     Worker::setSystemState('last_cron_run_at', db_now_utc());
     Worker::setSystemState('last_cron_ok', '0');

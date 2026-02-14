@@ -751,8 +751,173 @@ $rows = $sel->fetchAll();
 
         $admin = cfg('ADMIN_EMAIL', '');
         if ($admin) {
-            // best-effort email; no user_id context
-            @mail($admin, "[Certisent] critical cron_failed", $msg, "From: ".cfg('MAIL_FROM_NAME','Certisent')." <".cfg('MAIL_FROM','no-reply@example.com').">");
+            $from = cfg('MAIL_FROM_NAME','Certisent') . ' <' . cfg('MAIL_FROM','no-reply@example.com') . '>';
+            $sent = mail($admin, "[Certisent] critical cron_failed", $msg, "From: " . $from);
+            if (!$sent) {
+                error_log('[certisent] cron_health_alert_failed: mail() returned false for admin=' . $admin);
+            }
         }
+    }
+
+    /**
+     * Prune old snapshots beyond the configured retention window.
+     *
+     * Policy:
+     * - Keep all snapshots newer than SNAPSHOT_RETENTION_DAYS (default 90, 0=disabled).
+     * - Always keep the most recent SNAPSHOT_KEEP_PER_MONITOR snapshots per monitor (default 10).
+     * - Process in small batches to avoid long-running deletes on shared hosting.
+     *
+     * @return array{deleted:int,skipped_monitors:int}
+     */
+    public static function pruneSnapshots(int $batchSize = 500): array {
+        $retentionDays = (int)cfg('SNAPSHOT_RETENTION_DAYS', 90);
+        if ($retentionDays <= 0) {
+            return ['deleted' => 0, 'skipped_monitors' => 0];
+        }
+
+        $keepPerMonitor = max(1, (int)cfg('SNAPSHOT_KEEP_PER_MONITOR', 10));
+        $cutoff = gmdate('Y-m-d H:i:s', time() - ($retentionDays * 86400));
+        $batchSize = max(1, min(5000, $batchSize));
+
+        $monitors = db()->query("SELECT id FROM monitors")->fetchAll();
+        $totalDeleted = 0;
+        $skipped = 0;
+
+        foreach ($monitors as $mon) {
+            $mid = (int)$mon['id'];
+
+            // Count total snapshots for this monitor.
+            $countSt = db()->prepare("SELECT COUNT(*) AS c FROM cert_snapshots WHERE monitor_id = :mid");
+            $countSt->execute([':mid' => $mid]);
+            $total = (int)($countSt->fetch()['c'] ?? 0);
+
+            if ($total <= $keepPerMonitor) {
+                $skipped++;
+                continue;
+            }
+
+            // Find the fetched_at of the Nth newest snapshot (the retention floor).
+            $floorSt = db()->prepare(
+                "SELECT fetched_at FROM cert_snapshots WHERE monitor_id = :mid ORDER BY fetched_at DESC LIMIT 1 OFFSET :off"
+            );
+            $floorSt->bindValue(':mid', $mid, PDO::PARAM_INT);
+            $floorSt->bindValue(':off', $keepPerMonitor - 1, PDO::PARAM_INT);
+            $floorSt->execute();
+            $floorRow = $floorSt->fetch();
+            if (!$floorRow) {
+                $skipped++;
+                continue;
+            }
+            $floorDate = (string)$floorRow['fetched_at'];
+
+            // Delete snapshots older than both the cutoff AND the per-monitor floor.
+            $delSt = db()->prepare(
+                "DELETE FROM cert_snapshots WHERE monitor_id = :mid AND fetched_at < :cutoff AND fetched_at < :floor ORDER BY fetched_at ASC LIMIT :lim"
+            );
+            $delSt->bindValue(':mid', $mid, PDO::PARAM_INT);
+            $delSt->bindValue(':cutoff', $cutoff);
+            $delSt->bindValue(':floor', $floorDate);
+            $delSt->bindValue(':lim', $batchSize, PDO::PARAM_INT);
+            $delSt->execute();
+            $totalDeleted += $delSt->rowCount();
+        }
+
+        if ($totalDeleted > 0) {
+            self::createSystemEvent('snapshots_pruned', 'info', "Pruned {$totalDeleted} old snapshot(s).", [
+                'deleted' => $totalDeleted,
+                'retention_days' => $retentionDays,
+                'keep_per_monitor' => $keepPerMonitor,
+            ]);
+        }
+
+        return ['deleted' => $totalDeleted, 'skipped_monitors' => $skipped];
+    }
+
+    /**
+     * Reconcile denormalized "last known" fields on the monitors table.
+     *
+     * If the worker crashes between inserting a snapshot and updating the monitor row,
+     * the denormalized state becomes stale. This routine detects and repairs that drift.
+     *
+     * @return array{checked:int,repaired:int}
+     */
+    public static function reconcileDenormalized(): array {
+        $sql = "SELECT m.id,
+                       m.last_checked_at AS m_last_checked,
+                       m.last_fingerprint_sha256 AS m_fp,
+                       m.last_status AS m_status,
+                       m.last_days_remaining AS m_days,
+                       cs.fetched_at AS s_fetched,
+                       cs.fingerprint_sha256 AS s_fp,
+                       cs.status AS s_status,
+                       cs.days_remaining AS s_days,
+                       cs.issuer_cn AS s_issuer,
+                       cs.subject_cn AS s_subject,
+                       cs.valid_from AS s_vf,
+                       cs.valid_to AS s_vt,
+                       cs.error AS s_err
+                FROM monitors m
+                INNER JOIN (
+                    SELECT monitor_id, MAX(fetched_at) AS max_fetched
+                    FROM cert_snapshots
+                    GROUP BY monitor_id
+                ) latest ON latest.monitor_id = m.id
+                INNER JOIN cert_snapshots cs
+                    ON cs.monitor_id = latest.monitor_id AND cs.fetched_at = latest.max_fetched
+                WHERE m.enabled = 1";
+        $rows = db()->query($sql)->fetchAll();
+
+        $checked = 0;
+        $repaired = 0;
+
+        foreach ($rows as $row) {
+            $checked++;
+            $mid = (int)$row['id'];
+
+            // Detect drift: fingerprint mismatch or last_checked_at behind latest snapshot.
+            $fpDrift = ((string)($row['m_fp'] ?? '')) !== ((string)($row['s_fp'] ?? ''));
+            $timeDrift = ($row['m_last_checked'] === null && $row['s_fetched'] !== null)
+                || ($row['m_last_checked'] !== null && $row['s_fetched'] !== null
+                    && strtotime((string)$row['s_fetched'] . ' UTC') > strtotime((string)$row['m_last_checked'] . ' UTC'));
+            $statusDrift = ((string)($row['m_status'] ?? '')) !== ((string)($row['s_status'] ?? ''));
+
+            if (!$fpDrift && !$timeDrift && !$statusDrift) {
+                continue;
+            }
+
+            $up = db()->prepare("UPDATE monitors SET
+                last_checked_at = :c,
+                last_status = :st,
+                last_fingerprint_sha256 = :fp,
+                last_issuer_cn = :issuer,
+                last_valid_from = :vf,
+                last_valid_to = :vt,
+                last_days_remaining = :days,
+                last_error = :err,
+                updated_at = :u
+                WHERE id = :id");
+            $up->execute([
+                ':c' => $row['s_fetched'],
+                ':st' => $row['s_status'],
+                ':fp' => $row['s_fp'],
+                ':issuer' => $row['s_issuer'],
+                ':vf' => $row['s_vf'],
+                ':vt' => $row['s_vt'],
+                ':days' => $row['s_days'],
+                ':err' => $row['s_err'],
+                ':u' => db_now_utc(),
+                ':id' => $mid,
+            ]);
+            $repaired++;
+        }
+
+        if ($repaired > 0) {
+            self::createSystemEvent('monitors_reconciled', 'info', "Reconciled {$repaired} monitor(s) with stale denormalized data.", [
+                'checked' => $checked,
+                'repaired' => $repaired,
+            ]);
+        }
+
+        return ['checked' => $checked, 'repaired' => $repaired];
     }
 }

@@ -203,6 +203,10 @@ function cfg(string $key, $default = null) {
             // ADMIN_EMAIL (already used for admin notifications) also gates the first admin claim when set.
             'REGISTRATION_MODE' => (string)env('REGISTRATION_MODE', 'open'),
             'SETUP_ADMIN_TOKEN' => (string)env('SETUP_ADMIN_TOKEN', ''),
+
+            // v0.7.7 safeguards: snapshot retention.
+            'SNAPSHOT_RETENTION_DAYS' => (int)env('SNAPSHOT_RETENTION_DAYS', '90'),
+            'SNAPSHOT_KEEP_PER_MONITOR' => (int)env('SNAPSHOT_KEEP_PER_MONITOR', '10'),
         ];
     }
     return $cache[$key] ?? $default;
