@@ -16,9 +16,16 @@ final class Worker {
     }
 
     public static function setSystemState(string $key, string $value): void {
-        $st = db()->prepare("INSERT INTO system_state (`key`,`value`,`updated_at`) VALUES (:k,:v,:u)
-                             ON DUPLICATE KEY UPDATE `value`=VALUES(`value`), updated_at=VALUES(updated_at)");
-        $st->execute([':k'=>$key, ':v'=>$value, ':u'=>db_now_utc()]);
+        $pdo = db();
+        $driver = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
+        $now = db_now_utc();
+        if ($driver === 'sqlite') {
+            $st = $pdo->prepare("INSERT OR REPLACE INTO system_state (\"key\",\"value\",updated_at) VALUES (:k,:v,:u)");
+        } else {
+            $st = $pdo->prepare("INSERT INTO system_state (`key`,`value`,`updated_at`) VALUES (:k,:v,:u)
+                                 ON DUPLICATE KEY UPDATE `value`=VALUES(`value`), updated_at=VALUES(updated_at)");
+        }
+        $st->execute([':k'=>$key, ':v'=>$value, ':u'=>$now]);
     }
 
     public static function getSystemState(string $key): ?string {
@@ -811,8 +818,13 @@ $rows = $sel->fetchAll();
             $floorDate = (string)$floorRow['fetched_at'];
 
             // Delete snapshots older than both the cutoff AND the per-monitor floor.
+            // Uses a sub-select for portability (MySQL DELETE...LIMIT is non-standard).
             $delSt = db()->prepare(
-                "DELETE FROM cert_snapshots WHERE monitor_id = :mid AND fetched_at < :cutoff AND fetched_at < :floor ORDER BY fetched_at ASC LIMIT :lim"
+                "DELETE FROM cert_snapshots WHERE id IN (
+                    SELECT id FROM cert_snapshots
+                    WHERE monitor_id = :mid AND fetched_at < :cutoff AND fetched_at < :floor
+                    ORDER BY fetched_at ASC LIMIT :lim
+                )"
             );
             $delSt->bindValue(':mid', $mid, PDO::PARAM_INT);
             $delSt->bindValue(':cutoff', $cutoff);

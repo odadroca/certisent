@@ -72,9 +72,10 @@ if (!function_exists('cfg')) {
 }
 require_once __DIR__ . '/../app/services/MonitorService.php';
 
-// Discover and run test files.
+// Discover and run unit test files (exclude e2e_* which need their own runner).
 $testFiles = glob(__DIR__ . '/*_test.php');
 if ($testFiles === false) $testFiles = [];
+$testFiles = array_filter($testFiles, fn($f) => !str_starts_with(basename($f), 'e2e_'));
 sort($testFiles);
 
 foreach ($testFiles as $file) {
