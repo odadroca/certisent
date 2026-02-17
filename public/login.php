@@ -57,23 +57,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $title = function_exists('t') ? t('auth.sign_in') : 'Sign in';
 render_header($title);
 ?>
-<div class="bg-white text-black rounded-2xl p-6 shadow max-w-lg">
-  <h1 class="text-xl font-semibold mb-4"><?php echo h(function_exists('t') ? t('auth.sign_in') : 'Sign in'); ?></h1>
-  <?php if ($err): ?>
-    <div class="mb-3 p-3 rounded bg-red-100 text-red-800 text-sm"><?php echo h($err); ?></div>
-  <?php endif; ?>
-  <form method="post" class="space-y-3">
-    <?php echo csrf_field(); ?>
-    <div>
-      <label class="text-sm"><?php echo h(function_exists('t') ? t('auth.email') : 'Email'); ?></label>
-      <input name="email" class="w-full border rounded px-3 py-2" value="<?php echo h($_POST['email'] ?? ''); ?>" />
+<div class="auth-page">
+  <div class="auth-card">
+    <div class="card">
+      <div class="card-body">
+        <h1 class="page-title mb-4"><?php echo h(function_exists('t') ? t('auth.sign_in') : 'Sign in'); ?></h1>
+        <?php if ($err): ?>
+          <div class="form-error"><?php echo h($err); ?></div>
+        <?php endif; ?>
+        <form method="post" class="space-y-3">
+          <?php echo csrf_field(); ?>
+          <div class="form-group">
+            <label class="form-label"><?php echo h(function_exists('t') ? t('auth.email') : 'Email'); ?></label>
+            <input name="email" class="form-input" value="<?php echo h($_POST['email'] ?? ''); ?>" />
+          </div>
+          <div class="form-group">
+            <label class="form-label"><?php echo h(function_exists('t') ? t('auth.password') : 'Password'); ?></label>
+            <input type="password" name="password" class="form-input" />
+          </div>
+          <button class="btn btn-primary"><?php echo h(function_exists('t') ? t('auth.sign_in') : 'Sign in'); ?></button>
+          <div class="text-sm text-sub"><?php echo h(function_exists('t') ? t('auth.no_account') : 'No account?'); ?> <a href="register.php"><?php echo h(function_exists('t') ? t('nav.register') : 'Register'); ?></a></div>
+        </form>
+      </div>
     </div>
-    <div>
-      <label class="text-sm"><?php echo h(function_exists('t') ? t('auth.password') : 'Password'); ?></label>
-      <input type="password" name="password" class="w-full border rounded px-3 py-2" />
-    </div>
-    <button class="bg-green-700 text-white px-4 py-2 rounded"><?php echo h(function_exists('t') ? t('auth.sign_in') : 'Sign in'); ?></button>
-    <div class="text-sm text-gray-700"><?php echo h(function_exists('t') ? t('auth.no_account') : 'No account?'); ?> <a class="text-green-700 hover:underline" href="register.php"><?php echo h(function_exists('t') ? t('nav.register') : 'Register'); ?></a></div>
-  </form>
+  </div>
 </div>
 <?php render_footer(); ?>

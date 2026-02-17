@@ -40,62 +40,68 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 render_header(t('admin.email.page_title'), $user);
 ?>
 
-<div class="flex items-start justify-between mb-4">
+<div class="page-header">
   <div>
-    <div class="text-lg font-semibold">Email</div>
-    <div class="text-sm text-gray-400">Outbound configuration (read-only) and test send</div>
+    <div class="page-title">Email</div>
+    <div class="page-subtitle">Outbound configuration (read-only) and test send</div>
   </div>
   <div class="text-sm">
-    <a class="accent hover:underline" href="system.php">System</a>
-    <span class="text-gray-600 mx-2">·</span>
-    <a class="accent hover:underline" href="outbox.php">Outbox</a>
+    <a href="system.php">System</a>
+    <span style="color:var(--text-muted);margin:0 0.5rem">&middot;</span>
+    <a href="outbox.php">Outbox</a>
   </div>
 </div>
 
-<div class="grid md:grid-cols-2 gap-4">
-  <div class="bg-white text-black rounded-2xl p-6 shadow">
-    <h2 class="font-semibold mb-3">Active transport</h2>
-    <div class="text-sm text-gray-700 space-y-2">
-      <div><span class="text-gray-500">MAIL_TRANSPORT:</span> <span class="font-mono text-xs"><?php echo h($transport); ?></span></div>
-      <div><span class="text-gray-500">MAIL_FROM:</span> <span class="font-mono text-xs"><?php echo h($from); ?></span></div>
-      <div><span class="text-gray-500">MAIL_FROM_NAME:</span> <span class="font-mono text-xs"><?php echo h($fromName); ?></span></div>
-      <div><span class="text-gray-500">ADMIN_EMAIL:</span> <span class="font-mono text-xs"><?php echo h($adminEmail); ?></span></div>
+<div class="grid-2">
+  <div class="card">
+    <div class="card-body">
+    <h2 class="section-title">Active transport</h2>
+    <div class="text-sm text-sub space-y-2">
+      <div><span class="detail-label">MAIL_TRANSPORT:</span> <span class="font-mono text-xs"><?php echo h($transport); ?></span></div>
+      <div><span class="detail-label">MAIL_FROM:</span> <span class="font-mono text-xs"><?php echo h($from); ?></span></div>
+      <div><span class="detail-label">MAIL_FROM_NAME:</span> <span class="font-mono text-xs"><?php echo h($fromName); ?></span></div>
+      <div><span class="detail-label">ADMIN_EMAIL:</span> <span class="font-mono text-xs"><?php echo h($adminEmail); ?></span></div>
     </div>
-    <div class="mt-4 text-xs text-gray-600">
+    <div class="mt-4 text-xs text-muted">
       Secrets are read from <span class="font-mono">.env</span> and are not displayed.
     </div>
+    </div>
   </div>
 
-  <div class="bg-white text-black rounded-2xl p-6 shadow">
-    <h2 class="font-semibold mb-3"><?php echo h(t('admin.email.h2_smtp_api_details')); ?></h2>
+  <div class="card">
+    <div class="card-body">
+    <h2 class="section-title"><?php echo h(t('admin.email.h2_smtp_api_details')); ?></h2>
     <?php if (strtolower($transport) === 'smtp'): ?>
-      <div class="text-sm text-gray-700 space-y-2">
-        <div><span class="text-gray-500">SMTP_HOST:</span> <span class="font-mono text-xs"><?php echo h($smtpHost); ?></span></div>
-        <div><span class="text-gray-500">SMTP_PORT:</span> <?php echo (int)$smtpPort; ?></div>
-        <div><span class="text-gray-500">SMTP_USER:</span> <span class="font-mono text-xs"><?php echo h($smtpUser); ?></span></div>
-        <div><span class="text-gray-500">SMTP_ENCRYPTION:</span> <span class="font-mono text-xs"><?php echo h($smtpEnc); ?></span></div>
+      <div class="text-sm text-sub space-y-2">
+        <div><span class="detail-label">SMTP_HOST:</span> <span class="font-mono text-xs"><?php echo h($smtpHost); ?></span></div>
+        <div><span class="detail-label">SMTP_PORT:</span> <?php echo (int)$smtpPort; ?></div>
+        <div><span class="detail-label">SMTP_USER:</span> <span class="font-mono text-xs"><?php echo h($smtpUser); ?></span></div>
+        <div><span class="detail-label">SMTP_ENCRYPTION:</span> <span class="font-mono text-xs"><?php echo h($smtpEnc); ?></span></div>
       </div>
     <?php elseif (strtolower($transport) === 'api'): ?>
-      <div class="text-sm text-gray-700 space-y-2">
-        <div><span class="text-gray-500">MAIL_API_URL:</span> <span class="font-mono text-xs break-all"><?php echo h($apiUrl); ?></span></div>
-        <div class="text-xs text-gray-600">Expected: JSON POST to MAIL_API_URL with optional Authorization header.</div>
+      <div class="text-sm text-sub space-y-2">
+        <div><span class="detail-label">MAIL_API_URL:</span> <span class="font-mono text-xs text-break"><?php echo h($apiUrl); ?></span></div>
+        <div class="text-xs text-muted">Expected: JSON POST to MAIL_API_URL with optional Authorization header.</div>
       </div>
     <?php else: ?>
-      <div class="text-sm text-gray-700">Using PHP <span class="font-mono">mail()</span> function (shared-hosting default).</div>
+      <div class="text-sm text-sub">Using PHP <span class="font-mono">mail()</span> function (shared-hosting default).</div>
     <?php endif; ?>
+    </div>
   </div>
 </div>
 
-<div class="mt-6 bg-white text-black rounded-2xl p-6 shadow">
-  <h2 class="font-semibold mb-3"><?php echo h(t('admin.email.h2_send_test_email')); ?></h2>
+<div class="mt-6 card">
+  <div class="card-body">
+  <h2 class="section-title"><?php echo h(t('admin.email.h2_send_test_email')); ?></h2>
   <form method="post" class="space-y-3">
     <?php echo csrf_field(); ?>
     <div>
-      <label class="block text-sm text-gray-700 mb-1"><?php echo h(t('admin.email.label_recipient_optional')); ?></label>
-      <input name="to" class="w-full border rounded px-3 py-2" placeholder="<?php echo h(t('admin.email.placeholder_recipient')); ?>" />
+      <label class="form-label"><?php echo h(t('admin.email.label_recipient_optional')); ?></label>
+      <input name="to" class="form-input" placeholder="<?php echo h(t('admin.email.placeholder_recipient')); ?>" />
     </div>
-    <button class="bg-green-700 text-white px-4 py-2 rounded" type="submit"><?php echo h(t('admin.email.btn_send_test')); ?></button>
+    <button class="btn btn-primary" type="submit"><?php echo h(t('admin.email.btn_send_test')); ?></button>
   </form>
+  </div>
 </div>
 
 <?php render_footer(); ?>

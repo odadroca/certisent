@@ -51,23 +51,24 @@ $rows = $st->fetchAll();
 render_header(t('admin.monitors.page_title'), $user);
 ?>
 
-<div class="flex items-start justify-between mb-4">
+<div class="page-header">
   <div>
-    <div class="text-lg font-semibold"><?php echo h(t('admin.monitors.h1')); ?></div>
-    <div class="text-sm text-gray-400"><?php echo h(t('admin.monitors.help_inventory')); ?></div>
+    <div class="page-title"><?php echo h(t('admin.monitors.h1')); ?></div>
+    <div class="page-subtitle"><?php echo h(t('admin.monitors.help_inventory')); ?></div>
   </div>
   <div class="text-sm">
-    <a class="text-green-400 hover:underline" href="users.php"><?php echo h(t('admin.monitors.link_users')); ?></a>
-    <span class="text-gray-600 mx-2">·</span>
-    <a class="text-green-400 hover:underline" href="audit.php"><?php echo h(t('admin.monitors.link_audit')); ?></a>
+    <a href="users.php"><?php echo h(t('admin.monitors.link_users')); ?></a>
+    <span style="color:var(--text-muted);margin:0 0.5rem">&middot;</span>
+    <a href="audit.php"><?php echo h(t('admin.monitors.link_audit')); ?></a>
   </div>
 </div>
 
-<div class="bg-white text-black rounded-2xl p-4 shadow mb-4">
-  <form method="get" class="flex flex-wrap gap-3 items-end">
+<div class="card card-compact mb-4">
+  <div class="card-body">
+  <form method="get" class="flex flex-wrap gap-3 items-center">
     <div>
-      <label class="block text-xs text-gray-600"><?php echo h(t('admin.monitors.label_status_filter')); ?></label>
-      <select name="status" class="border rounded px-2 py-1">
+      <label class="form-label"><?php echo h(t('admin.monitors.label_status_filter')); ?></label>
+      <select name="status" class="form-select form-inline">
         <option value="" <?php echo $statusFilter===''?'selected':''; ?>><?php echo h(t('admin.monitors.opt_all')); ?></option>
         <option value="ok" <?php echo $statusFilter==='ok'?'selected':''; ?>><?php echo h(t('admin.monitors.opt_ok')); ?></option>
         <option value="warn" <?php echo $statusFilter==='warn'?'selected':''; ?>><?php echo h(t('admin.monitors.opt_warn')); ?></option>
@@ -75,48 +76,53 @@ render_header(t('admin.monitors.page_title'), $user);
         <option value="unknown" <?php echo $statusFilter==='unknown'?'selected':''; ?>><?php echo h(t('admin.monitors.opt_unknown')); ?></option>
       </select>
     </div>
-    <button class="bg-green-700 text-white px-3 py-2 rounded">Apply</button>
+    <button class="btn btn-primary btn-sm">Apply</button>
   </form>
+  </div>
 </div>
 
-<div class="bg-white text-black rounded-2xl p-6 shadow overflow-x-auto">
-  <table class="min-w-full text-sm">
+<div class="card">
+  <div class="card-body">
+  <div class="table-wrap">
+  <table class="table">
     <thead>
-      <tr class="text-left border-b">
-        <th class="py-2 pr-3"><?php echo h(t('admin.monitors.th_id')); ?></th>
-        <th class="py-2 pr-3"><?php echo h(t('admin.monitors.th_owner')); ?></th>
-        <th class="py-2 pr-3"><?php echo h(t('admin.monitors.th_url')); ?></th>
-        <th class="py-2 pr-3"><?php echo h(t('admin.monitors.th_enabled')); ?></th>
-        <th class="py-2 pr-3"><?php echo h(t('admin.monitors.th_freq_min')); ?></th>
-        <th class="py-2 pr-3"><?php echo h(t('admin.monitors.th_warn_days')); ?></th>
-        <th class="py-2 pr-3"><?php echo h(t('admin.monitors.th_status')); ?></th>
-        <th class="py-2 pr-3"><?php echo h(t('admin.monitors.th_valid_to')); ?></th>
-        <th class="py-2 pr-3"><?php echo h(t('admin.monitors.th_days')); ?></th>
-        <th class="py-2 pr-3"><?php echo h(t('admin.monitors.th_actions')); ?></th>
+      <tr>
+        <th><?php echo h(t('admin.monitors.th_id')); ?></th>
+        <th><?php echo h(t('admin.monitors.th_owner')); ?></th>
+        <th><?php echo h(t('admin.monitors.th_url')); ?></th>
+        <th><?php echo h(t('admin.monitors.th_enabled')); ?></th>
+        <th><?php echo h(t('admin.monitors.th_freq_min')); ?></th>
+        <th><?php echo h(t('admin.monitors.th_warn_days')); ?></th>
+        <th><?php echo h(t('admin.monitors.th_status')); ?></th>
+        <th><?php echo h(t('admin.monitors.th_valid_to')); ?></th>
+        <th><?php echo h(t('admin.monitors.th_days')); ?></th>
+        <th><?php echo h(t('admin.monitors.th_actions')); ?></th>
       </tr>
     </thead>
     <tbody>
       <?php foreach ($rows as $r): ?>
         <?php $displayStatus = !empty($r['fetched_at']) ? (string)($r['status'] ?? 'unknown') : 'not_checked'; ?>
-        <tr class="border-b align-top">
-          <td class="py-2 pr-3 font-mono text-xs"><?php echo (int)$r['id']; ?></td>
-          <td class="py-2 pr-3 text-xs"><?php echo h((string)$r['owner_email']); ?></td>
-          <td class="py-2 pr-3 font-mono text-xs break-all"><?php echo h((string)$r['url']); ?></td>
-          <td class="py-2 pr-3"><?php echo ((int)$r['enabled']===1?'Yes':'No'); ?></td>
-          <td class="py-2 pr-3"><?php echo (int)$r['check_frequency_minutes']; ?></td>
-          <td class="py-2 pr-3"><?php echo (int)$r['notify_days_before_expiry']; ?></td>
-          <td class="py-2 pr-3"><?php echo badge_status($displayStatus); ?></td>
-          <td class="py-2 pr-3 font-mono text-xs"><?php echo h((string)($r['valid_to'] ?? '')); ?></td>
-          <td class="py-2 pr-3"><?php echo h((string)($r['days_remaining'] ?? '')); ?></td>
-          <td class="py-2 pr-3 whitespace-nowrap">
-            <a class="text-green-700 hover:underline" href="../monitor_view.php?id=<?php echo (int)$r['id']; ?>"><?php echo h(t('common.view')); ?></a>
-            <span class="text-gray-400 mx-2">·</span>
-            <a class="text-green-700 hover:underline" href="../monitor_edit.php?id=<?php echo (int)$r['id']; ?>"><?php echo h(t('common.edit')); ?></a>
+        <tr>
+          <td class="font-mono text-xs"><?php echo (int)$r['id']; ?></td>
+          <td class="text-xs"><?php echo h((string)$r['owner_email']); ?></td>
+          <td class="font-mono text-xs text-break"><?php echo h((string)$r['url']); ?></td>
+          <td><?php echo ((int)$r['enabled']===1?'Yes':'No'); ?></td>
+          <td><?php echo (int)$r['check_frequency_minutes']; ?></td>
+          <td><?php echo (int)$r['notify_days_before_expiry']; ?></td>
+          <td><?php echo badge_status($displayStatus); ?></td>
+          <td class="font-mono text-xs"><?php echo h((string)($r['valid_to'] ?? '')); ?></td>
+          <td><?php echo h((string)($r['days_remaining'] ?? '')); ?></td>
+          <td style="white-space:nowrap">
+            <a href="../monitor_view.php?id=<?php echo (int)$r['id']; ?>"><?php echo h(t('common.view')); ?></a>
+            <span style="color:var(--text-muted);margin:0 0.5rem">&middot;</span>
+            <a href="../monitor_edit.php?id=<?php echo (int)$r['id']; ?>"><?php echo h(t('common.edit')); ?></a>
           </td>
         </tr>
       <?php endforeach; ?>
     </tbody>
   </table>
+  </div>
+  </div>
 </div>
 
 <?php render_footer(); ?>

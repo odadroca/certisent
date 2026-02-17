@@ -114,54 +114,55 @@ if ($hasOwnerCols) {
 render_header(t('admin.api_keys.page_title'), $user);
 ?>
 
-<div class="flex items-start justify-between mb-4">
+<div class="page-header">
   <div>
-    <div class="text-lg font-semibold">API Keys</div>
-    <div class="text-sm text-gray-400">Scoped Bearer tokens for worker/API calls.</div>
+    <div class="page-title">API Keys</div>
+    <div class="page-subtitle">Scoped Bearer tokens for worker/API calls.</div>
   </div>
   <div class="text-sm">
-    <a class="text-green-400 hover:underline" href="system.php">System</a>
-    <span class="text-gray-600 mx-2">·</span>
-    <a class="text-green-400 hover:underline" href="monitors.php">Monitors</a>
+    <a href="system.php">System</a>
+    <span style="color:var(--text-muted);margin:0 0.5rem">&middot;</span>
+    <a href="monitors.php">Monitors</a>
   </div>
 </div>
 
 <?php
 if ($createdToken !== null) {
-    echo '<div class="bg-yellow-100 text-black rounded-2xl p-5 shadow mb-4">';
+    echo '<div class="alert alert-warn mb-4" style="background:#fef9c3;color:var(--text-dark);border-color:var(--warn)">';
     echo '<div class="font-semibold mb-2">New token (copy now)</div>';
-    echo '<div class="font-mono text-xs break-all">'.h($createdToken).'</div>';
-    echo '<div class="text-xs text-gray-700 mt-2">Use as: Authorization: Bearer &lt;token&gt;</div>';
+    echo '<div class="font-mono text-xs text-break">'.h($createdToken).'</div>';
+    echo '<div class="text-xs text-sub mt-2">Use as: Authorization: Bearer &lt;token&gt;</div>';
     echo '</div>';
 }
 ?>
 
-<div class="bg-white text-black rounded-2xl p-6 shadow mb-6">
-  <h2 class="font-semibold mb-3">Create API key</h2>
+<div class="card mb-6">
+  <div class="card-body">
+  <h2 class="section-title">Create API key</h2>
   <form method="post" class="space-y-4">
     <?php echo csrf_field(); ?>
     <input type="hidden" name="action" value="create" />
 
     <div>
-      <label class="block text-sm text-gray-700"><?php echo h(t('admin.api_keys.label_name')); ?></label>
-      <input name="name" class="w-full border rounded px-3 py-2" placeholder="worker" />
+      <label class="form-label"><?php echo h(t('admin.api_keys.label_name')); ?></label>
+      <input name="name" class="form-input" placeholder="worker" />
     </div>
 
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div class="grid-2">
       <div>
-        <label class="block text-sm text-gray-700"><?php echo h(t('admin.api_keys.label_key_type')); ?></label>
-        <select name="key_type" class="w-full border rounded px-3 py-2">
+        <label class="form-label"><?php echo h(t('admin.api_keys.label_key_type')); ?></label>
+        <select name="key_type" class="form-select">
           <option value="system"><?php echo h(t('admin.api_keys.opt_system_legacy')); ?></option>
           <option value="user"><?php echo h(t('admin.api_keys.opt_user_scoped')); ?></option>
         </select>
-        <div class="text-xs text-gray-500 mt-1">
+        <div class="form-help">
           <?php echo h(t('admin.api_keys.help_user_scoped')); ?> <code>/api/v1/check</code> when using <code>monitor_id</code>.
         </div>
       </div>
       <div>
-        <label class="block text-sm text-gray-700"><?php echo h(t('admin.api_keys.label_owner_user')); ?></label>
-        <select name="owner_user_id" class="w-full border rounded px-3 py-2">
+        <label class="form-label"><?php echo h(t('admin.api_keys.label_owner_user')); ?></label>
+        <select name="owner_user_id" class="form-select">
           <option value="0">(none)</option>
           <?php foreach (db()->query('SELECT id,email,role FROM users ORDER BY email ASC')->fetchAll() as $uu): ?>
             <option value="<?php echo (int)$uu['id']; ?>">
@@ -169,74 +170,79 @@ if ($createdToken !== null) {
             </option>
           <?php endforeach; ?>
         </select>
-        <div class="text-xs text-gray-500 mt-1">
+        <div class="form-help">
           Requires DB migration for storage; system keys ignore owner.
         </div>
       </div>
     </div>
 
     <div>
-      <div class="text-sm text-gray-700 mb-2">Scopes</div>
-      <label class="flex items-center gap-2 text-sm"><input type="checkbox" name="scopes[]" value="run_worker" checked /> run_worker</label>
-      <label class="flex items-center gap-2 text-sm mt-1"><input type="checkbox" name="scopes[]" value="check_monitor" /> check_monitor</label>
-      <div class="text-xs text-gray-600 mt-2">Recommended: run_worker only.</div>
+      <div class="form-label mb-2">Scopes</div>
+      <label class="form-checkbox"><input type="checkbox" name="scopes[]" value="run_worker" checked /> run_worker</label>
+      <label class="form-checkbox mt-1"><input type="checkbox" name="scopes[]" value="check_monitor" /> check_monitor</label>
+      <div class="form-help mt-2">Recommended: run_worker only.</div>
     </div>
 
-    <button class="bg-green-700 text-white px-4 py-2 rounded">Create</button>
+    <button class="btn btn-primary">Create</button>
   </form>
+  </div>
 </div>
 
-<div class="bg-white text-black rounded-2xl p-6 shadow overflow-x-auto">
-  <h2 class="font-semibold mb-3"><?php echo h(t('admin.api_keys.h2_existing')); ?></h2>
-  <table class="min-w-full text-sm">
+<div class="card">
+  <div class="card-body">
+  <h2 class="section-title"><?php echo h(t('admin.api_keys.h2_existing')); ?></h2>
+  <div class="table-wrap">
+  <table class="table">
     <thead>
-      <tr class="text-left border-b">
-        <th class="py-2 pr-3">ID</th>
-        <th class="py-2 pr-3"><?php echo h(t('admin.api_keys.th_name')); ?></th>
+      <tr>
+        <th>ID</th>
+        <th><?php echo h(t('admin.api_keys.th_name')); ?></th>
         <?php if ($hasOwnerCols): ?>
-          <th class="py-2 pr-3"><?php echo h(t('admin.api_keys.th_type')); ?></th>
-          <th class="py-2 pr-3"><?php echo h(t('admin.api_keys.th_owner')); ?></th>
+          <th><?php echo h(t('admin.api_keys.th_type')); ?></th>
+          <th><?php echo h(t('admin.api_keys.th_owner')); ?></th>
         <?php endif; ?>
-        <th class="py-2 pr-3"><?php echo h(t('admin.api_keys.th_scopes')); ?></th>
-        <th class="py-2 pr-3">Active</th>
-        <th class="py-2 pr-3">Created (UTC)</th>
-        <th class="py-2 pr-3">Last used (UTC)</th>
-        <th class="py-2 pr-3"></th>
+        <th><?php echo h(t('admin.api_keys.th_scopes')); ?></th>
+        <th>Active</th>
+        <th>Created (UTC)</th>
+        <th>Last used (UTC)</th>
+        <th></th>
       </tr>
     </thead>
     <tbody>
       <?php foreach ($keys as $k): ?>
         <?php $sc = json_decode((string)($k['scopes_json'] ?? '[]'), true); if (!is_array($sc)) $sc = []; ?>
-        <tr class="border-b align-top">
-          <td class="py-2 pr-3 font-mono text-xs"><?php echo (int)$k['id']; ?></td>
-          <td class="py-2 pr-3"><?php echo h((string)$k['name']); ?></td>
+        <tr>
+          <td class="font-mono text-xs"><?php echo (int)$k['id']; ?></td>
+          <td><?php echo h((string)$k['name']); ?></td>
           <?php if ($hasOwnerCols): ?>
-            <td class="py-2 pr-3"><?php echo h((string)($k['key_type'] ?? '')); ?></td>
-            <td class="py-2 pr-3"><?php echo h((string)($k['owner_email'] ?? '')); ?></td>
+            <td><?php echo h((string)($k['key_type'] ?? '')); ?></td>
+            <td><?php echo h((string)($k['owner_email'] ?? '')); ?></td>
           <?php endif; ?>
-          <td class="py-2 pr-3 font-mono text-xs"><?php echo h(implode(',', array_map('strval',$sc))); ?></td>
-          <td class="py-2 pr-3"><?php echo ((int)$k['is_active']===1) ? 'Yes' : 'No'; ?></td>
-          <td class="py-2 pr-3 font-mono text-xs"><?php echo h((string)$k['created_at']); ?></td>
-          <td class="py-2 pr-3 font-mono text-xs"><?php echo h((string)($k['last_used_at'] ?? '')); ?></td>
-          <td class="py-2 pr-3 whitespace-nowrap">
+          <td class="font-mono text-xs"><?php echo h(implode(',', array_map('strval',$sc))); ?></td>
+          <td><?php echo ((int)$k['is_active']===1) ? 'Yes' : 'No'; ?></td>
+          <td class="font-mono text-xs"><?php echo h((string)$k['created_at']); ?></td>
+          <td class="font-mono text-xs"><?php echo h((string)($k['last_used_at'] ?? '')); ?></td>
+          <td style="white-space:nowrap">
             <?php if ((int)$k['is_active']===1): ?>
               <form method="post" class="inline" onsubmit="return confirm('Revoke this key?');">
                 <?php echo csrf_field(); ?>
                 <input type="hidden" name="action" value="revoke" />
                 <input type="hidden" name="id" value="<?php echo (int)$k['id']; ?>" />
-                <button class="text-red-700 hover:underline"><?php echo h(t('admin.api_keys.btn_revoke')); ?></button>
+                <button class="btn btn-ghost btn-xs" style="color:var(--crit)"><?php echo h(t('admin.api_keys.btn_revoke')); ?></button>
               </form>
             <?php else: ?>
-              <span class="text-gray-500">—</span>
+              <span class="text-muted">&mdash;</span>
             <?php endif; ?>
           </td>
         </tr>
       <?php endforeach; ?>
     </tbody>
   </table>
+  </div>
 
-  <div class="mt-4 text-xs text-gray-700">
+  <div class="mt-4 text-xs text-sub">
     Legacy fallback: if <span class="font-mono">API_WORKER_KEY</span> is set in <span class="font-mono">.env</span>, it remains valid with wildcard scope for upgrade safety.
+  </div>
   </div>
 </div>
 

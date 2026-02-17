@@ -23,15 +23,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 render_header(t('page.monitor_delete.title'), $user);
 ?>
-<div class="bg-white text-black rounded-2xl p-6 shadow max-w-xl">
-  <h1 class="text-xl font-semibold mb-4"><?php echo t('monitor_delete.heading'); ?></h1>
-  <div class="text-sm text-gray-700 mb-4">
-    <?php echo t('monitor_delete.stops_monitoring'); ?>: <span class="font-mono"><?php echo h($m['url']); ?></span>
+<div class="card max-w-xl">
+  <div class="card-body">
+    <h1 class="page-title mb-4"><?php echo t('monitor_delete.heading'); ?></h1>
+    <div class="text-sm text-sub mb-4">
+      <?php echo t('monitor_delete.stops_monitoring'); ?>: <span class="font-mono"><?php echo h($m['url']); ?></span>
+    </div>
+    <form method="post" class="flex items-center gap-3">
+      <?php echo csrf_field(); ?>
+      <button class="btn btn-danger"><?php echo t('common.delete'); ?></button>
+      <a href="dashboard.php"><?php echo t('common.cancel'); ?></a>
+    </form>
   </div>
-  <form method="post" class="flex gap-3 items-center">
-    <?php echo csrf_field(); ?>
-    <button class="bg-red-700 text-white px-4 py-2 rounded"><?php echo t('common.delete'); ?></button>
-    <a class="text-green-700 hover:underline" href="dashboard.php"><?php echo t('common.cancel'); ?></a>
-  </form>
 </div>
 <?php render_footer(); ?>

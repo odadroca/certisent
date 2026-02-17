@@ -64,36 +64,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 render_header(t('admin.user_edit.page_title'), $admin);
 ?>
-<div class="bg-white text-black rounded-2xl p-6 shadow max-w-2xl">
-  <div class="flex items-start justify-between mb-4">
+<div class="card max-w-2xl">
+  <div class="card-body">
+  <div class="page-header">
     <div>
-      <h1 class="text-xl font-semibold"><?php echo h(t('admin.user_edit.h1')); ?></h1>
-      <div class="text-sm text-gray-700"><?php echo h($u['email']); ?></div>
+      <h1 class="page-title"><?php echo h(t('admin.user_edit.h1')); ?></h1>
+      <div class="text-sm text-sub"><?php echo h($u['email']); ?></div>
     </div>
-    <a class="text-green-700 hover:underline" href="users.php"><?php echo h(t('common.back')); ?></a>
+    <a href="users.php"><?php echo h(t('common.back')); ?></a>
   </div>
 
   <?php if ($err): ?>
-    <div class="mb-3 p-3 rounded bg-red-100 text-red-800 text-sm"><?php echo h($err); ?></div>
+    <div class="mb-3 alert alert-error"><?php echo h($err); ?></div>
   <?php endif; ?>
 
   <form method="post" class="space-y-3">
     <?php echo csrf_field(); ?>
     <div>
-      <label class="text-sm"><?php echo h(t('admin.user_edit.label_role')); ?></label>
-      <select name="role" class="w-full border rounded px-3 py-2">
+      <label class="form-label"><?php echo h(t('admin.user_edit.label_role')); ?></label>
+      <select name="role" class="form-select">
         <?php foreach (['admin','viewer','auditor'] as $r): ?>
           <option value="<?php echo h($r); ?>" <?php echo (($u['role']===$r)?'selected':''); ?>><?php echo h($r); ?></option>
         <?php endforeach; ?>
       </select>
-      <div class="text-xs text-gray-600 mt-1"><?php echo h(t('admin.user_edit.help_roles')); ?></div>
+      <div class="form-help"><?php echo h(t('admin.user_edit.help_roles')); ?></div>
     </div>
     <div>
-      <label class="text-sm"><?php echo h(t('admin.user_edit.label_notify_channels_json')); ?></label>
-      <textarea name="channels_json" class="w-full border rounded px-3 py-2 font-mono text-xs" rows="6"><?php echo h($_POST['channels_json'] ?? (string)$u['notify_channels_json']); ?></textarea>
-      <div class="text-xs text-gray-600 mt-1">Example: {"email":true,"slack_webhook":"https://hooks.slack.com/...","teams_webhook":null}</div>
+      <label class="form-label"><?php echo h(t('admin.user_edit.label_notify_channels_json')); ?></label>
+      <textarea name="channels_json" class="form-textarea font-mono text-xs" rows="6"><?php echo h($_POST['channels_json'] ?? (string)$u['notify_channels_json']); ?></textarea>
+      <div class="form-help">Example: {"email":true,"slack_webhook":"https://hooks.slack.com/...","teams_webhook":null}</div>
     </div>
-    <button class="bg-green-700 text-white px-4 py-2 rounded"><?php echo h(t('common.save')); ?></button>
+    <button class="btn btn-primary"><?php echo h(t('common.save')); ?></button>
   </form>
+  </div>
 </div>
 <?php render_footer(); ?>

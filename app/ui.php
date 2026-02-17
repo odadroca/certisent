@@ -4,10 +4,6 @@ declare(strict_types=1);
 function h(string $s): string { return htmlspecialchars($s, ENT_QUOTES, 'UTF-8'); }
 
 /**
- * Flash messages stored in session.
- * Types: info|success|warn|error
- */
-/**
  * Locale-aware UI helpers (opt-in via I18N_FORMAT_DATES).
  * These return raw strings; callers should still escape with h().
  */
@@ -61,88 +57,115 @@ function url_for(string $path): string {
 function render_header(string $title, ?array $user = null): void {
     $appName = 'Certisent';
     $lang = function_exists('current_locale') ? current_locale() : 'en';
-    echo '<!doctype html><html lang="'.h($lang).'"><head><meta charset="utf-8">';
+
+    // Detect active page for nav highlighting.
+    $script = basename($_SERVER['SCRIPT_NAME'] ?? '');
+    $isAdmin = str_contains(($_SERVER['SCRIPT_NAME'] ?? ''), '/admin/');
+
+    echo '<!doctype html><html lang="' . h($lang) . '">';
+    echo '<head><meta charset="utf-8">';
     echo '<meta name="viewport" content="width=device-width, initial-scale=1">';
-    echo '<title>'.h($title).' · '.$appName.'</title>';
-    echo '<script src="https://cdn.tailwindcss.com"></script>';
-    echo '<style>:root{--app-bg:#0b2840;--app-accent:#09d2e8;--app-card:rgba(255,255,255,.06);--app-border:rgba(255,255,255,.12);}body{background:var(--app-bg);color:#fff;}a.accent,span.accent{color:var(--app-accent);} .card{background:var(--app-card);border:1px solid var(--app-border);} .btn{background:var(--app-accent);color:#001018;} .btn-outline{border:1px solid var(--app-accent);color:var(--app-accent);} .bg-green-400,.bg-green-500,.bg-green-600,.bg-green-700{background-color:var(--app-accent)!important;} .text-green-400{color:var(--app-accent)!important;} .text-green-700{color:var(--app-accent)!important;} </style>';
-    echo '</head><body class="min-h-screen">';
-    echo '<div class="max-w-6xl mx-auto px-4 py-6">';
+    echo '<title>' . h($title) . ' &middot; ' . $appName . '</title>';
+    echo '<link rel="stylesheet" href="' . h(url_for('/assets/style.css')) . '">';
+    echo '</head><body>';
 
-    echo '<div class="flex items-center justify-between">';
-    echo '<div class="text-2xl font-semibold">';
-    echo '<a href="'.h(url_for('index.php')).'" class="hover:opacity-90">';
-    echo '<img src="/assets/certisent-neg.png" border="0" width="10%" style="display: inline-block;">&nbsp;&nbsp;<span class="accent">Certisent</span>&nbsp;&nbsp;<span class="text-gray-300 text-base">certificate sentinel</span>';
+    // ── Header ──
+    echo '<header class="site-header"><div class="container"><div class="header-inner">';
+
+    echo '<a href="' . h(url_for('index.php')) . '" class="header-brand">';
+    echo '<img src="/assets/certisent-neg.png" alt="Certisent">';
+    echo '<span class="header-brand-name">' . $appName . '</span>';
+    echo '<span class="header-brand-tag">certificate sentinel</span>';
     echo '</a>';
-    echo '</div>';
 
-    echo '<div class="text-sm">';
+    echo '<div class="header-user">';
     if ($user) {
-        echo '<span class="text-gray-300 mr-3">'.h($user['email']).' ('.h($user['role']).')</span>';
-        echo '<form class="inline" method="post" action="'.h(url_for('logout.php')).'">'; echo csrf_field(); echo '<button class="accent hover:underline" type="submit">'.h(function_exists('t') ? t('nav.sign_out') : 'Sign out').'</button>'; echo '</form>';
-
+        echo '<span class="hide-mobile">' . h($user['email']) . '</span>';
+        echo '<span class="badge badge-neutral text-xs">' . h($user['role']) . '</span>';
+        echo '<form class="inline" method="post" action="' . h(url_for('logout.php')) . '">';
+        echo csrf_field();
+        echo '<button class="btn btn-ghost-accent btn-xs" type="submit">' . h(function_exists('t') ? t('nav.sign_out') : 'Sign out') . '</button>';
+        echo '</form>';
     } else {
-        echo '<a class="accent hover:underline mr-3" href="'.h(url_for('login.php')).'">'.h(function_exists('t') ? t('nav.sign_in') : 'Sign in').'</a>';
-        echo '<a class="accent hover:underline" href="'.h(url_for('register.php')).'">'.h(function_exists('t') ? t('nav.register') : 'Register').'</a>';
+        echo '<a class="btn btn-ghost-accent btn-sm" href="' . h(url_for('login.php')) . '">' . h(function_exists('t') ? t('nav.sign_in') : 'Sign in') . '</a>';
+        echo '<a class="btn btn-outline-accent btn-sm" href="' . h(url_for('register.php')) . '">' . h(function_exists('t') ? t('nav.register') : 'Register') . '</a>';
     }
     echo '</div>';
-    echo '</div>';
+    echo '</div></div></header>';
 
-    // Signed-in navigation
+    // ── Navigation (signed-in only) ──
     if ($user) {
-        echo '<div class="mt-4 flex flex-wrap gap-3 text-sm">';
-        echo '<a class="accent hover:underline" href="'.h(url_for('dashboard.php')).'">'.h(function_exists('t') ? t('nav.dashboard') : 'Dashboard').'</a>';
-        echo '<a class="accent hover:underline" href="'.h(url_for('history.php')).'">'.h(function_exists('t') ? t('nav.history') : 'History').'</a>';
-        echo '<a class="accent hover:underline" href="'.h(url_for('settings.php')).'">'.h(function_exists('t') ? t('nav.settings') : 'Settings').'</a>';
-        echo '<a class="accent hover:underline" href="'.h(url_for('index.php')).'">'.h(function_exists('t') ? t('nav.quick_check') : 'Quick check').'</a>';
-        if (($user['role'] ?? '') === 'admin') {
-            echo '<a class="accent hover:underline" href="'.h(url_for('admin/monitors.php')).'">'.h(function_exists('t') ? t('nav.admin_monitors') : 'Admin · Monitors').'</a>';
-            echo '<a class="accent hover:underline" href="'.h(url_for('admin/users.php')).'">'.h(function_exists('t') ? t('nav.admin_users') : 'Admin · Users').'</a>';
-            echo '<a class="accent hover:underline" href="'.h(url_for('admin/system.php')).'">'.h(function_exists('t') ? t('nav.admin_system') : 'Admin · System').'</a>';
-            echo '<a class="accent hover:underline" href="'.h(url_for('admin/email.php')).'">'.h(function_exists('t') ? t('nav.admin_email') : 'Admin · Email').'</a>';
-            echo '<a class="accent hover:underline" href="'.h(url_for('admin/api_keys.php')).'">'.h(function_exists('t') ? t('nav.admin_api_keys') : 'Admin · API Keys').'</a>';
-            echo '<a class="accent hover:underline" href="'.h(url_for('admin/outbox.php')).'">'.h(function_exists('t') ? t('nav.admin_outbox') : 'Admin · Outbox').'</a>';
+        echo '<nav class="site-nav"><div class="container"><div class="nav-inner">';
+
+        $navItems = [
+            ['dashboard.php', function_exists('t') ? t('nav.dashboard') : 'Dashboard'],
+            ['history.php', function_exists('t') ? t('nav.history') : 'History'],
+            ['settings.php', function_exists('t') ? t('nav.settings') : 'Settings'],
+            ['index.php', function_exists('t') ? t('nav.quick_check') : 'Quick check'],
+        ];
+        foreach ($navItems as [$href, $label]) {
+            $active = (!$isAdmin && $script === $href) ? ' active' : '';
+            echo '<a class="nav-link' . $active . '" href="' . h(url_for($href)) . '">' . h($label) . '</a>';
         }
-        echo '</div>';
+
+        if (($user['role'] ?? '') === 'admin') {
+            echo '<div class="nav-sep"></div>';
+
+            $adminItems = [
+                ['admin/system.php', function_exists('t') ? t('nav.admin_system') : 'System'],
+                ['admin/monitors.php', function_exists('t') ? t('nav.admin_monitors') : 'Monitors'],
+                ['admin/users.php', function_exists('t') ? t('nav.admin_users') : 'Users'],
+                ['admin/email.php', function_exists('t') ? t('nav.admin_email') : 'Email'],
+                ['admin/api_keys.php', function_exists('t') ? t('nav.admin_api_keys') : 'API Keys'],
+                ['admin/outbox.php', function_exists('t') ? t('nav.admin_outbox') : 'Outbox'],
+                ['admin/audit.php', 'Audit'],
+            ];
+            foreach ($adminItems as [$href, $label]) {
+                $active = ($isAdmin && str_contains($href, $script)) ? ' active' : '';
+                echo '<a class="nav-link' . $active . '" href="' . h(url_for($href)) . '">' . h($label) . '</a>';
+            }
+        }
+
+        echo '</div></div></nav>';
     }
 
-    // Flash messages
+    // ── Flash Messages + Content ──
+    echo '<main class="site-main"><div class="container">';
     $flashes = flash_pop_all();
     if ($flashes) {
-        echo '<div class="mt-4 space-y-2">';
         foreach ($flashes as $f) {
             $t = (string)($f['type'] ?? 'info');
             $msg = (string)($f['message'] ?? '');
-            $cls = 'bg-gray-800 text-gray-100';
-            if ($t === 'success') $cls = 'bg-green-900 text-green-100';
-            elseif ($t === 'warn') $cls = 'bg-yellow-900 text-yellow-100';
-            elseif ($t === 'error') $cls = 'bg-red-900 text-red-100';
-            echo '<div class="p-3 rounded-lg text-sm '.$cls.'">'.h($msg).'</div>';
+            $cls = 'alert-info';
+            if ($t === 'success') $cls = 'alert-success';
+            elseif ($t === 'warn') $cls = 'alert-warn';
+            elseif ($t === 'error') $cls = 'alert-error';
+            echo '<div class="alert ' . $cls . '">' . h($msg) . '</div>';
         }
-        echo '</div>';
     }
-
-    echo '<div class="mt-6">';
 }
 
 function render_footer(): void {
-    echo '</div>'; // content wrapper
     $v = function_exists('app_version') ? app_version() : 'unknown';
-    echo '<div class="mt-10 text-xs text-gray-500">Certisent v'.h($v).' · UTC timestamps</div>';
-    echo '</div></body></html>';
+    echo '</div></main>';
+    echo '<footer class="site-footer"><div class="container">';
+    echo '<span class="version-pill">v' . h($v) . '</span>';
+    echo ' &middot; UTC timestamps';
+    echo '</div></footer>';
+    echo '</body></html>';
 }
 
 function badge_status(?string $status): string {
     $status = $status ?: 'unknown';
     $map = [
-        'ok' => 'bg-green-700',
-        'warn' => 'bg-yellow-700',
-        'critical' => 'bg-red-700',
-        'not_checked' => 'bg-slate-700',
-        'unknown' => 'bg-gray-700',
+        'ok'          => 'badge-ok',
+        'warn'        => 'badge-warn',
+        'critical'    => 'badge-crit',
+        'not_checked' => 'badge-unknown',
+        'unknown'     => 'badge-unknown',
     ];
-    $cls = $map[$status] ?? 'bg-gray-700';
-    return '<span class="px-2 py-1 rounded '.$cls.' text-xs">'.h(strtoupper($status)).'</span>';
+    $cls = $map[$status] ?? 'badge-unknown';
+    return '<span class="badge ' . $cls . '"><span class="badge-dot"></span>' . h(strtoupper($status)) . '</span>';
 }
 
 /**
@@ -164,7 +187,6 @@ function format_event_meta(?string $metaJson): string {
 
     $parts = [];
 
-    // Worker run summary
     $hasRun = isset($m['checked']) || isset($m['errors']) || isset($m['changed']) || isset($m['renewed']) || isset($m['warned']);
     if ($hasRun) {
         $parts[] = 'checked=' . (int)($m['checked'] ?? 0);
@@ -174,14 +196,8 @@ function format_event_meta(?string $metaJson): string {
         $parts[] = 'warned=' . (int)($m['warned'] ?? 0);
         if (isset($m['duration_ms'])) $parts[] = 'ms=' . (int)$m['duration_ms'];
     }
-
-    // Change/renew confirmation
-    if (isset($m['confirm_result'])) {
-        $parts[] = 'confirm=' . (string)$m['confirm_result'];
-    }
-    if (isset($m['confirm_samples'])) {
-        $parts[] = 'samples=' . (int)$m['confirm_samples'];
-    }
+    if (isset($m['confirm_result'])) $parts[] = 'confirm=' . (string)$m['confirm_result'];
+    if (isset($m['confirm_samples'])) $parts[] = 'samples=' . (int)$m['confirm_samples'];
     if (isset($m['observed_fingerprints']) && is_array($m['observed_fingerprints'])) {
         $fps = array_values(array_unique(array_map('strval', $m['observed_fingerprints'])));
         $parts[] = 'observed_fp=' . count($fps);
@@ -189,30 +205,12 @@ function format_event_meta(?string $metaJson): string {
         $short = array_map(function($x){ return substr($x, 0, 12) . '…'; }, $fps);
         $parts[] = 'observed=' . implode(',', $short);
     }
-
-    // Renewal timing
-    if (isset($m['early_renewal_days'])) {
-        $parts[] = 'early_renewal_days=' . (int)$m['early_renewal_days'];
-    }
-    if (isset($m['prev_valid_to'])) {
-        $parts[] = 'prev_valid_to=' . (string)$m['prev_valid_to'];
-    }
-    if (isset($m['new_valid_to'])) {
-        $parts[] = 'new_valid_to=' . (string)$m['new_valid_to'];
-    }
-
-    // Error (short)
-    if (isset($m['error'])) {
-        $parts[] = 'error=' . (string)$m['error'];
-    }
-
-    // Fingerprints are long; show only a prefix.
-    if (isset($m['prev_fingerprint'])) {
-        $parts[] = 'prev_fp=' . substr((string)$m['prev_fingerprint'], 0, 12) . '…';
-    }
-    if (isset($m['new_fingerprint'])) {
-        $parts[] = 'new_fp=' . substr((string)$m['new_fingerprint'], 0, 12) . '…';
-    }
+    if (isset($m['early_renewal_days'])) $parts[] = 'early_renewal_days=' . (int)$m['early_renewal_days'];
+    if (isset($m['prev_valid_to'])) $parts[] = 'prev_valid_to=' . (string)$m['prev_valid_to'];
+    if (isset($m['new_valid_to'])) $parts[] = 'new_valid_to=' . (string)$m['new_valid_to'];
+    if (isset($m['error'])) $parts[] = 'error=' . (string)$m['error'];
+    if (isset($m['prev_fingerprint'])) $parts[] = 'prev_fp=' . substr((string)$m['prev_fingerprint'], 0, 12) . '…';
+    if (isset($m['new_fingerprint'])) $parts[] = 'new_fp=' . substr((string)$m['new_fingerprint'], 0, 12) . '…';
 
     if (!$parts) {
         $j = json_encode($m, JSON_UNESCAPED_SLASHES);
@@ -223,26 +221,28 @@ function format_event_meta(?string $metaJson): string {
 
 function progress_bar(?int $daysRemaining, ?string $validFrom, ?string $validTo): string {
     if ($daysRemaining === null || !$validFrom || !$validTo) {
-        return '<div class="h-2 bg-gray-800 rounded"></div>';
+        return '<div class="progress"><div class="progress-bar" style="width:0%"></div></div>';
     }
     $vf = strtotime($validFrom . ' UTC');
     $vt = strtotime($validTo . ' UTC');
-    if (!$vf || !$vt || $vt <= $vf) return '<div class="h-2 bg-gray-800 rounded"></div>';
+    if (!$vf || !$vt || $vt <= $vf) return '<div class="progress"><div class="progress-bar" style="width:0%"></div></div>';
 
     $total = max(1, $vt - $vf);
     $left = max(0, $vt - time());
     $pct = (int)round(($left / $total) * 100);
     $pct = max(0, min(100, $pct));
-    return '<div class="h-2 bg-gray-800 rounded overflow-hidden"><div class="h-2 bg-green-400" style="width: '.$pct.'%"></div></div>';
+
+    $cls = 'progress-ok';
+    if ($daysRemaining <= 7) $cls = 'progress-crit';
+    elseif ($daysRemaining <= 30) $cls = 'progress-warn';
+
+    return '<div class="progress ' . $cls . '"><div class="progress-bar" style="width:' . $pct . '%"></div></div>';
 }
 
 /**
  * Flash message using a translation key.
- * Additive helper: preserves flash_set() for existing callers.
  */
 function flash_set_key(string $type, string $key, array $params = []): void {
     $msg = function_exists('t') ? t($key, $params) : $key;
     flash_set($type, $msg);
 }
-
-

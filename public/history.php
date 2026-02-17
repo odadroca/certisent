@@ -50,70 +50,72 @@ $rows = $st->fetchAll();
 render_header(t('page.history.title'), $user);
 ?>
 
-<div class="bg-white text-black rounded-2xl p-6 shadow">
-  <div class="flex items-start justify-between mb-4">
-    <div>
-      <h1 class="text-xl font-semibold"><?php echo t('page.history.title'); ?></h1>
-      <div class="text-xs text-gray-600"><?php echo t('history.last_n', ['n' => '200']); ?><?php echo ($user['role']==='admin'||$user['role']==='auditor') ? t('history.scope_global') : t('history.scope_yours'); ?>.</div>
+<div class="card">
+  <div class="card-body">
+    <div class="flex-between items-start mb-4">
+      <div>
+        <h1 class="page-title"><?php echo t('page.history.title'); ?></h1>
+        <div class="text-xs text-muted"><?php echo t('history.last_n', ['n' => '200']); ?><?php echo ($user['role']==='admin'||$user['role']==='auditor') ? t('history.scope_global') : t('history.scope_yours'); ?>.</div>
+      </div>
+      <form method="get" class="flex flex-wrap gap-2 items-end">
+        <div>
+          <label class="form-help"><?php echo t('common.severity'); ?></label>
+          <select name="severity" class="form-select form-inline">
+            <option value="" <?php echo $severity===''?'selected':''; ?>><?php echo t('common.all'); ?></option>
+            <option value="info" <?php echo $severity==='info'?'selected':''; ?>>info</option>
+            <option value="warn" <?php echo $severity==='warn'?'selected':''; ?>>warn</option>
+            <option value="critical" <?php echo $severity==='critical'?'selected':''; ?>>critical</option>
+          </select>
+        </div>
+        <div>
+          <label class="form-help"><?php echo t('common.type'); ?></label>
+          <input name="type" value="<?php echo h($type); ?>" placeholder="<?php echo h(t('history.type_placeholder')); ?>" class="form-input form-inline form-input-sm" />
+        </div>
+        <button class="btn btn-secondary btn-sm"><?php echo t('common.filter'); ?></button>
+        <a class="text-sm" href="history.php"><?php echo t('common.reset'); ?></a>
+      </form>
     </div>
-    <form method="get" class="flex flex-wrap gap-2 items-end">
-      <div>
-        <label class="text-xs text-gray-600"><?php echo t('common.severity'); ?></label>
-        <select name="severity" class="border rounded px-2 py-1 text-sm">
-          <option value="" <?php echo $severity===''?'selected':''; ?>><?php echo t('common.all'); ?></option>
-          <option value="info" <?php echo $severity==='info'?'selected':''; ?>>info</option>
-          <option value="warn" <?php echo $severity==='warn'?'selected':''; ?>>warn</option>
-          <option value="critical" <?php echo $severity==='critical'?'selected':''; ?>>critical</option>
-        </select>
-      </div>
-      <div>
-        <label class="text-xs text-gray-600"><?php echo t('common.type'); ?></label>
-        <input name="type" value="<?php echo h($type); ?>" placeholder="<?php echo h(t('history.type_placeholder')); ?>" class="border rounded px-2 py-1 text-sm" />
-      </div>
-      <button class="bg-black text-white px-3 py-2 rounded text-sm"><?php echo t('common.filter'); ?></button>
-      <a class="text-green-700 hover:underline text-sm" href="history.php"><?php echo t('common.reset'); ?></a>
-    </form>
-  </div>
 
-  <div class="overflow-x-auto">
-    <table class="min-w-full text-sm">
-      <thead>
-        <tr class="text-left border-b">
-          <th class="py-2 pr-3"><?php echo t('common.time_utc'); ?></th>
-          <th class="py-2 pr-3"><?php echo t('common.severity'); ?></th>
-          <th class="py-2 pr-3"><?php echo t('common.type'); ?></th>
-          <th class="py-2 pr-3"><?php echo t('common.target'); ?></th>
-          <th class="py-2 pr-3"><?php echo t('common.message'); ?></th>
-          <th class="py-2 pr-3"><?php echo t('common.meta'); ?></th>
-        </tr>
-      </thead>
-      <tbody>
-        <?php foreach ($rows as $e): ?>
-          <tr class="border-b align-top">
-            <td class="py-2 pr-3 font-mono text-xs"><?php echo h((string)$e['created_at']); ?></td>
-            <td class="py-2 pr-3"><?php echo h((string)$e['severity']); ?></td>
-            <td class="py-2 pr-3 font-mono text-xs"><?php echo h((string)$e['type']); ?></td>
-            <td class="py-2 pr-3">
-              <?php if (!empty($e['monitor_id'])): ?>
-                <a class="text-green-700 hover:underline font-mono text-xs" href="monitor_view.php?id=<?php echo (int)$e['monitor_id']; ?>"><?php echo h((string)($e['monitor_url'] ?? '')); ?></a>
-              <?php else: ?>
-                <span class="text-gray-600"><?php echo t('common.system'); ?></span>
-              <?php endif; ?>
-            </td>
-            <td class="py-2 pr-3"><?php echo h((string)$e['message']); ?></td>
-            <td class="py-2 pr-3">
-              <div class="font-mono text-xs break-all text-gray-600"><?php echo h(format_event_meta((string)($e['meta_json'] ?? ''))); ?></div>
-              <?php if (!empty($e['meta_json'])): ?>
-                <details class="mt-1">
-                  <summary class="cursor-pointer text-xs text-gray-500"><?php echo t('common.raw'); ?></summary>
-                  <pre class="mt-2 p-2 bg-gray-100 rounded text-xs overflow-x-auto"><?php echo h((string)$e['meta_json']); ?></pre>
-                </details>
-              <?php endif; ?>
-            </td>
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th><?php echo t('common.time_utc'); ?></th>
+            <th><?php echo t('common.severity'); ?></th>
+            <th><?php echo t('common.type'); ?></th>
+            <th><?php echo t('common.target'); ?></th>
+            <th><?php echo t('common.message'); ?></th>
+            <th><?php echo t('common.meta'); ?></th>
           </tr>
-        <?php endforeach; ?>
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          <?php foreach ($rows as $e): ?>
+            <tr>
+              <td class="font-mono text-xs"><?php echo h((string)$e['created_at']); ?></td>
+              <td><?php echo h((string)$e['severity']); ?></td>
+              <td class="font-mono text-xs"><?php echo h((string)$e['type']); ?></td>
+              <td>
+                <?php if (!empty($e['monitor_id'])): ?>
+                  <a class="font-mono text-xs" href="monitor_view.php?id=<?php echo (int)$e['monitor_id']; ?>"><?php echo h((string)($e['monitor_url'] ?? '')); ?></a>
+                <?php else: ?>
+                  <span class="text-muted"><?php echo t('common.system'); ?></span>
+                <?php endif; ?>
+              </td>
+              <td><?php echo h((string)$e['message']); ?></td>
+              <td>
+                <div class="font-mono text-xs text-break text-muted"><?php echo h(format_event_meta((string)($e['meta_json'] ?? ''))); ?></div>
+                <?php if (!empty($e['meta_json'])): ?>
+                  <details class="mt-1">
+                    <summary class="text-xs"><?php echo t('common.raw'); ?></summary>
+                    <pre class="code-block mt-2"><?php echo h((string)$e['meta_json']); ?></pre>
+                  </details>
+                <?php endif; ?>
+              </td>
+            </tr>
+          <?php endforeach; ?>
+        </tbody>
+      </table>
+    </div>
   </div>
 </div>
 

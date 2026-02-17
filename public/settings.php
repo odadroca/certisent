@@ -150,91 +150,93 @@ $rssAbsolute = $appUrl ? app_url($rssPath) : '';
 render_header('Settings', $user);
 ?>
 
-<div class="bg-white text-black rounded-2xl p-6 shadow max-w-2xl">
-  <div class="flex items-start justify-between mb-4">
-    <div>
-      <h1 class="text-xl font-semibold">Settings</h1>
-      <div class="text-xs text-gray-600">Notification channels and RSS feed.</div>
+<div class="card max-w-2xl">
+  <div class="card-body">
+    <div class="flex-between items-start mb-4">
+      <div>
+        <h1 class="page-title">Settings</h1>
+        <div class="text-xs text-muted">Notification channels and RSS feed.</div>
+      </div>
     </div>
-  </div>
 
-  <?php if ($err): ?>
-    <div class="mb-3 p-3 rounded bg-red-100 text-red-800 text-sm"><?php echo h($err); ?></div>
-  <?php endif; ?>
+    <?php if ($err): ?>
+      <div class="form-error"><?php echo h($err); ?></div>
+    <?php endif; ?>
 
-  <form method="post" class="space-y-4">
-    <?php echo csrf_field(); ?>
-    <input type="hidden" name="action" value="save" />
+    <form method="post" class="space-y-4">
+      <?php echo csrf_field(); ?>
+      <input type="hidden" name="action" value="save" />
 
-	    <div class="border rounded-xl p-4">
-	      <div class="font-semibold mb-2">Language</div>
-	      <select name="locale" class="border rounded px-3 py-2 text-sm" <?php echo $hasLocale ? '' : 'disabled'; ?>>
-	        <option value="en" <?php echo ($locale === 'en') ? 'selected' : ''; ?>>English</option>
-	        <option value="pt" <?php echo ($locale === 'pt') ? 'selected' : ''; ?>>Português</option>
-	      </select>
-	      <?php if (!$hasLocale): ?>
-	        <div class="text-xs text-gray-600 mt-1">DB migration required (adds users.locale).</div>
-	      <?php endif; ?>
-	    </div>
-
-    <div class="border rounded-xl p-4">
-      <div class="font-semibold mb-2">Email</div>
-      <label class="flex items-center gap-2 text-sm">
-        <input type="checkbox" name="email_enabled" <?php echo $emailEnabled ? 'checked' : ''; ?> />
-        Enable email notifications
-      </label>
-      <div class="mt-3">
-        <label class="block text-xs text-gray-600">Send each notification this many times (1-5)</label>
-        <input type="number" min="1" max="5" name="notify_repeat_count" class="border rounded px-3 py-2 text-sm w-28" value="<?php echo (int)$repeatCount; ?>" <?php echo $hasRepeat ? '' : 'disabled'; ?> />
-        <?php if (!$hasRepeat): ?>
-          <div class="text-xs text-gray-600 mt-1">DB migration required (adds users.notify_repeat_count).</div>
+      <div class="form-section">
+        <div class="form-section-title">Language</div>
+        <select name="locale" class="form-select form-inline" <?php echo $hasLocale ? '' : 'disabled'; ?>>
+          <option value="en" <?php echo ($locale === 'en') ? 'selected' : ''; ?>>English</option>
+          <option value="pt" <?php echo ($locale === 'pt') ? 'selected' : ''; ?>>Português</option>
+        </select>
+        <?php if (!$hasLocale): ?>
+          <div class="form-help mt-1">DB migration required (adds users.locale).</div>
         <?php endif; ?>
       </div>
-      <div class="text-xs text-gray-600 mt-1">Email is sent to your account email address.</div>
-    </div>
 
-    <div class="border rounded-xl p-4">
-      <div class="font-semibold mb-2">Slack webhook</div>
-      <input name="slack_webhook" class="w-full border rounded px-3 py-2 text-sm" placeholder="https://hooks.slack.com/services/..." value="<?php echo h($slackWebhook); ?>" />
-      <div class="text-xs text-gray-600 mt-1">Optional. Best-effort delivery (no retries).</div>
-    </div>
-
-    <div class="border rounded-xl p-4">
-      <div class="font-semibold mb-2">MS Teams webhook</div>
-      <input name="teams_webhook" class="w-full border rounded px-3 py-2 text-sm" placeholder="https://..." value="<?php echo h($teamsWebhook); ?>" />
-      <div class="text-xs text-gray-600 mt-1">Optional. Best-effort delivery (no retries).</div>
-    </div>
-
-    <button class="bg-green-700 text-white px-4 py-2 rounded">Save settings</button>
-  </form>
-
-  <div class="mt-8 border-t pt-6">
-    <div class="flex items-start justify-between gap-4">
-      <div>
-        <div class="font-semibold">RSS feed</div>
-        <div class="text-sm text-gray-700 mt-1">Use this feed in your aggregator for event notifications.</div>
-        <div class="mt-3 text-xs text-gray-700">
-          <div class="font-mono break-all"><?php echo h($rssPath); ?></div>
-          <?php if ($rssAbsolute): ?>
-            <div class="font-mono break-all mt-1"><?php echo h($rssAbsolute); ?></div>
-          <?php else: ?>
-            <div class="text-gray-500 mt-1">Set APP_URL in .env to show absolute URL.</div>
+      <div class="form-section">
+        <div class="form-section-title">Email</div>
+        <label class="form-checkbox">
+          <input type="checkbox" name="email_enabled" <?php echo $emailEnabled ? 'checked' : ''; ?> />
+          Enable email notifications
+        </label>
+        <div class="mt-3">
+          <label class="form-help" style="display:block">Send each notification this many times (1-5)</label>
+          <input type="number" min="1" max="5" name="notify_repeat_count" class="form-input form-narrow" value="<?php echo (int)$repeatCount; ?>" <?php echo $hasRepeat ? '' : 'disabled'; ?> />
+          <?php if (!$hasRepeat): ?>
+            <div class="form-help mt-1">DB migration required (adds users.notify_repeat_count).</div>
           <?php endif; ?>
         </div>
+        <div class="form-help mt-1">Email is sent to your account email address.</div>
       </div>
-      <form method="post" onsubmit="return confirm('Rotate RSS token? Old feed URL will stop working.');">
-        <?php echo csrf_field(); ?>
-        <input type="hidden" name="action" value="rotate_rss" />
-        <button class="bg-black text-white px-4 py-2 rounded">Rotate token</button>
-      </form>
-    </div>
-  </div>
 
-  <div class="mt-8 border-t pt-6">
-    <div class="font-semibold">Worker API</div>
-    <div class="text-xs text-gray-600 mt-1">External workers can call the API with Bearer API_WORKER_KEY.</div>
-    <div class="mt-2 text-xs font-mono text-gray-800 bg-gray-100 rounded p-3 break-all">
-      POST <?php echo h(url_for('api/v1/index.php')); ?>
+      <div class="form-section">
+        <div class="form-section-title">Slack webhook</div>
+        <input name="slack_webhook" class="form-input" placeholder="https://hooks.slack.com/services/..." value="<?php echo h($slackWebhook); ?>" />
+        <div class="form-help mt-1">Optional. Best-effort delivery (no retries).</div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">MS Teams webhook</div>
+        <input name="teams_webhook" class="form-input" placeholder="https://..." value="<?php echo h($teamsWebhook); ?>" />
+        <div class="form-help mt-1">Optional. Best-effort delivery (no retries).</div>
+      </div>
+
+      <button class="btn btn-primary">Save settings</button>
+    </form>
+
+    <div class="mt-8" style="border-top: 1px solid var(--border-light); padding-top: 1.5rem;">
+      <div class="flex-between items-start gap-4">
+        <div>
+          <div class="font-semibold">RSS feed</div>
+          <div class="text-sm text-sub mt-1">Use this feed in your aggregator for event notifications.</div>
+          <div class="mt-3 text-xs text-sub">
+            <div class="font-mono text-break"><?php echo h($rssPath); ?></div>
+            <?php if ($rssAbsolute): ?>
+              <div class="font-mono text-break mt-1"><?php echo h($rssAbsolute); ?></div>
+            <?php else: ?>
+              <div class="text-muted mt-1">Set APP_URL in .env to show absolute URL.</div>
+            <?php endif; ?>
+          </div>
+        </div>
+        <form method="post" onsubmit="return confirm('Rotate RSS token? Old feed URL will stop working.');">
+          <?php echo csrf_field(); ?>
+          <input type="hidden" name="action" value="rotate_rss" />
+          <button class="btn btn-secondary">Rotate token</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="mt-8" style="border-top: 1px solid var(--border-light); padding-top: 1.5rem;">
+      <div class="font-semibold">Worker API</div>
+      <div class="form-help mt-1">External workers can call the API with Bearer API_WORKER_KEY.</div>
+      <div class="code-block mt-2 text-break">
+        POST <?php echo h(url_for('api/v1/index.php')); ?>
+      </div>
     </div>
   </div>
 </div>

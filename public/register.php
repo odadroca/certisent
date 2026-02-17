@@ -23,11 +23,11 @@ $isFirstUser = ($existingUsers === 0);
 if ($regDisabled || $regMode === 'closed') {
     $title = function_exists('t') ? t('auth.register') : 'Register';
     render_header($title);
-    echo '<div class="bg-white text-black rounded-2xl p-6 shadow max-w-lg">';
-    echo '<h1 class="text-xl font-semibold mb-2">' . h(function_exists('t') ? t('reg.disabled_title') : 'Registration disabled') . '</h1>';
-    echo '<div class="text-sm text-gray-700">' . h(function_exists('t') ? t('reg.disabled_body') : 'New account registration is currently disabled.') . '</div>';
-    echo '<div class="mt-4 text-sm text-gray-700"><a class="text-green-700 hover:underline" href="login.php">' . h(function_exists('t') ? t('nav.sign_in') : 'Sign in') . '</a></div>';
-    echo '</div>';
+    echo '<div class="auth-page"><div class="auth-card"><div class="card"><div class="card-body">';
+    echo '<h1 class="page-title mb-2">' . h(function_exists('t') ? t('reg.disabled_title') : 'Registration disabled') . '</h1>';
+    echo '<div class="text-sm text-sub">' . h(function_exists('t') ? t('reg.disabled_body') : 'New account registration is currently disabled.') . '</div>';
+    echo '<div class="mt-4 text-sm text-sub"><a href="login.php">' . h(function_exists('t') ? t('nav.sign_in') : 'Sign in') . '</a></div>';
+    echo '</div></div></div></div>';
     render_footer();
     exit;
 }
@@ -37,11 +37,11 @@ if ($regDisabled || $regMode === 'closed') {
 if ($regMode === 'invite' && $setupToken === '') {
     $title = function_exists('t') ? t('auth.register') : 'Register';
     render_header($title);
-    echo '<div class="bg-white text-black rounded-2xl p-6 shadow max-w-lg">';
-    echo '<h1 class="text-xl font-semibold mb-2">' . h(function_exists('t') ? t('reg.unavailable_title') : 'Registration unavailable') . '</h1>';
-    echo '<div class="text-sm text-gray-700">' . h(function_exists('t') ? t('reg.unavailable_body') : 'REGISTRATION_MODE is set to invite, but SETUP_ADMIN_TOKEN is not configured.') . '</div>';
-    echo '<div class="mt-4 text-sm text-gray-700"><a class="text-green-700 hover:underline" href="login.php">' . h(function_exists('t') ? t('nav.sign_in') : 'Sign in') . '</a></div>';
-    echo '</div>';
+    echo '<div class="auth-page"><div class="auth-card"><div class="card"><div class="card-body">';
+    echo '<h1 class="page-title mb-2">' . h(function_exists('t') ? t('reg.unavailable_title') : 'Registration unavailable') . '</h1>';
+    echo '<div class="text-sm text-sub">' . h(function_exists('t') ? t('reg.unavailable_body') : 'REGISTRATION_MODE is set to invite, but SETUP_ADMIN_TOKEN is not configured.') . '</div>';
+    echo '<div class="mt-4 text-sm text-sub"><a href="login.php">' . h(function_exists('t') ? t('nav.sign_in') : 'Sign in') . '</a></div>';
+    echo '</div></div></div></div>';
     render_footer();
     exit;
 }
@@ -110,34 +110,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $title = function_exists('t') ? t('auth.register') : 'Register';
 render_header($title);
 ?>
-<div class="bg-white text-black rounded-2xl p-6 shadow max-w-lg">
-  <h1 class="text-xl font-semibold mb-4"><?php echo h(function_exists('t') ? t('auth.register') : 'Register'); ?></h1>
-  <?php if ($err): ?>
-    <div class="mb-3 p-3 rounded bg-red-100 text-red-800 text-sm"><?php echo h($err); ?></div>
-  <?php endif; ?>
-  <form method="post" class="space-y-3">
-    <?php echo csrf_field(); ?>
-    <div>
-      <label class="text-sm"><?php echo h(function_exists('t') ? t('auth.email') : 'Email'); ?></label>
-      <input name="email" class="w-full border rounded px-3 py-2" value="<?php echo h($_POST['email'] ?? ''); ?>" />
-    </div>
-    <?php if ($regMode === 'invite' || ($isFirstUser && $setupToken !== '')): ?>
-    <div>
-      <label class="text-sm"><?php echo h(($regMode === 'invite') ? (function_exists('t') ? t('reg.token_label.registration') : 'Registration token') : (function_exists('t') ? t('reg.token_label.setup') : 'Setup token')); ?></label>
-      <input name="setup_admin_token" class="w-full border rounded px-3 py-2 font-mono text-sm" value="<?php echo h($_POST['setup_admin_token'] ?? ''); ?>" />
-      <div class="text-xs text-gray-600 mt-1">
-        <?php echo h(($regMode === 'invite') ? (function_exists('t') ? t('reg.token_help.registration') : 'Required to register.') : (function_exists('t') ? t('reg.token_help.setup') : 'Required to claim the first admin.')); ?>
+<div class="auth-page">
+  <div class="auth-card">
+    <div class="card">
+      <div class="card-body">
+        <h1 class="page-title mb-4"><?php echo h(function_exists('t') ? t('auth.register') : 'Register'); ?></h1>
+        <?php if ($err): ?>
+          <div class="form-error"><?php echo h($err); ?></div>
+        <?php endif; ?>
+        <form method="post" class="space-y-3">
+          <?php echo csrf_field(); ?>
+          <div class="form-group">
+            <label class="form-label"><?php echo h(function_exists('t') ? t('auth.email') : 'Email'); ?></label>
+            <input name="email" class="form-input" value="<?php echo h($_POST['email'] ?? ''); ?>" />
+          </div>
+          <?php if ($regMode === 'invite' || ($isFirstUser && $setupToken !== '')): ?>
+          <div class="form-group">
+            <label class="form-label"><?php echo h(($regMode === 'invite') ? (function_exists('t') ? t('reg.token_label.registration') : 'Registration token') : (function_exists('t') ? t('reg.token_label.setup') : 'Setup token')); ?></label>
+            <input name="setup_admin_token" class="form-input font-mono text-sm" value="<?php echo h($_POST['setup_admin_token'] ?? ''); ?>" />
+            <div class="form-help">
+              <?php echo h(($regMode === 'invite') ? (function_exists('t') ? t('reg.token_help.registration') : 'Required to register.') : (function_exists('t') ? t('reg.token_help.setup') : 'Required to claim the first admin.')); ?>
+            </div>
+          </div>
+          <?php endif; ?>
+
+          <div class="form-group">
+            <label class="form-label"><?php echo h(function_exists('t') ? t('auth.password') : 'Password'); ?></label>
+            <input type="password" name="password" class="form-input" />
+            <div class="form-help"><?php echo h(function_exists('t') ? t('reg.password_help') : 'Min 10 chars. Use a unique password.'); ?></div>
+          </div>
+          <button class="btn btn-primary"><?php echo h(function_exists('t') ? t('reg.create_account') : 'Create account'); ?></button>
+          <div class="text-sm text-sub"><?php echo h(function_exists('t') ? t('reg.already_have') : 'Already have an account?'); ?> <a href="login.php"><?php echo h(function_exists('t') ? t('nav.sign_in') : 'Sign in'); ?></a></div>
+        </form>
       </div>
     </div>
-    <?php endif; ?>
-
-    <div>
-      <label class="text-sm"><?php echo h(function_exists('t') ? t('auth.password') : 'Password'); ?></label>
-      <input type="password" name="password" class="w-full border rounded px-3 py-2" />
-      <div class="text-xs text-gray-600 mt-1"><?php echo h(function_exists('t') ? t('reg.password_help') : 'Min 10 chars. Use a unique password.'); ?></div>
-    </div>
-    <button class="bg-green-700 text-white px-4 py-2 rounded"><?php echo h(function_exists('t') ? t('reg.create_account') : 'Create account'); ?></button>
-    <div class="text-sm text-gray-700"><?php echo h(function_exists('t') ? t('reg.already_have') : 'Already have an account?'); ?> <a class="text-green-700 hover:underline" href="login.php"><?php echo h(function_exists('t') ? t('nav.sign_in') : 'Sign in'); ?></a></div>
-  </form>
+  </div>
 </div>
 <?php render_footer(); ?>
