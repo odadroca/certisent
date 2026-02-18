@@ -13,6 +13,7 @@ return [
     'nav.history' => 'History',
     'nav.settings' => 'Settings',
     'nav.quick_check' => 'Quick check',
+    'nav.reports' => 'Reports',
     'nav.admin_monitors' => 'Admin · Monitors',
     'nav.admin_users' => 'Admin · Users',
     'nav.admin_system' => 'Admin · System',

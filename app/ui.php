@@ -41,7 +41,7 @@ function flash_pop_all(): array {
 function public_base_path(): string {
     $script = $_SERVER['SCRIPT_NAME'] ?? '';
     $dir = rtrim(str_replace('\\', '/', dirname($script)), '/');
-    if (basename($dir) === 'admin') {
+    if (basename($dir) === 'admin' || basename($dir) === 'reports') {
         $dir = rtrim(str_replace('\\', '/', dirname($dir)), '/');
     }
     return $dir === '' ? '' : $dir;
@@ -61,6 +61,7 @@ function render_header(string $title, ?array $user = null): void {
     // Detect active page for nav highlighting.
     $script = basename($_SERVER['SCRIPT_NAME'] ?? '');
     $isAdmin = str_contains(($_SERVER['SCRIPT_NAME'] ?? ''), '/admin/');
+    $isReports = str_contains(($_SERVER['SCRIPT_NAME'] ?? ''), '/reports/');
 
     echo '<!doctype html><html lang="' . h($lang) . '">';
     echo '<head><meta charset="utf-8">';
@@ -99,12 +100,18 @@ function render_header(string $title, ?array $user = null): void {
 
         $navItems = [
             ['dashboard.php', function_exists('t') ? t('nav.dashboard') : 'Dashboard'],
+            ['reports/index.php', function_exists('t') ? t('nav.reports') : 'Reports'],
             ['history.php', function_exists('t') ? t('nav.history') : 'History'],
             ['settings.php', function_exists('t') ? t('nav.settings') : 'Settings'],
             ['index.php', function_exists('t') ? t('nav.quick_check') : 'Quick check'],
         ];
         foreach ($navItems as [$href, $label]) {
-            $active = (!$isAdmin && $script === $href) ? ' active' : '';
+            $active = '';
+            if (str_contains($href, 'reports/')) {
+                $active = $isReports ? ' active' : '';
+            } elseif (!$isAdmin && !$isReports && $script === $href) {
+                $active = ' active';
+            }
             echo '<a class="nav-link' . $active . '" href="' . h(url_for($href)) . '">' . h($label) . '</a>';
         }
 
@@ -245,4 +252,127 @@ function progress_bar(?int $daysRemaining, ?string $validFrom, ?string $validTo)
 function flash_set_key(string $type, string $key, array $params = []): void {
     $msg = function_exists('t') ? t($key, $params) : $key;
     flash_set($type, $msg);
+}
+
+// ── Report Helpers ───────────────────────────────────────────
+
+/**
+ * Render a health ring (CSS conic-gradient donut chart).
+ * @param array<string,int> $segments ['ok'=>N,'warn'=>N,'crit'=>N,'unknown'=>N]
+ */
+function render_health_ring(array $segments): string {
+    $total = max(1, array_sum($segments));
+    $okPct = round(($segments['ok'] ?? 0) / $total * 100);
+
+    $colors = [
+        'ok'      => 'var(--ok)',
+        'warn'    => 'var(--warn)',
+        'crit'    => 'var(--crit)',
+        'unknown' => '#94a3b8',
+    ];
+    $labels = [
+        'ok'      => 'OK',
+        'warn'    => 'Warning',
+        'crit'    => 'Critical',
+        'unknown' => 'Unknown',
+    ];
+
+    // Build conic-gradient stops.
+    $stops = [];
+    $pos = 0;
+    foreach (['ok','warn','crit','unknown'] as $k) {
+        $v = $segments[$k] ?? 0;
+        if ($v <= 0) continue;
+        $pct = $v / $total * 100;
+        $stops[] = $colors[$k] . ' ' . round($pos, 2) . '% ' . round($pos + $pct, 2) . '%';
+        $pos += $pct;
+    }
+    if (empty($stops)) $stops[] = '#e2e8f0 0% 100%';
+    $gradient = 'conic-gradient(' . implode(', ', $stops) . ')';
+
+    $html = '<div class="flex items-center gap-6">';
+    $html .= '<div class="health-ring" style="background:' . $gradient . '">';
+    $html .= '<div class="health-ring-inner"><span class="health-ring-pct">' . (int)$okPct . '%</span>';
+    $html .= '<span class="health-ring-label">Healthy</span></div>';
+    $html .= '</div>';
+
+    $html .= '<div class="health-ring-legend">';
+    foreach (['ok','warn','crit','unknown'] as $k) {
+        $v = $segments[$k] ?? 0;
+        if ($v <= 0) continue;
+        $html .= '<div class="health-ring-legend-item">';
+        $html .= '<span class="health-ring-legend-dot" style="background:' . $colors[$k] . '"></span>';
+        $html .= '<span>' . h($labels[$k]) . ': <strong>' . $v . '</strong></span>';
+        $html .= '</div>';
+    }
+    $html .= '</div></div>';
+
+    return $html;
+}
+
+/**
+ * Render a horizontal bar chart.
+ * @param array<int,array{label:string,value:int,color:string}> $rows
+ */
+function render_bar_chart(array $rows): string {
+    if (empty($rows)) return '<div class="empty-state"><div class="empty-state-desc">No data</div></div>';
+    $max = max(1, max(array_column($rows, 'value')));
+
+    $html = '<div class="bar-chart">';
+    foreach ($rows as $row) {
+        $pct = round($row['value'] / $max * 100);
+        $html .= '<div class="bar-row">';
+        $html .= '<div class="bar-label" title="' . h($row['label']) . '">' . h($row['label']) . '</div>';
+        $html .= '<div class="bar-track"><div class="bar-fill bar-fill--' . h($row['color'] ?? 'accent') . '" style="width:' . $pct . '%"></div></div>';
+        $html .= '<div class="bar-count">' . (int)$row['value'] . '</div>';
+        $html .= '</div>';
+    }
+    $html .= '</div>';
+    return $html;
+}
+
+/**
+ * Render a stacked health bar.
+ * @param array<string,int> $segments ['ok'=>N,'warn'=>N,'crit'=>N,'unknown'=>N]
+ */
+function render_stacked_bar(array $segments): string {
+    $total = max(1, array_sum($segments));
+    $html = '<div class="stacked-bar">';
+    foreach (['ok','warn','crit','unknown'] as $k) {
+        $v = $segments[$k] ?? 0;
+        if ($v <= 0) continue;
+        $pct = round($v / $total * 100, 1);
+        $html .= '<div class="stacked-bar-seg stacked-bar-seg--' . $k . '" style="width:' . $pct . '%" data-tip="' . h(ucfirst($k) . ': ' . $v) . '"></div>';
+    }
+    $html .= '</div>';
+    return $html;
+}
+
+/**
+ * Render breadcrumbs.
+ * @param array<int,array{label:string,href?:string}> $crumbs
+ */
+function render_breadcrumbs(array $crumbs): string {
+    $html = '<nav class="breadcrumbs">';
+    $last = count($crumbs) - 1;
+    foreach ($crumbs as $i => $c) {
+        if ($i === $last) {
+            $html .= '<span class="breadcrumbs-current">' . h($c['label']) . '</span>';
+        } else {
+            $html .= '<a href="' . h($c['href'] ?? '#') . '">' . h($c['label']) . '</a>';
+            $html .= '<span class="breadcrumbs-sep">/</span>';
+        }
+    }
+    $html .= '</nav>';
+    return $html;
+}
+
+/**
+ * Render stat card.
+ */
+function render_stat_card(string $icon, string $value, string $label, string $variant = 'info'): string {
+    return '<div class="stat-card stat-card--' . h($variant) . '">'
+         . '<div class="stat-card-icon">' . $icon . '</div>'
+         . '<div class="stat-card-data"><div class="stat-card-value">' . h($value) . '</div>'
+         . '<div class="stat-card-label">' . h($label) . '</div></div></div>';
 }

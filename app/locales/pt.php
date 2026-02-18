@@ -13,6 +13,7 @@ return [
     'nav.history' => 'Histórico',
     'nav.settings' => 'Definições',
     'nav.quick_check' => 'Verificação rápida',
+    'nav.reports' => 'Relatórios',
     'nav.admin_monitors' => 'Admin · Monitores',
     'nav.admin_users' => 'Admin · Utilizadores',
     'nav.admin_system' => 'Admin · Sistema',
