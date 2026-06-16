@@ -1,0 +1,26 @@
+{
+    "name": "odadroca/certisent",
+    "description": "Certisent — TLS/SSL Certificate Sentinel",
+    "type": "project",
+    "license": "Apache-2.0",
+    "require": {
+        "php": ">=8.1",
+        "ext-openssl": "*",
+        "ext-pdo": "*"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^10.5"
+    },
+    "autoload": {
+        "classmap": [
+            "app/services"
+        ]
+    },
+    "scripts": {
+        "test": "phpunit",
+        "lint": "find app public scripts tools -name '*.php' -print0 | xargs -0 -n1 -P4 php -l > /dev/null"
+    },
+    "config": {
+        "sort-packages": true
+    }
+}
